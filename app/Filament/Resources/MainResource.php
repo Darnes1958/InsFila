@@ -32,7 +32,10 @@ class MainResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
+
+
             ->schema([
+
               Select::make('bank_id')
                 ->label('المصرف')
                 ->relationship('Bank','BankName')
@@ -126,18 +129,19 @@ class MainResource extends Resource
 
               TextInput::make('kst')
                 ->label('القسط')
-
-
                 ->required(),
               TextInput::make('notes')
                 ->label('ملاحظات')
+
                 ->columnSpan(2),
             ]);
     }
 
+
     public static function table(Table $table): Table
     {
         return $table
+
 
             ->columns([
               TextColumn::make('Customer.CusName'),
@@ -149,7 +153,8 @@ class MainResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ,
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -169,8 +174,8 @@ class MainResource extends Resource
     {
         return [
             'index' => Pages\ListMains::route('/'),
-            'create' => Pages\CreateMain::route('/create'),
-            'edit' => Pages\EditMain::route('/{record}/edit'),
+       //     'create' => Pages\CreateMain::route('/create'),
+         //   'edit' => Pages\EditMain::route('/{record}/edit'),
         ];
     }
 }
