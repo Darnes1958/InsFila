@@ -14,6 +14,10 @@ class Taj extends Model
   public function Bank(){
     return $this->hasMany(Bank::class);
   }
+  public function main()
+  {
+    return $this->hasManyThrough('App\Models\main', 'App\Models\bank');
+  }
 
   public function __construct(array $attributes = [])
   {
