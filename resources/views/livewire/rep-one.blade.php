@@ -12,6 +12,12 @@
             <x-label  class="text-primary-400" for="radio2" value="{{ __('بفروع المصارف') }}"/>
             <x-input type="radio" class="ml-4" wire:model.live="By" name="radio2" value="1"/>
         </div>
+        <div class="flex gap-1">
+            <span>طباعة</span>
+            <a  href="{{route('pdfbanksum',['By'=>$By])}}"  class="text-blue-400">
+                <x-icon.print/>
+            </a>
+        </div>
 
     </div>
 
