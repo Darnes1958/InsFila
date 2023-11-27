@@ -2,8 +2,8 @@
     'sortable' => null,
     'direction' => null,
     'multiColumn' => null,
-    'bgcolor' => 'bg-blue-900',
-    'fcolor' => 'text-white',
+    'bgcolor' => 'bg-gray-200',
+    'fcolor' => 'text-gray-900',
 ])
 
 <th

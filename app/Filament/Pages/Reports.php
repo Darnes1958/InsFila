@@ -15,6 +15,8 @@ class Reports extends Page
 
     public static ?string $title = 'تقرير عن مصرف';
 
+    protected static ?string $navigationGroup='تقارير';
+
 
 
 

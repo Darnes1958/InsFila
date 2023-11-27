@@ -27,6 +27,7 @@ class MainResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $pluralModelLabel='عقود';
+    protected static ?string $navigationGroup='ادخال وتعديل عقود';
 
 
     public static function form(Form $form): Form
