@@ -1,27 +1,22 @@
-import colors from 'tailwindcss/colors'
-import forms from '@tailwindcss/forms'
-import typography from '@tailwindcss/typography'
+const colors = require('tailwindcss/colors')
 
-export default {
+ module.exports = {
     content: [
-        './resources/**/*.blade.php',
-        './vendor/filament/**/*.blade.php',
+        './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
+
+        './storage/framework/views/*.php',
+        './resources/views/**/*.blade.php',
+        './app/Filament/**/*.php'
     ],
-    darkMode: 'class',
     theme: {
         extend: {
             colors: {
-                danger: colors.rose,
-                primary: colors.blue,
-                gray : colors.gray,
-                success: colors.green,
-                warning: colors.yellow,
-            },
+                // you can either spread `colors` to apply all the colors
+                ...colors,
 
-        },
-    },
-    plugins: [
-        forms,
-        typography,
-    ],
+                // or add them one by one and name whatever you want
+
+            }
+        }
+    }
 }

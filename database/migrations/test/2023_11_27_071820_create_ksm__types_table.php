@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::connection('other')->create('ksm_types', function (Blueprint $table) {
+        Schema::connection('other')->create('KsmTypes', function (Blueprint $table) {
             $table->id();
             $table->string('ksm_type_name');
             $table->timestamps();
@@ -23,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('ksm_types');
+        Schema::dropIfExists('KsmTypes');
     }
 };

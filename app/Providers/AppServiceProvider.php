@@ -26,10 +26,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
 
-        FilamentAsset::register([
-            Js::make('https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js', __DIR__ . '/../../resources/js/custom.js'),
-
-        ]);
 
       LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
         $switch

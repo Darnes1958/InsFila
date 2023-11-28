@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::connection('other')->create('trans', function (Blueprint $table) {
             $table->id();
             $table->foreignId('main_id')->constrained('mains')->cascadeOnDelete();
-            $table->foreignId('ksm_type_id')->constrained('ksm_types')->cascadeOnDelete();
+            $table->foreignId('ksm_type_id')->constrained('ksmtypes')->cascadeOnDelete();
             $table->integer('ser');
             $table->date('kst_date');
             $table->date('ksm_date');

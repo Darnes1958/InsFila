@@ -143,19 +143,25 @@ class MainResource extends Resource
     {
         return $table
 
+          ->recordClasses(fn (Model $record) => match ($record->sul) {
+            '100' => 'leading-3 p-0 h-4 text-xs',
 
+            default => ' text-xs text-blue-100',
+          })
             ->columns([
               TextColumn::make('Customer.CusName'),
-              TextColumn::make('sul'),
-              TextColumn::make('kst'),
+
+              TextColumn::make('sul')
+               ,
+              TextColumn::make('kst')
+                ,
 
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make()
-                    ,
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
