@@ -8,25 +8,20 @@ use App\Models\Main;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Resources\Components\Tab;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\HtmlString;
 
 class ListMains extends ListRecords
 {
     protected static string $resource = MainResource::class;
 
-  public function getTabs(): array
-  {
-    return [
-      'all' => Tab::make()->icon('heroicon-m-user-group')
-        ->badge(Main::query()->where('user_id', 1)->count()),
-      'active' => Tab::make()
-        ->modifyQueryUsing(fn (Builder $query) => $query->where('user_id', 1)),
-      'inactive' => Tab::make()
-        ->modifyQueryUsing(fn (Builder $query) => $query->where('user_id', 2)),
-    ];
-  }
 
-#Cust
+
+    public function getTitle():  string|Htmlable
+    {
+        return  new HtmlString('<div class="leading-3 h-4 py-0 text-base text-primary-400 py-0">استفسار عن عقود</div>');
+    }
     protected function getHeaderActions(): array
     {
         return [

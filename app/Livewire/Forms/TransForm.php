@@ -50,7 +50,7 @@ use AksatTrait;
         $this->user_id=Auth::user()->id;
     }
     public function TransDelete($id){
-      Trans::where('id',$id)->delete();
+      Tran::where('id',$id)->delete();
       $this->SortTrans($this->main_id);
       $this->SortKstDate($this->main_id);
 

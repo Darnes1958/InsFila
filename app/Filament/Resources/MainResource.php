@@ -3,22 +3,22 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\MainResource\Pages;
-use App\Filament\Resources\MainResource\RelationManagers;
+
 use App\Models\Main;
+
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Hamcrest\Core\Set;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Database\Eloquent\Model;
+
 
 class MainResource extends Resource
 {
@@ -28,6 +28,7 @@ class MainResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $pluralModelLabel='عقود';
     protected static ?string $navigationGroup='ادخال وتعديل عقود';
+
 
 
     public static function form(Form $form): Form
@@ -143,25 +144,22 @@ class MainResource extends Resource
     {
         return $table
 
-          ->recordClasses(fn (Model $record) => match ($record->sul) {
-            '100' => 'leading-3 p-0 h-4 text-xs',
-
-            default => ' text-xs text-blue-100',
-          })
             ->columns([
-              TextColumn::make('Customer.CusName'),
+                TextColumn::make('Customer.CusName')->label('الاسم')->searchable()->sortable(),
 
-              TextColumn::make('sul')
-               ,
-              TextColumn::make('kst')
-                ,
-
+                TextColumn::make('Bank.BankName')->label('المصرف')->searchable()->sortable(),
+                TextColumn::make('acc')->label('رقم الحساب')->searchable()->sortable(),
+                TextColumn::make('sul')->label('الاجمالي')->sortable(),
+                TextColumn::make('kst')->label('القسط')->sortable(),
             ])
             ->filters([
                 //
             ])
             ->actions([
 
+                ViewAction::make()->iconButton(),
+                DeleteAction::make()->iconButton(),
+                EditAction::make()->iconButton(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -183,6 +181,7 @@ class MainResource extends Resource
             'index' => Pages\ListMains::route('/'),
        //     'create' => Pages\CreateMain::route('/create'),
          //   'edit' => Pages\EditMain::route('/{record}/edit'),
+            'view' => Pages\ViewMain::route('/{record}'),
         ];
     }
 }

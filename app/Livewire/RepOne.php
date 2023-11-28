@@ -21,8 +21,11 @@ use Filament\Tables\Table;
 
 use Filament\Forms;
 
+use http\QueryString;
 use Livewire\Component;
 use Filament\Forms\Form;
+use PhpParser\Builder;
+use function PHPUnit\Framework\isFalse;
 
 
 class RepOne extends Component implements HasTable, HasForms
@@ -34,11 +37,14 @@ public $taj;
 public $By=1;
 public $is_show=false;
 public $field='id';
+public $query;
 
     use InteractsWithTable,InteractsWithForms;
 
     public function updatedBy(){
+
       $this->form($this->form);
+
     }
 
   public function form(Form $form): Form
@@ -79,21 +85,27 @@ public $field='id';
     public function table(Table $table):Table
     {
       return $table
-        ->query(Bank::where($this->field,$this->bank_id))
+        ->query(function (Main $main)  {
+            if ($this->By==1) $main=Main::where('bank_id',$this->bank_id);
+            if ($this->By==2) $main=Main::whereIn('bank_id',function ($q){
+                $q->select('id')->from('banks')->where('taj_id',$this->bank_id);
+            });
+            return  $main;
+        })
         ->columns([
-            TextColumn::make('Main.Customer.CusName')
+            TextColumn::make('Customer.CusName')
              ->label('الاسم'),
-            TextColumn::make('BankName')
+            TextColumn::make('Bank.BankName')
              ->label('المصرف')
              ->visible($this->field=='taj_id'),
-            TextColumn::make('Taj.TajName')
+            TextColumn::make('Bank.Taj.TajName')
              ->label('المصرف التجميعي')
              ->visible($this->field=='id'),
-            TextColumn::make('Main.sul')
+            TextColumn::make('sul')
               ->label('اجمالي العقد'),
-            TextColumn::make('Main.kst')
+            TextColumn::make('kst')
               ->label('القسط'),
-            TextColumn::make('Main.pay')
+            TextColumn::make('pay')
               ->label('المدفوع'),
 
 

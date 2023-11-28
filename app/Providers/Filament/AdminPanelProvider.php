@@ -21,11 +21,11 @@ use Filament\Support\Enums\MaxWidth;
 
 class AdminPanelProvider extends PanelProvider
 {
-
     public function panel(Panel $panel): Panel
     {
 
         return $panel
+
             ->sidebarFullyCollapsibleOnDesktop()
             ->breadcrumbs(false)
             ->maxContentWidth('Full')
