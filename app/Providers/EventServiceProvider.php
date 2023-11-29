@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Livewire\Traits\AksatTrait;
 use App\Models\Bank;
 use App\Models\Customer;
 use App\Models\Main;
@@ -27,6 +28,7 @@ class EventServiceProvider extends ServiceProvider
     /**
      * Register any events for your application.
      */
+    use AksatTrait;
 
       public function boot(): void
     {
@@ -55,6 +57,8 @@ class EventServiceProvider extends ServiceProvider
       Main::creating(function($blog){
         $blog->user_id = auth()->id();
         $blog->sul_end = date('Y-m-d', strtotime($blog->sul_begin . "+".$blog->kst_count." month"));
+        $blog->NextKst=$this->setMonth($blog->sul_begin);
+
 
       });
 

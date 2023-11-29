@@ -51,7 +51,14 @@ class MainForm extends Form
     public $kst = '';
 
     public $pay = 0;
+
     public $raseed = 0;
+
+    public $LastKsm;
+    public $NextKst;
+    public $Late;
+    public $sell_id;
+    public $LastUpd;
 
     public $notes = '';
 
@@ -74,6 +81,11 @@ class MainForm extends Form
         $this->raseed=$rec->raseed;
         $this->notes=$rec->notes;
         $this->user_id=$rec->user_id;
+        $this->LastKsm=$rec->LastKsm;
+        $this->NextKst=$rec->NextKst;
+        $this->Late=$rec->Late;
+        $this->LastUpd=$rec->LastUpd;
+        $this->sell_id=$rec->sell_id;
 
     }
 

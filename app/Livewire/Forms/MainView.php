@@ -5,6 +5,7 @@ namespace App\Livewire\Forms;
 
 use App\Models\Main;
 use App\Models\Tran;
+use Carbon\Carbon;
 use Livewire\Attributes\Rule;
 use Livewire\Form;
 use App\Livewire\Traits\AksatTrait;
@@ -43,9 +44,15 @@ class MainView extends Form
 
     #[Rule('required')]
     public $pay = 0;
-
+    #[Rule('required')]
     public $raseed = 0;
     public $notes = '';
+
+    public $LastKsm;
+    public $NextKst;
+    public $Late;
+    public $sell_id;
+    public $LastUpd;
 
     public $user_id;
 
@@ -69,12 +76,48 @@ class MainView extends Form
         $this->user_id=$rec->user_id;
         $this->CusName=$rec->customer->CusName;
         $this->BankName=$rec->bank->BankName;
-        $this->raseed=$this->sul-$this->pay;
+        $this->LastKsm=$rec->LastKsm;
+        $this->NextKst=$rec->NextKst;
+        $this->Late=$rec->Late;
+        $this->LastUpd=$rec->LastUpd;
+        $this->sell_id=$rec->sell_id;
+
     }
-    public function Tarseed(){
-        Main::where('id',$this->id)->update(['pay'=>Tran::where('main_id',$this->id)->sum('ksm'),]);
-      $this->pay=Main::find($this->id)->pay;
-      $this->raseed=$this->sul-$this->pay;
+    public function Tarseed($lastksm =null,$nextkst=null){
+        $pay=Tran::where('main_id',$this->id)->sum('ksm');
+        $sul=Main::where('id',$this->id)->first()->sul;
+
+        if ($lastksm) {
+            $this->NextKst= date('Y-m-d', strtotime($nextkst . "+1 month"));
+            $this->LastKsm=$lastksm;
+            $this->LastUpd=now();
+
+            $toDate = Carbon::parse($this->LastUpd);
+            $fromDate = Carbon::now();
+
+            if ($fromDate>$toDate)
+             $months = $toDate->diffInMonths($fromDate);
+            else $months=0;
+
+            Main::where('id',$this->id)->
+            update([
+                'pay'=>$pay,
+                'raseed'=>$sul-$pay,
+                'LastKsm'=>$lastksm,
+                'LastUpd'=>$this->LastUpd,
+                'NextKst'=>$this->NextKst,
+                'Late'=>$months,
+            ]);
+
+        } else
+            Main::where('id',$this->id)->
+            update([
+                'pay'=>$pay,
+                'raseed'=>$sul-$pay,
+            ]);
+
+        $this->pay=$pay;
+        $this->raseed=$sul-$pay;
 
     }
 

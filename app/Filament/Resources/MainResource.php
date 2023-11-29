@@ -25,6 +25,7 @@ class MainResource extends Resource
     protected static ?string $model = Main::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $pluralModelLabel='عقود';
+
     protected static ?string $navigationGroup='ادخال وتعديل عقود';
     public static function form(Form $form): Form
     {
@@ -51,6 +52,7 @@ class MainResource extends Resource
                           ->createOptionForm([
                             TextInput::make('TajName')
                               ->required()
+
                               ->label('المصرف التجميعي')
                               ->maxLength(255),
                             TextInput::make('TajAcc')
@@ -64,8 +66,10 @@ class MainResource extends Resource
                  ->required(),
               Select::make('customer_id')
                 ->label('الزبون')
+
                 ->relationship('Customer','cusName')
                 ->searchable()
+
                 ->preload()
                 ->createOptionForm([
                   Forms\Components\Section::make('ادخال زبائن')
@@ -128,11 +132,18 @@ class MainResource extends Resource
 
               TextInput::make('kst')
                 ->label('القسط')
-                ->required(),
-              TextInput::make('notes')
-                ->label('ملاحظات')
 
-                ->columnSpan(2),
+                ->required(),
+              Select::make('sell_id')
+                    ->label('البضاعة')
+                    ->relationship('Sell','item_name')
+                    ->preload()
+                    ->required()
+                  ->columnSpan(2),
+              TextInput::make('notes')
+                ->label('ملاحظات')->columnSpanFull()
+
+
             ]);
     }
 
@@ -177,8 +188,8 @@ class MainResource extends Resource
     {
         return [
             'index' => Pages\ListMains::route('/'),
-       //     'create' => Pages\CreateMain::route('/create'),
-         //   'edit' => Pages\EditMain::route('/{record}/edit'),
+            'create' => Pages\CreateMain::route('/create'),
+            'edit' => Pages\EditMain::route('/{record}/edit'),
             'view' => Pages\ViewMain::route('/{record}'),
         ];
     }

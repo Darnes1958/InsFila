@@ -11,8 +11,9 @@ use Illuminate\Support\HtmlString;
 class CreateMain extends CreateRecord
 {
     protected static string $resource = MainResource::class;
+
     public function getTitle():  string|Htmlable
     {
-        return  new HtmlString('<div class="leading-3 h-0 text-sm py-0">ادخال عقود</div>');
+        return  new HtmlString('<div class="leading-3 h-0 text-md mb-2  text-primary-400">ادخال عقود</div>');
     }
 }

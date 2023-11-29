@@ -109,7 +109,7 @@ class InpKst extends Component
             Tran::create(
                 $this->TransForm->all()
             );
-            $this->mainView->tarseed();
+            $this->mainView->tarseed($this->TransForm->ksm_date,$this->TransForm->kst_date);
 
         }
         if ($this->Mod=='upd'){

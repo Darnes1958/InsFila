@@ -18,8 +18,16 @@ class Main extends Model
     return $this->belongsTo(Customer::class);
   }
 
+  public function Sell(){
+        return $this->belongsTo(Sell::class);
+    }
 
-  public function __construct(array $attributes = [])
+    public function Tran(){
+        return $this->belongsTo(Tran::class);
+    }
+
+
+    public function __construct(array $attributes = [])
   {
     parent::__construct($attributes);
     if (Auth::check()) {

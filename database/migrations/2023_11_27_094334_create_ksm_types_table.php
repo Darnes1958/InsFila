@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('ksm_types', function (Blueprint $table) {
             $table->id();
-
+            $table->string('ksm_type_name');
             $table->timestamps();
         });
     }

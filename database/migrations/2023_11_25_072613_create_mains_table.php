@@ -21,7 +21,7 @@ return new class extends Migration
             $table->decimal('sul',12,3);
             $table->integer('kst_count');
             $table->decimal('kst',12,3);
-            $table->decimal('pay',12,3);
+            $table->decimal('pay',12,3)->default(0);
             $table->text('notes')->nullable();
             $table->integer('user_id');
             $table->timestamps();
