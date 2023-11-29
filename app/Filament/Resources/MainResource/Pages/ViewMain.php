@@ -3,12 +3,21 @@
 namespace App\Filament\Resources\MainResource\Pages;
 
 use App\Filament\Resources\MainResource;
+use App\Models\Main;
+use App\Models\Tran;
+use App\Services\MainForm;
 use Filament\Actions;
+use Filament\Infolists\Components\Group;
 use Filament\Infolists\Components\Grid;
 use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\Split;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Tables\Actions\CreateAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\HtmlString;
 
@@ -23,38 +32,66 @@ class ViewMain extends ViewRecord
     {
         return $infolist
             ->schema([
-                Grid::make([
-                    'default' => 2,
-                    'sm' => 2,
-                    'md' => 3,
-                    'lg' => 4,
-                    'xl' => 6,
-                    '2xl' => 8,
+
+                Group::make([
+                  Section::make(new HtmlString('<div class="text-danger-600">بيانات الزبون</div>'))
+
+                    ->schema([
+
+                          TextEntry::make('Customer.CusName')
+                            ->label(new HtmlString('<div class="text-primary-400 text-lg">اسم الزبون</div>'))
+                            ->color('info')->size(TextEntry\TextEntrySize::Large)
+                            ->columnSpanFull(),
+                          TextEntry::make('Bank.BankName')
+                            ->label('المصرف')
+                            ->color('info')
+                            ->columnSpanFull(),
+                          TextEntry::make('acc')->label('رقم الحساب')
+                           ->color('info')->columnSpan(2),
+                          TextEntry::make('libyana')->label('لبيانا')
+                           ->color('Fuchsia'),
+                          TextEntry::make('mdar')->label('المدار')->color('grean')
+                           ->color('green'),
+
+
+                      ])
                 ]),
-                Section::make('بيانات الزبون')
-                    ->description('عرض لبيانات الزبون')
-                    ->schema([
-                        TextEntry::make('Customer.CusName')
-                        ->columnSpan(2),
-                        TextEntry::make('Bank.BankName'),
-                        TextEntry::make('acc'),
+                Group::make([
+                  Section::make('بيانات العقد')
 
-
-                        TextEntry::make('libyana'),
-                        TextEntry::make('mdar'),
-
-                    ]),
-                Section::make('بيانات العقد')
-                    ->description('عرض لبيانات العقد')
                     ->schema([
 
-                        TextEntry::make('sul')->columnSpan(2),
-                        TextEntry::make('kst_count'),
-                        TextEntry::make('kst'),
-                        TextEntry::make('pay'),
-                        TextEntry::make('raseed'),
+                          TextEntry::make('sul')->label('قيمة العقد')->columnSpan(2),
+                          TextEntry::make('sul_begin')->label('تاريخ العقد'),
+                          TextEntry::make('kst_count')->label('عدد الأقساط'),
+                          TextEntry::make('kst')->label('القسط'),
+                          TextEntry::make('pay')->label('المدفوع'),
+                          TextEntry::make('raseed')->label('المتبقي'),
+                        ])
+                ]),
 
-                    ]),
+
             ]);
     }
+
+  public function table(Table $table):Table
+  {
+    return $table
+      ->query(function (Tran $tran)  {
+         $tran=Main::all();
+        return  $tran;
+      })
+      ->columns([
+        TextColumn::make('kst_date')
+          ->label('تاريخ القسط'),
+        TextColumn::make('ksm_date')
+          ->label('تاريخ الخصم'),
+        TextColumn::make('ksm')
+          ->label('القسط')
+
+      ]);
+
+
+
+  }
 }

@@ -23,56 +23,53 @@ use Filament\Tables\Columns\TextColumn;
 class MainResource extends Resource
 {
     protected static ?string $model = Main::class;
-
-
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $pluralModelLabel='عقود';
     protected static ?string $navigationGroup='ادخال وتعديل عقود';
-
-
-
     public static function form(Form $form): Form
     {
         return $form
-
-
             ->schema([
-
               Select::make('bank_id')
                 ->label('المصرف')
                 ->relationship('Bank','BankName')
                 ->searchable()
                 ->preload()
                 ->createOptionForm([
-                  TextInput::make('BankName')
-                    ->required()
-                    ->label('اسم المصرف')
-                    ->maxLength(255),
-                  Select::make('taj_id')
-                    ->relationship('Taj','TajName')
-                    ->label('المصرف التجميعي')
-                    ->searchable()
-                    ->createOptionForm([
-                      TextInput::make('TajName')
+                  Forms\Components\Section::make('ادخال مصارف')
+                    ->description('ادخال بيانات مصرف .. ويمكن ادخال المصرف التجميعي اذا كان غير موجود بالقائمة')
+                  ->schema([
+                      TextInput::make('BankName')
                         ->required()
-                        ->label('المصرف التجميعي')
+                        ->label('اسم المصرف')
                         ->maxLength(255),
-                      TextInput::make('TajAcc')
-                        ->label('رقم الحساب')
-                        ->required(),
+                        Select::make('taj_id')
+                          ->relationship('Taj','TajName')
+                          ->label('المصرف التجميعي')
+                          ->searchable()
+                          ->preload()
+                          ->createOptionForm([
+                            TextInput::make('TajName')
+                              ->required()
+                              ->label('المصرف التجميعي')
+                              ->maxLength(255),
+                            TextInput::make('TajAcc')
+                              ->label('رقم الحساب')
+                              ->required(),
+                          ])
+                          ->required(),
+                  ])
 
-                    ])
-                    ->required(),
-                ])
-                ->required(),
+                 ])
+                 ->required(),
               Select::make('customer_id')
                 ->label('الزبون')
                 ->relationship('Customer','cusName')
                 ->searchable()
                 ->preload()
                 ->createOptionForm([
-                  Forms\Components\Section::make('Publishing')
-                    ->description('Settings for publishing this post.')
+                  Forms\Components\Section::make('ادخال زبائن')
+                    ->description('يجب ادخال اسم الزبون والبيانات الاخري اختيارية')
                     ->schema([
                       TextInput::make('CusName')
                         ->required()
@@ -157,9 +154,10 @@ class MainResource extends Resource
             ])
             ->actions([
 
-                ViewAction::make()->iconButton(),
+                ViewAction::make('View Information')->iconButton()->color('primary'),
                 DeleteAction::make()->iconButton(),
-                EditAction::make()->iconButton(),
+
+                EditAction::make()->iconButton()->color('blue'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

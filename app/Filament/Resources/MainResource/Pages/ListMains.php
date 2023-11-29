@@ -20,7 +20,7 @@ class ListMains extends ListRecords
 
     public function getTitle():  string|Htmlable
     {
-        return  new HtmlString('<div class="leading-3 h-4 py-0 text-base text-primary-400 py-0">استفسار عن عقود</div>');
+        return  new HtmlString('<div class="leading-3 h-4 py-0 text-base text-primary-400 py-0">عقود</div>');
     }
     protected function getHeaderActions(): array
     {

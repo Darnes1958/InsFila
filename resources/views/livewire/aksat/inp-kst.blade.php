@@ -1,6 +1,6 @@
 
-  <div class="flex gap-2 my-0 py-0 w-full" >
-                <div class="w-6/12  rounded shadow-inner {{$color}}">
+  <div class="flex gap-2  w-full" >
+                <div class="w-6/12 p-2 rounded shadow-inner {{$color}}">
                     <div class="flex gap-2  py-2 px-2 border-2 justify-center">
                         <x-label  for="radio1" value="{{ __('نقدا') }}"/>
                         <x-input type="radio" class="ml-4" wire:model="TransForm.ksm_type_id" name="radio1" value="1" />
@@ -21,7 +21,7 @@
                             <x-label class="w-4/12" for="search" value="{{ __('الحساب') }}"/>
                             <x-input id="search" wire:model.live="search"
                                      wire:keydown.enter="ChkAcc" wire:click="OpenTable"
-                                     class="w-full leading-none text-sm py-1"   type="text" autofocus autocomplete="off"/>
+                                     class="w-full leading-none text-indigo-700 text-sm py-1"   type="text" autofocus autocomplete="off"/>
                         </div>
                         <div class="flex w-4/12 gap-1">
                             <x-label class="w-3/12 " for="main_id" value="{{ __('العقد') }}"/>
@@ -99,7 +99,7 @@
                         <div class="flex gap-1 w-full">
                             <x-label class="w-3/12"  value="{{ __('الاسم') }}"/>
                             <x-input  wire:model="mainView.CusName"
-                                      disabled class="w-full leading-none text-md py-1 bg-gray-200"
+                                      disabled class="w-full leading-none text-indigo-800 text-md py-1 bg-gray-200"
                                       type="text"/>
                         </div>
                     </div>
@@ -107,7 +107,7 @@
                         <div class="flex gap-1 w-full">
                             <x-label class="w-3/12"  value="{{ __('المصرف') }}"/>
                             <x-input  wire:model="mainView.BankName"
-                                      readonly class="w-full leading-none text-md py-1 bg-gray-200"
+                                      readonly class="w-full leading-none text-blue-400 text-md py-1 bg-gray-200"
                                       type="text"/>
                         </div>
                     </div>
@@ -115,11 +115,11 @@
                         <div class="flex gap-1 w-full">
                             <x-label class="w-3/12 "  value="{{ __('الاجمـــــــالي') }}"/>
                             <x-input  wire:model="mainView.sul"
-                                      readonly class=" w-3/12 ml-2 leading-none text-md py-1 bg-gray-200"
+                                      readonly class=" w-3/12 ml-2 leading-none text-blue-400 text-md py-1 bg-gray-200"
                                       type="text"/>
                             <x-label class="w-2/12"  value="{{ __('المدفوع') }}"/>
                             <x-input  wire:model="mainView.pay"
-                                      readonly class=" w-4/12 leading-none text-md py-1 bg-gray-200"
+                                      readonly class=" w-4/12 leading-none text-blue-400 text-md py-1 bg-gray-200"
                                       type="text"/>
 
                         </div>
@@ -128,11 +128,11 @@
                         <div class="flex gap-1 w-full">
                             <x-label class="w-3/12 "  value="{{ __('عدد الاقساط') }}"/>
                             <x-input  wire:model="mainView.kst_count"
-                                      readonly class=" w-3/12 ml-2  leading-none text-md py-1 bg-gray-200"
+                                      readonly class=" w-3/12 ml-2  leading-none text-blue-400 text-md py-1 bg-gray-200"
                                       type="text"/>
                             <x-label class="w-2/12"  value="{{ __('القسط') }}"/>
                             <x-input  wire:model="mainView.kst"
-                                      readonly class=" w-4/12 leading-none text-md py-1 bg-gray-200"
+                                      readonly class=" w-4/12 leading-none text-blue-400 text-md py-1 bg-gray-200"
                                       type="numeric"/>
 
                         </div>
@@ -149,7 +149,7 @@
                             <x-label class="w-3/12"  value="{{ __('ملاحظات') }}"/>
                             <x-input  wire:model="TransForm.ksm_notes"
                                       wire:keydown.enter="$dispatch('goto', {test: 'ksm_date'})"
-                                      class="w-full leading-none text-md py-1 " type="text"/>
+                                      class="w-full leading-none text-blue-400 text-md py-1 " type="text"/>
                         </div>
                     </div>
 
@@ -159,7 +159,7 @@
                             <x-label class="w-3/12" for="ksm" value="{{ __('التاريخ') }}"/>
                             <x-input id="ksm_date" wire:model="TransForm.ksm_date"
                                      wire:keydown.enter="$dispatch('goto', {test: 'ksm'})"
-                                     class="w-full leading-none text-md py-1" type="date"/>
+                                     class="w-full leading-none text-blue-400 text-md py-1" type="date"/>
 
                         </div>
                         <x-input-error for="TransForm.ksm_date"></x-input-error>
@@ -169,7 +169,7 @@
                             <x-label class="w-3/12" for="ksm" value="{{ __('الخصم') }}"/>
                             <x-input id="ksm" wire:model="TransForm.ksm"
                                      wire:keydown.enter="$dispatch('goto', {test: 'Transstore'})"
-                                     class="block w-full leading-none text-md py-1" type="number"/>
+                                     class="block w-full leading-none text-blue-400 text-md py-1" type="number"/>
                         </div>
                         <x-input-error for="TransForm.ksm"></x-input-error>
 
@@ -199,7 +199,7 @@
 
                         <x-slot name="body">
                             @forelse ($Table as $item)
-                                <x-table.row wire:loading.class.delay="opacity-75" class=" text-s " >
+                                <x-table.row wire:loading.class.delay="opacity-75" class=" text-xs text-blue-400" >
                                     <x-table.cell  >{{$item->ser}}</x-table.cell>
                                     <x-table.cell  >{{$item->kst_date}}</x-table.cell>
                                     <x-table.cell  >{{$item->ksm_date}}</x-table.cell>

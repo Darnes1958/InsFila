@@ -2,12 +2,12 @@
 
 namespace App\Providers;
 
-use Filament\Support\Facades\FilamentAsset;
+
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 use BezhanSalleh\FilamentLanguageSwitch\LanguageSwitch;
-use Filament\Facades\Filament;
-use Filament\Support\Assets\Js;
+use Filament\Support\Colors\Color;
+use Filament\Support\Facades\FilamentColor;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,7 +25,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-
+      FilamentColor::register([
+        'Fuchsia' =>  Color::Fuchsia,
+        'green' =>  Color::Green,
+        'blue' =>  Color::Blue,
+        'gray' =>  Color::Gray,
+      ]);
 
       LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
         $switch
