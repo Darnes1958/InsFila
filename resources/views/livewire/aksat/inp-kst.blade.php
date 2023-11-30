@@ -168,12 +168,16 @@
                         <div class="flex gap-1 w-1/2">
                             <x-label class="w-3/12" for="ksm" value="{{ __('الخصم') }}"/>
                             <x-input id="ksm" wire:model="TransForm.ksm"
-                                     wire:keydown.enter="$dispatch('goto', {test: 'Transstore'})"
+                                     wire:keydown.enter="ChkKst"
                                      class="block w-full leading-none text-blue-400 text-md py-1" type="number"/>
                         </div>
                         <x-input-error for="TransForm.ksm"></x-input-error>
 
                     </div>
+                    @if($ShowOverMessage)
+                        <div  class="text-red-400">{{ $OverMessage }}</div>
+                    @endif
+
 
                     <div class="flex flex-row items-center justify-center gap-4">
                         <x-button wire:click="store" id="Transstore" class="mt-4 mb-4">

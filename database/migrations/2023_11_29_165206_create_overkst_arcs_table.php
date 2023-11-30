@@ -11,17 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::connection('other')->create('trans', function (Blueprint $table) {
+        Schema::connection('other')->create('overkst_arcs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('main_id')->constrained('mains')->cascadeOnDelete();
-            $table->foreignId('ksm_type_id')->constrained('ksm_types')->cascadeOnDelete();
-            $table->integer('ser');
-            $table->date('kst_date');
-            $table->date('ksm_date');
-            $table->decimal('ksm',12,3);
-            $table->string('ksm_notes')->nullable();
+            $table->date('over_date');
+            $table->decimal('kst',12,3);
+            $table->string('status')->default('غير مرجع');
+            $table->bigInteger('tar_id')->default(0);
             $table->bigInteger('haf_id')->default(0);
-            $table->bigInteger('user_id');
             $table->timestamps();
         });
     }
@@ -31,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('trans');
+        Schema::dropIfExists('overkst_arcs');
     }
 };

@@ -17,6 +17,8 @@ class InpKst extends Component
     public $search='';
     public $IsSearch=true;
     public $ShowManyMessage=false;
+    public $ShowOverMessage=false;
+    public $OverMessage;
     public MainView $mainView;
     public $Mod='inp';
     public $main_id;
@@ -45,7 +47,9 @@ class InpKst extends Component
     }
 
     public function Main_idGo(){
+        $this->ShowOverMessage=false;
         $this->mainView->SetMainView($this->main_id);
+        if ($this->mainView->raseed<=0) {$this->ShowOverMessage=true;$this->OverMessage='خصم بالفائض';}
         $this->acc=$this->mainView->acc;
         $this->TransForm->ksm=$this->mainView->kst;
         $this->TransForm->main_id=$this->main_id;
@@ -58,12 +62,26 @@ class InpKst extends Component
         }
         $this->IdSelected=0;
     }
+    public function ChkKst(){
+      if ($this->TransForm->ksm){
+        if ($this->TransForm->ksm>$this->mainView->raseed){
+          if ($this->mainView->raseed<=0) {
+            $this->OverMessage='خصم بالفائض';
+          } else $this->OverMessage='خصم جزئي';
+          $this->ShowOverMessage=true;
+        }else $this->ShowOverMessage=false;
+        $this->dispatch('goto', test: 'Transstore');
+      }
+    }
     public function ChkAcc(){
+        $this->ShowOverMessage=false;
         if ($this->search){
             $res=Main::where('acc',$this->search)->get();
             if (count($res)>0){
                 if (count($res)==1) {
                     $this->main_id=$res->first()->id;
+                    if ($res[0]['raseed']<=0) {$this->OverMessage='خصم بالفائض'; $this->ShowOverMessage=true;}
+
                     $this->CloseTable();
                     $this->Main_idGo();
                 } else $this->ShowManyMessage=true;
@@ -94,7 +112,8 @@ class InpKst extends Component
         $this->ShowDeleteModal=false;
     }
     public function store(){
-        if ($this->Mod=='inp') $this->TransForm->FillTrans($this->main_id);
+      $this->ShowOverMessage=false;
+      if ($this->Mod=='inp') $this->TransForm->FillTrans($this->main_id);
 
         try {
             $this->validate();
@@ -106,6 +125,7 @@ class InpKst extends Component
 
 
         if ($this->Mod=='inp'){
+            if ($this->mainView->raseed<=0) $this->TransForm->DoOver($this->mainView->main_id);
             Tran::create(
                 $this->TransForm->all()
             );

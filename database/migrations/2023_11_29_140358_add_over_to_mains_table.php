@@ -12,12 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::connection('other')->table('mains', function (Blueprint $table) {
-            $table->foreignId('sell_id')->default(1)->constrained('sells')->cascadeOnDelete();
-            $table->decimal('raseed',12,3)->default(0);
-            $table->date('LastKsm')->nullable();
-            $table->date('NextKst')->default(now());
-            $table->integer('Late')->default(0);
-            $table->date('LastUpd')->default(now());
+            $table->bigInteger('last_cont')->default('0');
+            $table->integer('over_count')->default(0);
+            $table->decimal('over_kst',12,3)->default(0);
+            $table->integer('tar_count')->default(0);
+            $table->decimal('tar_kst',12,3)->default(0);
+
         });
     }
 
@@ -27,7 +27,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('mains', function (Blueprint $table) {
-            $table->dropColumn(['LastUpd',  'raseed',  'Late',  'NextKst',  'LastKsm','sell_id']);
+
+            $table->dropColumn(['last_cont',  'over_count',  'over_kst',  'tar_count',  'tar_kst']);
+
+
         });
     }
 };

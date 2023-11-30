@@ -59,7 +59,12 @@ class MainForm extends Form
     public $Late;
     public $sell_id;
     public $LastUpd;
-
+    public $kst_baky;
+    public $last_cont;
+    public $over_count;
+    public $over_kst;
+    public $tar_count;
+    public $tar_kst;
     public $notes = '';
 
     public $user_id;
@@ -86,6 +91,13 @@ class MainForm extends Form
         $this->Late=$rec->Late;
         $this->LastUpd=$rec->LastUpd;
         $this->sell_id=$rec->sell_id;
+        $this->kst_baky=$rec->kst_baky;
+      $this->last_cont=$rec->last_cont;
+      $this->over_count=$rec->over_count;
+      $this->over_kst=$rec->over_kst;
+      $this->tar_count=$rec->tar_count;
+      $this->tar_kst=$rec->tar_kst;
+
 
     }
 

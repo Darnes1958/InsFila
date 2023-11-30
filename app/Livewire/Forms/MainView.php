@@ -53,8 +53,13 @@ class MainView extends Form
     public $Late;
     public $sell_id;
     public $LastUpd;
-
+    public $kst_baky;
     public $user_id;
+  public $last_cont;
+  public $over_count;
+  public $over_kst;
+  public $tar_count;
+  public $tar_kst;
 
     public $BankName;
     public $CusName;
@@ -81,43 +86,52 @@ class MainView extends Form
         $this->Late=$rec->Late;
         $this->LastUpd=$rec->LastUpd;
         $this->sell_id=$rec->sell_id;
-
+        $this->kst_baky=$rec->kst_baky;
+        $this->last_cont=$rec->last_cont;
+        $this->over_count=$rec->over_count;
+        $this->over_kst=$rec->over_kst;
+        $this->tar_count=$rec->tar_count;
+        $this->tar_kst=$rec->tar_kst;
     }
     public function Tarseed($lastksm =null,$nextkst=null){
         $pay=Tran::where('main_id',$this->id)->sum('ksm');
-        $sul=Main::where('id',$this->id)->first()->sul;
+        $count=Tran::where('main_id',$this->id)->count();
+        $main=Main::where('id',$this->id)->first();
 
         if ($lastksm) {
             $this->NextKst= date('Y-m-d', strtotime($nextkst . "+1 month"));
             $this->LastKsm=$lastksm;
             $this->LastUpd=now();
 
-            $toDate = Carbon::parse($this->LastUpd);
+            $toDate = Carbon::parse($nextkst);
             $fromDate = Carbon::now();
 
             if ($fromDate>$toDate)
              $months = $toDate->diffInMonths($fromDate);
             else $months=0;
 
+            if ($months>($main->kst_count-$count)) $months=$main->kst_count-$count;
+
             Main::where('id',$this->id)->
             update([
                 'pay'=>$pay,
-                'raseed'=>$sul-$pay,
+                'raseed'=>$main->sul-$pay,
                 'LastKsm'=>$lastksm,
                 'LastUpd'=>$this->LastUpd,
                 'NextKst'=>$this->NextKst,
                 'Late'=>$months,
+                'Kst_baky'=>$main->kst_count-$count,
             ]);
 
         } else
             Main::where('id',$this->id)->
             update([
                 'pay'=>$pay,
-                'raseed'=>$sul-$pay,
+                'raseed'=>$main->sul-$pay,
             ]);
 
         $this->pay=$pay;
-        $this->raseed=$sul-$pay;
+        $this->raseed=$main->sul-$pay;
 
     }
 
