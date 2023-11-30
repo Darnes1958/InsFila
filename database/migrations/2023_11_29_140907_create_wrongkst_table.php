@@ -20,6 +20,7 @@ return new class extends Migration
           $table->string('status')->default('غير مرجع');
           $table->bigInteger('tar_id')->default(0);
           $table->bigInteger('haf_id')->default(0);
+            $table->bigInteger('user_id');
           $table->timestamps();
         });
     }

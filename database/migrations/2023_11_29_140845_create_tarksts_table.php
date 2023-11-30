@@ -19,6 +19,7 @@ return new class extends Migration
           $table->string('tar_type')->default('من الفائض');
           $table->bigInteger('from_id');
           $table->bigInteger('haf_id')->default(0);
+            $table->bigInteger('user_id');
             $table->timestamps();
         });
     }

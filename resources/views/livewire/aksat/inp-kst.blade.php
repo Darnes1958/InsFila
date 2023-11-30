@@ -1,5 +1,5 @@
 
-  <div class="flex gap-2  w-full" >
+  <div  class="flex gap-2  w-full" >
                 <div class="w-6/12 p-2 rounded shadow-inner {{$color}}">
                     <div class="flex gap-2  py-2 px-2 border-2 justify-center">
                         <x-label  for="radio1" value="{{ __('نقدا') }}"/>
@@ -32,11 +32,64 @@
 
                         <x-input-error for="accc"></x-input-error>
                     </div>
-                    @if($ShowManyMessage)
-                        <div  class="text-red-400">يوجد اكثر من عقد .. يجب الاختيار</div>
-                    @endif
+                   <div x-show="$wire.isWrong" class="rounded shadow-inner bg-primary-500/10 mt-2">
+                       <div class="my-2 mx-2">
+                           <span class="text-danger-600">بالفائض من الارشيف</span>
+                       </div>
+                       <div class="w-full mx-2 my-2" wire:ignore>
+                           <select
+                               x-init="$($el).select2({placeholder: 'ابحث هنا ..'});$($el).on('change',function(){
+                                        $wire.set('WrongForm.bank_id',$($el).val());
+                                        $wire.set('bankSelected',2);
+                                        });
+                                         $($el).val($($el).val()); $($el).trigger('change'); "
+                               wire:model.live="WrongForm.bank-id"
+                               name="bank_id" id="bank_id" class="select2 w-full">
+                               <option value="">اختيار من القائمة</option>
+                               @foreach(App\Models\Bank::all() as $s)
+                                   <option value="{{ $s->id }}">{{ $s->BankName }}</option>
+                               @endforeach
+                           </select>
+                       </div>
+                       <div class=" gap-4 mt-2  ">
+                          <div class="flex gap-1 mt-2 px-2 w-full">
+                               <x-input-error for="TransForm.id"></x-input-error>
+                               <div class="flex gap-1 w-1/2 mt-2 mx-1">
+                                   <x-label class="w-3/12" for="wrong_date" value="{{ __('التاريخ') }}"/>
+                                   <x-input id="wrong_date" wire:model="WrongForm.wrong_date"
+                                            wire:keydown.enter="$dispatch('goto', {test: 'wrong_kst'})"
+                                            class="w-full leading-none text-blue-400 text-md py-1" type="date"/>
 
-                    @if($IsSearch)
+                               </div>
+                               <x-input-error for="WrongForm.wrong_date"></x-input-error>
+
+
+                               <div class="flex gap-1 w-1/2 mt-2 mx-1">
+                                   <x-label class="w-3/12" for="wrong_kst" value="{{ __('الخصم') }}"/>
+                                   <x-input id="ksm" wire:model="WrongForm.kst"
+                                            wire:keydown.enter="$dispatch('goto', {test: 'wrongstore'})"
+                                            class="block w-full leading-none text-blue-400 text-md py-1" type="number"/>
+                               </div>
+                               <x-input-error for="TransForm.ksm"></x-input-error>
+
+                           </div>
+                         <div class="flex flex-row items-center justify-center gap-4">
+                           <x-button wire:click="wrongStore" id="wrongstore" class="mt-4 mb-4">
+                               تخزين البيانات
+                           </x-button>
+                           <x-button.primary  wire:click="wrngCancel" id="wrongcancel" class="mt-4 mb-4">
+                               تجاهل
+                           </x-button.primary>
+
+                         </div>
+                       </div>
+                   </div>
+
+                         @if($ShowManyMessage)
+                        <div  class="text-red-400">يوجد اكثر من عقد .. يجب الاختيار</div>
+                        @endif
+
+                        @if($IsSearch && !$isWrong)
                         <div class="mt-2">
                             <x-table class="table-fixed font-medium">
                                 <x-slot name="head">
@@ -90,10 +143,7 @@
                             {{$MainSearch->links('Mypaginator')}}
 
                         </div>
-                    @endif
-
-
-
+                          @endif
 
                     <div class="gap-4 mt-2  ">
                         <div class="flex gap-1 w-full">
@@ -144,6 +194,7 @@
                                       readonly class=" w-4/12 ml-3 leading-none text-md py-1 bg-gray-200 text-red-500 text-center"  type="text"/>
                         </div>
                     </div>
+                <div x-show="!$wire.isWrong">
                     <div class="gap-4 mt-2  ">
                         <div class="flex gap-1 w-full">
                             <x-label class="w-3/12"  value="{{ __('ملاحظات') }}"/>
@@ -189,7 +240,11 @@
 
                     </div>
                 </div>
+                </div>
                 <div class="w-full ">
+                    @if($ShowDeteteMessage)
+                        <div  class="text-red-400">{{ $DeleteMessage }}</div>
+                    @endif
                     <x-table class="table-fixed font-medium ">
                         <x-slot name="head">
                             <x-table.heading  class="w-1/12 text-right ">ت</x-table.heading>
@@ -212,12 +267,16 @@
 
                                     <x-table.cell  >{{$item->ksm_notes}}</x-table.cell>
                                     <x-table.cell  >
+                                        @if( !$has_over )
                                         <x-button.link class=" text-blue-400" wire:click="Edit({{$item}})">
                                             <x-icon.edit dim="w-4 h-4"/>
                                         </x-button.link>
-                                        <x-button.link class="text-red-400" wire:click="Delete({{$item->id}})">
+                                        @endif
+                                            @if( !$has_over || ($item->baky>0 && $can_delete) )
+                                        <x-button.link class="text-red-400" wire:click="Delete({{$item->id}},{{ $item->over_id }})">
                                             <x-icon.delete dim="w-4 h-4"/>
                                         </x-button.link>
+                                            @endif
                                     </x-table.cell>
                                 </x-table.row>
                             @empty
@@ -257,7 +316,11 @@
 
   @push('scripts')
             <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+          <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+          <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
             <script src="https://cdn.tailwindcss.com"></script>
+
+
             <script>
 
                 document.addEventListener('livewire:initialized', () => {

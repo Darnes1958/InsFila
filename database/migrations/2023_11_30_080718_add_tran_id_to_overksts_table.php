@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::connection('other')->create('banks', function (Blueprint $table) {
-            $table->id();
-            $table->string('BankName');
-            $table->foreignId('taj_id')->constrained('tajs')->cascadeOnDelete();
-            $table->bigInteger('user_id');
-            $table->timestamps();
+        Schema::connection('other')->table('overksts', function (Blueprint $table) {
+            $table->bigInteger('tran_id')->default(0);
         });
     }
 
@@ -25,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('banks');
+        Schema::table('overksts', function (Blueprint $table) {
+            //
+        });
     }
 };

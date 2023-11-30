@@ -4,7 +4,9 @@ namespace App\Livewire\Aksat;
 
 use App\Livewire\Forms\MainView;
 use App\Livewire\Forms\TransForm;
+use App\Livewire\Traits\AksatTrait;
 use App\Models\Main;
+use App\Models\Overkst;
 use App\Models\Tran;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -12,13 +14,16 @@ use Livewire\WithPagination;
 class InpKst extends Component
 {
     use WithPagination;
+    use AksatTrait;
     public TransForm $TransForm;
     public $ShowDeleteModal=false;
     public $search='';
     public $IsSearch=true;
     public $ShowManyMessage=false;
     public $ShowOverMessage=false;
+    public $ShowDeteteMessage=false;
     public $OverMessage;
+    public $DeleteMessage;
     public MainView $mainView;
     public $Mod='inp';
     public $main_id;
@@ -28,12 +33,17 @@ class InpKst extends Component
     public $bank_name;
     public Main $rec;
     public $color='bg-gray-100';
-
+    public $has_over=false;
+    public $over_id;
+    public $can_delete=true;
+    public $isWrong=true;
+    public $bankSelected=0;
     public function updatedSearch(){
         $this->ShowManyMessage=false;
     }
     public function OpenTable(){
         $this->IsSearch=true;
+        $this->isWrong=false;
     }
     public function CloseTable(){
         $this->search='';
@@ -47,9 +57,33 @@ class InpKst extends Component
     }
 
     public function Main_idGo(){
+        $this->has_over=false;
+        $this->can_delete=true;
         $this->ShowOverMessage=false;
+        $this->ShowDeteteMessage=false;
         $this->mainView->SetMainView($this->main_id);
         if ($this->mainView->raseed<=0) {$this->ShowOverMessage=true;$this->OverMessage='خصم بالفائض';}
+        $this->has_over= $this->mainView->over_count>0;
+        if ($this->has_over) {
+            if ($this->mainView->over_count > 1) {
+                $this->ShowDeteteMessage=true;
+                $this->DeleteMessage = ' هذا الزبون لديه عدة اقساط بالفائض .. ولا يسمح بالتعديل أو الإلغاء إلا بعد الغاءها';
+                $this->can_delete=false;
+            }else
+            {
+
+                $res=Overkst::where('main_id',$this->main_id)->first();
+
+                if ($res->tar_id>0) {
+                    $this->ShowDeteteMessage=true;
+                    $this->DeleteMessage = 'هذا الزبون لديه قسط بالفائض وتم ترجيعه .. ولا يسمح بالتعديل أو الإلغاء قبل الغاء الترجيع';
+                    $this->can_delete=false;}
+
+            }
+
+        }
+
+
         $this->acc=$this->mainView->acc;
         $this->TransForm->ksm=$this->mainView->kst;
         $this->TransForm->main_id=$this->main_id;
@@ -101,12 +135,17 @@ class InpKst extends Component
         $this->TransForm->reset();
         $this->dispatch('goto', test: 'accc');
     }
-    public function Delete($id){
+    public function Delete($id,$over_id){
         $this->trans_id=$id;
+        $this->over_id=$over_id;
         $this->ShowDeleteModal=true;
 
     }
     public function DoDelete(){
+        if ($this->over_id!=0){
+            Overkst::where('id',$this->over_id)->delete();
+            $this->OverTarseed($this->main_id);
+        }
         $this->TransForm->TransDelete($this->trans_id);
         $this->mainView->Tarseed();
         $this->ShowDeleteModal=false;
@@ -125,12 +164,18 @@ class InpKst extends Component
 
 
         if ($this->Mod=='inp'){
-            if ($this->mainView->raseed<=0) $this->TransForm->DoOver($this->mainView->main_id);
-            Tran::create(
-                $this->TransForm->all()
-            );
-            $this->mainView->tarseed($this->TransForm->ksm_date,$this->TransForm->kst_date);
+            if ($this->mainView->raseed<=0) $this->TransForm->DoOver($this->mainView->id);
+            if ($this->mainView->raseed>0){
+              if ($this->mainView->raseed<$this->TransForm->ksm) $this->TransForm->DoBaky($this->mainView->id,$this->mainView->raseed);
+              $res=Tran::create($this->TransForm->all());
+              if ($this->TransForm->over_id!=0) Overkst::where('id',$this->TransForm->over_id)->update(['tran_id'=>$res->id]);
 
+              $this->mainView->tarseed($this->TransForm->ksm_date,$this->TransForm->kst_date);
+            }
+            $this->TransForm->reset();
+            $this->TransForm->ksm_date=date('Y-m-d');
+            $this->TransForm->ksm=$this->mainView->kst;
+            $this->TransForm->main_id=$this->main_id;
         }
         if ($this->Mod=='upd'){
 

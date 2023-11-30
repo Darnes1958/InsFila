@@ -2,11 +2,31 @@
 namespace App\Livewire\Traits;
 
 use App\Models\Main;
+use App\Models\Overkst;
 use App\Models\Tran;
 
 use DateTime;
 
 trait AksatTrait {
+    public function OverTarseed($main_id){
+        $count=Overkst::where('main_id',$main_id)->count();
+        $sum=Overkst::where('main_id',$main_id)->sum('kst');
+        Main::where('id',$main_id)->update([
+            'over_count'=>$count,
+            'over_kst'=>$sum,
+        ]);
+
+    }
+    public function StoreOver($main_id,$ksm_date,$ksm){
+
+        $over=Overkst::create([
+            'main_id'=>$main_id,
+            'over_date'=>$ksm_date,
+            'kst'=>$ksm,
+            ]);
+        $this->OverTarseed($main_id);
+        return $over->id;
+    }
   public function setMonth($begin){
       $month = date('m', strtotime($begin));
       $year = date('Y', strtotime($begin));

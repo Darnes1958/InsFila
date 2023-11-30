@@ -58,21 +58,19 @@ use AksatTrait;
         $this->user_id=Auth::user()->id;
     }
     public function TransDelete($id){
+
       Tran::where('id',$id)->delete();
       $this->SortTrans($this->main_id);
       $this->SortKstDate($this->main_id);
     }
     public function DoOver($main_id){
-      Overkst::create([
-        'main_id'=>$main_id,
-        'over_date'=>$this->ksm_date,
-        'kst'=>$this->ksm,
-        'status'=>'غير مرجع',]);
-      $count=Overkst::where('main_id',$main_id)->count();
-      $sum=Overkst::where('main_id',$main_id)->sum('kst');
-      Main::where('id',$main_id)->update([
-        'over_count'=>$count,
-        'over_kst'=>$sum,
-      ]);
+        $this->StoreOver($main_id,$this->ksm_date,$this->ksm);
+    }
+    public function DoBaky($main_id,$raseed){
+
+        $this->over_id=$this->StoreOver($main_id,$this->ksm_date,$this->ksm-$raseed);
+        $this->baky=$this->ksm-$raseed;
+        $this->ksm=$raseed;
+
     }
 }
