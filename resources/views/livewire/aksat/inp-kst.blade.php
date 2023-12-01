@@ -1,7 +1,8 @@
 
-  <div  class="flex gap-2  w-full" >
+<div  class="flex gap-2  w-full" >
+
                 <div class="w-6/12 p-2 rounded shadow-inner {{$color}}">
-                    <div class="flex gap-2  py-2 px-2 border-2 justify-center">
+                   <div class="flex gap-2  py-2 px-2 border-2 justify-center">
                         <x-label  for="radio1" value="{{ __('نقدا') }}"/>
                         <x-input type="radio" class="ml-4" wire:model="TransForm.ksm_type_id" name="radio1" value="1" />
 
@@ -14,9 +15,7 @@
                         <x-label  for="radio4" value="{{ __('الكتروني') }}"/>
                         <x-input type="radio" class="ml-4" wire:model="TransForm.ksm_type_id" name="radio4" value="4"/>
                     </div>
-
-
-                    <div class="flex gap-4 mt-2  ">
+                   <div class="flex gap-4 mt-2  ">
                         <div class="flex w-8/12 gap-1">
                             <x-label class="w-4/12" for="search" value="{{ __('الحساب') }}"/>
                             <x-input id="search" wire:model.live="search"
@@ -32,59 +31,61 @@
 
                         <x-input-error for="accc"></x-input-error>
                     </div>
-                   <div x-show="$wire.isWrong" class="rounded shadow-inner bg-primary-500/10 mt-2">
-                       <div class="my-2 mx-2">
-                           <span class="text-danger-600">بالفائض من الارشيف</span>
+                  @if($isWrong)
+                   <div  class="w-full rounded shadow-inner bg-primary-500/10 mt-2">
+                       <div class="w-full my-2 mx-2">
+                           <span class="text-danger-600">قسط وارد بالخطأ !!</span>
                        </div>
-                       <div class="w-full mx-2 my-2" wire:ignore>
+                       <div class="w-full my-2 py-2" wire:ignore>
                            <select
                                x-init="$($el).select2({placeholder: 'ابحث هنا ..'});$($el).on('change',function(){
-                                        $wire.set('WrongForm.bank_id',$($el).val());
+                                        $wire.set('wrongForm.bank_id',$($el).val());
                                         $wire.set('bankSelected',2);
                                         });
                                          $($el).val($($el).val()); $($el).trigger('change'); "
-                               wire:model.live="WrongForm.bank-id"
-                               name="bank_id" id="bank_id" class="select2 w-full">
+                               wire:model.live="wrongForm.bank_id"
+                               name="bank_id" id="bank_id" class="select2 w-full ">
                                <option value="">اختيار من القائمة</option>
                                @foreach(App\Models\Bank::all() as $s)
                                    <option value="{{ $s->id }}">{{ $s->BankName }}</option>
                                @endforeach
                            </select>
                        </div>
+                       <x-input-error for="wrongForm.bank_id"></x-input-error>
                        <div class=" gap-4 mt-2  ">
                           <div class="flex gap-1 mt-2 px-2 w-full">
                                <x-input-error for="TransForm.id"></x-input-error>
                                <div class="flex gap-1 w-1/2 mt-2 mx-1">
                                    <x-label class="w-3/12" for="wrong_date" value="{{ __('التاريخ') }}"/>
-                                   <x-input id="wrong_date" wire:model="WrongForm.wrong_date"
+                                   <x-input id="wrong_date" wire:model="wrongForm.wrong_date"
                                             wire:keydown.enter="$dispatch('goto', {test: 'wrong_kst'})"
                                             class="w-full leading-none text-blue-400 text-md py-1" type="date"/>
 
                                </div>
-                               <x-input-error for="WrongForm.wrong_date"></x-input-error>
+                               <x-input-error for="wrongForm.wrong_date"></x-input-error>
 
 
                                <div class="flex gap-1 w-1/2 mt-2 mx-1">
                                    <x-label class="w-3/12" for="wrong_kst" value="{{ __('الخصم') }}"/>
-                                   <x-input id="ksm" wire:model="WrongForm.kst"
+                                   <x-input id="wrong_kst" wire:model="wrongForm.kst"
                                             wire:keydown.enter="$dispatch('goto', {test: 'wrongstore'})"
                                             class="block w-full leading-none text-blue-400 text-md py-1" type="number"/>
                                </div>
-                               <x-input-error for="TransForm.ksm"></x-input-error>
+                               <x-input-error for="wrongForm.kst"></x-input-error>
 
                            </div>
                          <div class="flex flex-row items-center justify-center gap-4">
                            <x-button wire:click="wrongStore" id="wrongstore" class="mt-4 mb-4">
                                تخزين البيانات
                            </x-button>
-                           <x-button.primary  wire:click="wrngCancel" id="wrongcancel" class="mt-4 mb-4">
+                           <x-button.primary  wire:click="wrongCancel" id="wrongcancel" class="mt-4 mb-4">
                                تجاهل
                            </x-button.primary>
 
                          </div>
                        </div>
                    </div>
-
+                    @endif
                          @if($ShowManyMessage)
                         <div  class="text-red-400">يوجد اكثر من عقد .. يجب الاختيار</div>
                         @endif
@@ -345,6 +346,23 @@
                             document.getElementById('Transstore').focus();
                         }, 100);
                     }
+
+                    if (postid == 'wrong_kst') {
+                        $("#wrong_kst").focus();
+                        $("#wrong_kst").select();
+                    }
+                    if (postid == 'wrong_date') {
+
+                        $("#wrong_date").focus();
+                        $("#wrong_date").select();
+                    }
+
+                    if (postid == 'wrongstore') {
+                        setTimeout(function () {
+                            document.getElementById('wrongstore').focus();
+                        }, 100);
+                    }
+
                 });
                 });
 

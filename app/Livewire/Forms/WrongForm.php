@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Forms;
 
+use App\Models\Wrongkst;
 use Livewire\Attributes\Rule;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
@@ -14,6 +15,18 @@ class WrongForm extends Form
     public $kst = '';
     #[Rule('required',message: 'يجب ادخال المصرف')]
     public $bank_id='';
+    public $acc='';
     public $user_id='';
+    public $tar_id=0;
+    public $status='غير مرجع';
+    public $haf_id=0;
+
+  public function store()
+  {
+    $this->validate();
+    $this->user_id=auth()->id();
+    Wrongkst::create($this->all());
+    $this->reset();
+  }
 
 }

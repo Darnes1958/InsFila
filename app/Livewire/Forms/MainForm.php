@@ -4,6 +4,7 @@ namespace App\Livewire\Forms;
 
 
 use App\Models\Main;
+use App\Models\Main_arc;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Livewire\Attributes\Rule;
@@ -70,36 +71,42 @@ class MainForm extends Form
     public $user_id;
 
 
-
-    public function SetMain($id){
-        $rec=Main::where('id',$id)->first();
-        $this->id=$id;
-        $this->customer_id=$rec->customer_id;
-        $this->bank_id=$rec->bank_id;
-        $this->acc=$rec->acc;
-        $this->sul_begin=$rec->sul_begin;
-        $this->sul_end=$rec->sul_end;
-        $this->sul=$rec->sul;
-        $this->kst_count=$rec->kst_count;
-        $this->kst=$rec->kst;
-        $this->pay=$rec->pay;
-        $this->raseed=$rec->raseed;
-        $this->notes=$rec->notes;
-        $this->user_id=$rec->user_id;
-        $this->LastKsm=$rec->LastKsm;
-        $this->NextKst=$rec->NextKst;
-        $this->Late=$rec->Late;
-        $this->LastUpd=$rec->LastUpd;
-        $this->sell_id=$rec->sell_id;
-        $this->kst_baky=$rec->kst_baky;
+    public function FillRec($rec){
+      $this->customer_id=$rec->customer_id;
+      $this->bank_id=$rec->bank_id;
+      $this->acc=$rec->acc;
+      $this->sul_begin=$rec->sul_begin;
+      $this->sul_end=$rec->sul_end;
+      $this->sul=$rec->sul;
+      $this->kst_count=$rec->kst_count;
+      $this->kst=$rec->kst;
+      $this->pay=$rec->pay;
+      $this->raseed=$rec->raseed;
+      $this->notes=$rec->notes;
+      $this->user_id=$rec->user_id;
+      $this->LastKsm=$rec->LastKsm;
+      $this->NextKst=$rec->NextKst;
+      $this->Late=$rec->Late;
+      $this->LastUpd=$rec->LastUpd;
+      $this->sell_id=$rec->sell_id;
+      $this->kst_baky=$rec->kst_baky;
       $this->last_cont=$rec->last_cont;
       $this->over_count=$rec->over_count;
       $this->over_kst=$rec->over_kst;
       $this->tar_count=$rec->tar_count;
       $this->tar_kst=$rec->tar_kst;
 
-
     }
+    public function SetMain($id){
+        $rec=Main::where('id',$id)->first();
+        $this->id=$id;
+        $this->FillRec($rec);
+    }
+  public function SetMain_arc($id){
+    $rec=Main_arc::where('id',$id)->first();
+    $this->id=$id;
+    $this->FillRec($rec);
+  }
 
 
 }

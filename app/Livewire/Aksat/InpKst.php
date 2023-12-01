@@ -4,10 +4,12 @@ namespace App\Livewire\Aksat;
 
 use App\Livewire\Forms\MainView;
 use App\Livewire\Forms\TransForm;
+use App\Livewire\Forms\WrongForm;
 use App\Livewire\Traits\AksatTrait;
 use App\Models\Main;
 use App\Models\Overkst;
 use App\Models\Tran;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -16,6 +18,8 @@ class InpKst extends Component
     use WithPagination;
     use AksatTrait;
     public TransForm $TransForm;
+    public WrongForm $wrongForm;
+
     public $ShowDeleteModal=false;
     public $search='';
     public $IsSearch=true;
@@ -36,7 +40,7 @@ class InpKst extends Component
     public $has_over=false;
     public $over_id;
     public $can_delete=true;
-    public $isWrong=true;
+    public $isWrong=false;
     public $bankSelected=0;
     public function updatedSearch(){
         $this->ShowManyMessage=false;
@@ -107,6 +111,7 @@ class InpKst extends Component
         $this->dispatch('goto', test: 'Transstore');
       }
     }
+
     public function ChkAcc(){
         $this->ShowOverMessage=false;
         if ($this->search){
@@ -119,7 +124,14 @@ class InpKst extends Component
                     $this->CloseTable();
                     $this->Main_idGo();
                 } else $this->ShowManyMessage=true;
+            }else {
+              $this->wrongForm->reset();
+              $this->wrongForm->acc=$this->search;
+              $this->wrongForm->wrong_date=date('Y-m-d');
+              $this->isWrong=true;
+              $this->dispatch('goto', test: 'wrong_date');
             }
+
         }
     }
     public function Edit(Tran $transrec){
@@ -149,6 +161,14 @@ class InpKst extends Component
         $this->TransForm->TransDelete($this->trans_id);
         $this->mainView->Tarseed();
         $this->ShowDeleteModal=false;
+    }
+
+    public function wrongStore(){
+
+      $this->wrongForm->store();
+
+      $this->isWrong=false;
+      $this->dispatch('goto', test: 'search');
     }
     public function store(){
       $this->ShowOverMessage=false;
