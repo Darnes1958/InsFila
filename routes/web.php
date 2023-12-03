@@ -17,6 +17,11 @@ use App\Http\Controllers\PdfController;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/login', function () {
+  return redirect(route('filament.admin.auth.login'));
+})->name('login');
+
 Route::controller(PdfController::class)->group(function (){
   route::get('/pdfbanksum/{By}', 'PdfBankSum')->name('pdfbanksum') ;
 });

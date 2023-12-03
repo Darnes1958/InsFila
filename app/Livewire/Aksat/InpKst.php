@@ -3,10 +3,12 @@
 namespace App\Livewire\Aksat;
 
 use App\Livewire\Forms\MainView;
+use App\Livewire\Forms\OverForm;
 use App\Livewire\Forms\TransForm;
 use App\Livewire\Forms\WrongForm;
 use App\Livewire\Traits\AksatTrait;
 use App\Models\Main;
+use App\Models\Main_arc;
 use App\Models\Overkst;
 use App\Models\Tran;
 use Illuminate\Support\Facades\Auth;
@@ -19,6 +21,7 @@ class InpKst extends Component
     use AksatTrait;
     public TransForm $TransForm;
     public WrongForm $wrongForm;
+    public OverForm $overForm;
 
     public $ShowDeleteModal=false;
     public $search='';
@@ -41,6 +44,9 @@ class InpKst extends Component
     public $over_id;
     public $can_delete=true;
     public $isWrong=false;
+    public $isOverArc=false;
+    public $mainArcName;
+    public $mainArcId;
     public $bankSelected=0;
     public function updatedSearch(){
         $this->ShowManyMessage=false;
@@ -48,6 +54,7 @@ class InpKst extends Component
     public function OpenTable(){
         $this->IsSearch=true;
         $this->isWrong=false;
+        $this->isOverArc=false;
     }
     public function CloseTable(){
         $this->search='';
@@ -123,13 +130,29 @@ class InpKst extends Component
 
                     $this->CloseTable();
                     $this->Main_idGo();
-                } else $this->ShowManyMessage=true;
+                } else
+                {$this->ShowManyMessage=true;$this->IsSearch=true;}
             }else {
-              $this->wrongForm->reset();
-              $this->wrongForm->acc=$this->search;
-              $this->wrongForm->wrong_date=date('Y-m-d');
-              $this->isWrong=true;
-              $this->dispatch('goto', test: 'wrong_date');
+              $rec=Main_arc::where('acc',$this->search)->get();
+              if (count($rec)>0) {
+                $this->overForm->reset();
+                $this->overForm->over_date=date('Y-m-d');
+                $this->overForm->main_id=$rec->first()->id;
+                $this->overForm->user_id=Auth::id();
+                $this->isOverArc=true;
+                $this->mainArcId=$rec->first()->id;
+                $this->mainArcName=$rec->first()->Customer->CusName;
+                $this->dispatch('goto', test: 'over_date');
+              } else {
+
+                $this->wrongForm->reset();
+                $this->wrongForm->acc=$this->search;
+                $this->wrongForm->wrong_date=date('Y-m-d');
+                $this->isWrong=true;
+                $this->dispatch('goto', test: 'wrong_date');
+
+              }
+
             }
 
         }
@@ -145,6 +168,11 @@ class InpKst extends Component
         $this->Mod='inp';
         $this->color='bg-gray-100';
         $this->TransForm->reset();
+        $this->wrongForm->reset();
+        $this->overForm->reset();
+        $this->isWrong=false;
+        $this->isOverArc=false;
+
         $this->dispatch('goto', test: 'accc');
     }
     public function Delete($id,$over_id){
@@ -164,16 +192,22 @@ class InpKst extends Component
     }
 
     public function wrongStore(){
-
       $this->wrongForm->store();
-
       $this->isWrong=false;
       $this->dispatch('goto', test: 'search');
     }
+  public function overArcStore(){
+    $this->overForm->storeArc();
+    $this->isOverArc=false;
+    $this->dispatch('goto', test: 'search');
+  }
+
     public function store(){
       $this->ShowOverMessage=false;
       if ($this->Mod=='inp') $this->TransForm->FillTrans($this->main_id);
 
+       $this->wrongForm->FillAny();
+       $this->overForm->FillAny();
         try {
             $this->validate();
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -181,6 +215,7 @@ class InpKst extends Component
             info($validator->errors());
             throw $e;
         }
+        $this->wrongForm->reset();
 
 
         if ($this->Mod=='inp'){

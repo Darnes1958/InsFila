@@ -60,14 +60,18 @@ class ViewMain extends ViewRecord
                   Section::make('بيانات العقد')
 
                     ->schema([
-
-                          TextEntry::make('sul')->label('قيمة العقد')->columnSpan(2),
+                      TextEntry::make('id')
+                        ->columnSpanFull()
+                        ->label(new HtmlString('<div class="text-primary-400 text-lg">رقم العقد</div>'))
+                        ->color('info')
+                        ->size(TextEntry\TextEntrySize::Large),
+                          TextEntry::make('sul')->label('قيمة العقد'),
                           TextEntry::make('sul_begin')->label('تاريخ العقد'),
                           TextEntry::make('kst_count')->label('عدد الأقساط'),
                           TextEntry::make('kst')->label('القسط'),
                           TextEntry::make('pay')->label('المدفوع'),
                           TextEntry::make('raseed')->label('المتبقي'),
-                        ])
+                        ])->columns(3)
                 ]),
 
 

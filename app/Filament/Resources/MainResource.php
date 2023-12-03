@@ -6,6 +6,7 @@ use App\Filament\Resources\MainResource\Pages;
 
 use App\Models\Main;
 
+use App\Models\Main_arc;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
@@ -18,6 +19,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Database\Eloquent\Builder;
 
 
 class MainResource extends Resource
@@ -25,12 +28,23 @@ class MainResource extends Resource
     protected static ?string $model = Main::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $pluralModelLabel='عقود';
+    protected static ?int $navigationSort = 1;
 
-    protected static ?string $navigationGroup='ادخال وتعديل عقود';
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
+              TextInput::make('id')
+                ->label('رقم العقد')
+                ->required()
+                ->unique()
+                ->unique(table: Main_arc::class)
+                ->default(Main::max('id')+1)
+                ->autofocus()
+
+                ->numeric(),
+
               Select::make('bank_id')
                 ->label('المصرف')
                 ->relationship('Bank','BankName')
@@ -139,6 +153,7 @@ class MainResource extends Resource
                     ->relationship('Sell','item_name')
                     ->preload()
                     ->required()
+                    ->default(1)
                   ->columnSpan(2),
               TextInput::make('notes')
                 ->label('ملاحظات')->columnSpanFull()
@@ -161,7 +176,13 @@ class MainResource extends Resource
                 TextColumn::make('kst')->label('القسط')->sortable(),
             ])
             ->filters([
-                //
+                SelectFilter::make('bank_id')
+                 ->relationship('Bank','BankName')
+                 ->label('مصارف'),
+                Tables\Filters\Filter::make('المسددة')
+                 ->query(fn(Builder $query): Builder=>$query->where('raseed','=',0))
+
+
             ])
             ->actions([
 

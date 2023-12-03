@@ -58,7 +58,7 @@ class MainForm extends Form
     public $LastKsm;
     public $NextKst;
     public $Late;
-    public $sell_id;
+    public $sell_id=1;
     public $LastUpd;
     public $kst_baky;
     public $last_cont;

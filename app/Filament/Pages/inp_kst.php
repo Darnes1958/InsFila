@@ -10,9 +10,12 @@ class inp_kst extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
-    protected static ?string $navigationLabel='ادخال وتعديل أقساط';
-    protected static ?string $navigationGroup='أقساط';
+    protected static ?string $navigationLabel='أقساط';
+
+
     protected static string $view = 'filament.pages.inp_kst';
+  protected static ?int $navigationSort = 2;
+
 
   public function getTitle():  string|Htmlable
   {

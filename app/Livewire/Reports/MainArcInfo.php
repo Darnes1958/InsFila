@@ -33,13 +33,13 @@ use Livewire\Component;
 use Filament\Forms\Form;
 
 
-class   MainInfo extends Component implements HasInfolists,HasForms,HasTable
+class   MainArcInfo extends Component implements HasInfolists,HasForms,HasTable
 {
   use InteractsWithInfolists,InteractsWithForms,InteractsWithTable;
 
   public $mainId;
-  public Main $mainRec;
-  public $montahy=false;
+  public Main_arc $mainRec;
+
   public MainForm $mainForm;
   public TransForm $transForm;
   public OverForm $overForm;
@@ -50,14 +50,14 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable
     return $form
       ->schema([
         Select::make('mainId')
-          ->options(Main::all()->pluck('Customer.CusName', 'id')->toArray())
+          ->options(Main_arc::all()->pluck('Customer.CusName', 'id')->toArray())
           ->searchable()
           ->reactive()
           ->hiddenLabel()
 
 
           ->afterStateUpdated(function (callable $get) {
-            if (Main::where('id',$get('mainId'))->exists())
+            if (Main_arc::where('id',$get('mainId'))->exists())
              $this->mainId=$get('mainId');
             else $this->mainId=null;
 
@@ -65,7 +65,7 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable
       ]);
   }
 
-  public function mainInfolist(Infolist $infolist): Infolist
+  public function mainArcInfolist(Infolist $infolist): Infolist
   {
     return $infolist
       ->record($this->mainRec)
@@ -76,7 +76,6 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable
               TextEntry::make('Customer.CusName')
                 ->label(new HtmlString('<div class="text-primary-400 text-lg">اسم الزبون</div>'))
                 ->color('info')->size(TextEntry\TextEntrySize::Large)
-
                 ->columnSpan(2),
               TextEntry::make('Bank.BankName')
                 ->label('المصرف')
@@ -94,7 +93,7 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable
 
             ->schema([
               TextEntry::make('id')
-                ->columnSpan(2)
+                ->columnSpanFull()
                 ->label(new HtmlString('<div class="text-primary-400 text-lg">رقم العقد</div>'))
                 ->color('info')
                 ->size(TextEntry\TextEntrySize::Large),
@@ -105,7 +104,7 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable
               TextEntry::make('kst')->label('القسط'),
               TextEntry::make('pay')->label('المدفوع'),
               TextEntry::make('raseed')->label('المتبقي')->color('danger'),
-            ])->columns(4)->collapsible()
+            ])->columns(3)->collapsible()
         ]),
         Group::make([
           Section::make('بيانات عامة')
@@ -124,8 +123,8 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable
   public function table(Table $table):Table
   {
     return $table
-      ->query(function (Tran $tran)  {
-          $tran=Tran::where('main_id',$this->mainId);
+      ->query(function (Trans_arc $tran)  {
+          $tran=Trans_arc::where('main_id',$this->mainId);
         return  $tran;
       })
       ->columns([
@@ -142,57 +141,54 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable
   public function DoArc(){
     DB::connection(Auth()->user()->company)->beginTransaction();
     try {
-        $this->mainForm->SetMain($this->mainId);
-        Main_arc::create(
+        $this->mainForm->SetMain_arc($this->mainId);
+        Main::create(
           $this->mainForm->all()
         );
 
-        $res=Tran::where('main_id',$this->mainId)->get();
-
+        $res=Trans_arc::where('main_id',$this->mainId)->get();
         foreach ($res as $item){
-          $this->transForm->SetTrans($item);
+          $this->transForm->SetTransArc($item);
           $this->transForm->user_id=$item->user_id;
-
-          Trans_arc::create(
+          Tran::create(
             $this->transForm->all()
           );
 
         }
 
-        $res=Overkst::where('main_id',$this->mainId)->get();
+        $res=Overkst_arc::where('main_id',$this->mainId)->get();
         foreach ($res as $item){
-          $this->overForm->SetOver($item);
+          $this->overForm->SetOverArc($item);
           $this->overForm->user_id=$item->user_id;
-          Overkst_arc::create(
+          Overkst::create(
             $this->overForm->all()
           );
 
         }
 
         $old=$this->mainId;
-        $this->mainId=Main::latest()->first()->id;
-      Overkst::where('main_id',$old)->delete();
-      Tran::where('main_id',$old)->delete();
-      Main::where('id',$old)->delete();
-
+        $this->mainId=Main_arc::latest()->first()->id;
+        Overkst_arc::where('main_id',$old)->delete();
+        Trans_arc::where('main_id',$old)->delete();
+        Main_arc::where('id',$old)->delete();
 
       DB::connection(Auth()->user()->company)->commit();
     } catch (\Exception $e) {
       info($e);
       DB::connection(Auth()->user()->company)->rollback();
     }
-
+   $this->form($this->form);
 
   }
 
   public function render()
     {
 
-        if (!$this->mainId) $this->mainId=Main::latest()->first()->id;
+        if (!$this->mainId) $this->mainId=Main_arc::latest()->first()->id;
 
-        $this->mainRec=Main::where('id',$this->mainId)->first();
-        $this->montahy=$this->mainRec->raseed<=0;
+        $this->mainRec=Main_arc::where('id',$this->mainId)->first();
 
-        return view('livewire.reports.main-info');
+
+      return view('livewire.reports.main-arc-info');
     }
 }

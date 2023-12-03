@@ -21,6 +21,12 @@ class WrongForm extends Form
     public $status='غير مرجع';
     public $haf_id=0;
 
+    public function FillAny(){
+      $this->wrong_date=date('Y-m-d');
+      $this->kst=1;
+      $this->bank_id=1;
+    }
+
   public function store()
   {
     $this->validate();

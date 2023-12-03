@@ -6,6 +6,7 @@ use App\Livewire\Traits\AksatTrait;
 use App\Models\Main;
 use App\Models\Overkst;
 use App\Models\Tran;
+use App\Models\Trans_arc;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Rule;
 use Livewire\Form;
@@ -27,7 +28,7 @@ use AksatTrait;
     public $kst_date ='';
 
 
-    #[Rule('required')]
+
     public $ksm_type_id = 2;
 
     public $ksm_notes = '';
@@ -38,19 +39,36 @@ use AksatTrait;
 
     public $user_id = '';
 
-    public function SetTrans(Tran $tran){
-      $this->main_id=$tran->main_id;
-      $this->ser=$tran->ser;
-      $this->ksm=$tran->ksm;
-      $this->ksm_date=$tran->ksm_date;
-      $this->kst_date=$tran->kst_date;
-      $this->ksm_type_id=$tran->ksm_type_id;
-      $this->ksm_notes=$tran->ksm_notes;
-      $this->haf_id=$tran->haf_id;
-      $this->over_id=$tran->over_id;
-      $this->baky=$tran->baky;
+
+    public function SetTrans(Tran $rec){
+      $this->main_id=$rec->main_id;
+      $this->ser=$rec->ser;
+      $this->ksm=$rec->ksm;
+      $this->ksm_date=$rec->ksm_date;
+      $this->kst_date=$rec->kst_date;
+      $this->ksm_type_id=$rec->ksm_type_id;
+      $this->ksm_notes=$rec->ksm_notes;
+      $this->haf_id=$rec->haf_id;
+      $this->over_id=$rec->over_id;
+      $this->baky=$rec->baky;
       $this->user_id=Auth::user()->id;
+
     }
+  public function SetTransArc(Trans_arc $rec){
+    $this->main_id=$rec->main_id;
+    $this->ser=$rec->ser;
+    $this->ksm=$rec->ksm;
+    $this->ksm_date=$rec->ksm_date;
+    $this->kst_date=$rec->kst_date;
+    $this->ksm_type_id=$rec->ksm_type_id;
+    $this->ksm_notes=$rec->ksm_notes;
+    $this->haf_id=$rec->haf_id;
+    $this->over_id=$rec->over_id;
+    $this->baky=$rec->baky;
+    $this->user_id=Auth::user()->id;
+
+  }
+
     public function FillTrans($main_id){
         $this->main_id=$main_id;
         $this->ser=Tran::where('main_id',$main_id)->max('ser')+1;

@@ -31,7 +31,8 @@
 
                         <x-input-error for="accc"></x-input-error>
                     </div>
-                  @if($isWrong)
+
+                    @if($isWrong)
                    <div  class="w-full rounded shadow-inner bg-primary-500/10 mt-2">
                        <div class="w-full my-2 mx-2">
                            <span class="text-danger-600">قسط وارد بالخطأ !!</span>
@@ -54,7 +55,7 @@
                        <x-input-error for="wrongForm.bank_id"></x-input-error>
                        <div class=" gap-4 mt-2  ">
                           <div class="flex gap-1 mt-2 px-2 w-full">
-                               <x-input-error for="TransForm.id"></x-input-error>
+
                                <div class="flex gap-1 w-1/2 mt-2 mx-1">
                                    <x-label class="w-3/12" for="wrong_date" value="{{ __('التاريخ') }}"/>
                                    <x-input id="wrong_date" wire:model="wrongForm.wrong_date"
@@ -78,7 +79,7 @@
                            <x-button wire:click="wrongStore" id="wrongstore" class="mt-4 mb-4">
                                تخزين البيانات
                            </x-button>
-                           <x-button.primary  wire:click="wrongCancel" id="wrongcancel" class="mt-4 mb-4">
+                           <x-button.primary  wire:click="cancel" id="wrongcancel" class="mt-4 mb-4">
                                تجاهل
                            </x-button.primary>
 
@@ -86,6 +87,60 @@
                        </div>
                    </div>
                     @endif
+
+                    @if($isOverArc)
+                        <div  class="w-full rounded shadow-inner bg-primary-500/10 mt-2">
+                            <div class="w-full my-2 mx-2">
+                                <span class="text-danger-600">بالفائض من الأرشيف !!</span>
+                            </div>
+
+                            <div class=" gap-4 mt-2  ">
+                                <div class="flex w-full gap-2">
+                                    <div class="flex  w-4/12 ">
+                                        <x-label class="w-2/5"  value="{{ __('رقم العقد') }}"/>
+                                        <x-input  wire:model="mainArcId" class="w-3/5 leading-none text-center text-blue-400 text-md py-1" disabled/>
+                                    </div>
+
+                                    <div class="flex  w-8/12 ">
+                                        <x-label class="w-2/12"  value="{{ __('الاسم') }}"/>
+                                        <x-input  wire:model="mainArcName" class="w-10/12 leading-none text-blue-400 text-md p-1" disabled/>
+                                    </div>
+
+                                </div>
+
+                                <div class="flex gap-1 mt-2 px-2 w-full">
+
+
+                                    <div class="flex gap-1 w-1/2 mt-2 mx-1">
+                                        <x-label class="w-1/5" for="over_date" value="{{ __('التاريخ') }}"/>
+                                        <x-input id="over_date" wire:model="overForm.over_date"
+                                                 wire:keydown.enter="$dispatch('goto', {test: 'over_kst'})"
+                                                 class="w-4/5 leading-none text-blue-400 text-md py-1 text-center" type="date"/>
+                                    </div>
+
+                                    <div class="flex gap-1 w-1/2 mt-2 mx-1">
+                                        <x-label class="w-1/5" for="wrong_kst" value="{{ __('الخصم') }}"/>
+                                        <x-input id="over_kst" wire:model="overForm.kst"
+                                                 wire:keydown.enter="$dispatch('goto', {test: 'overstore'})"
+                                                 class="w-4/5 leading-none text-blue-400 text-md py-1" type="number"/>
+                                    </div>
+
+                                </div>
+                                <x-input-error for="overForm.over_date"></x-input-error>
+                                <x-input-error for="overForm.kst"></x-input-error>
+                                <div class="flex flex-row items-center justify-center gap-4">
+                                    <x-button wire:click="overArcStore" id="overstore" class="mt-4 mb-4">
+                                        تخزين البيانات
+                                    </x-button>
+                                    <x-button.primary  wire:click="cancel" id="overcancel" class="mt-4 mb-4">
+                                        تجاهل
+                                    </x-button.primary>
+
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
                          @if($ShowManyMessage)
                         <div  class="text-red-400">يوجد اكثر من عقد .. يجب الاختيار</div>
                         @endif
@@ -360,6 +415,22 @@
                     if (postid == 'wrongstore') {
                         setTimeout(function () {
                             document.getElementById('wrongstore').focus();
+                        }, 100);
+                    }
+
+                    if (postid == 'over_kst') {
+                        $("#over_kst").focus();
+                        $("#over_kst").select();
+                    }
+                    if (postid == 'over_date') {
+
+                        $("#over_date").focus();
+                        $("#over_date").select();
+                    }
+
+                    if (postid == 'overstore') {
+                        setTimeout(function () {
+                            document.getElementById('overstore').focus();
                         }, 100);
                     }
 

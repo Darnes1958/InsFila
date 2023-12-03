@@ -16,4 +16,8 @@ class CreateMain extends CreateRecord
     {
         return  new HtmlString('<div class="leading-3 h-0 text-md mb-2  text-primary-400">ادخال عقود</div>');
     }
+  protected function getRedirectUrl(): string
+  {
+    return $this->previousUrl ?? $this->getResource()::getUrl('list');
+  }
 }

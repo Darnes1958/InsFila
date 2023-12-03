@@ -12,6 +12,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
@@ -22,6 +23,7 @@ use Filament\Tables\Table;
 use Filament\Forms;
 
 use http\QueryString;
+use Illuminate\Database\Eloquent\Collection;
 use Livewire\Component;
 use Filament\Forms\Form;
 use PhpParser\Builder;
@@ -110,6 +112,8 @@ public $query;
 
 
         ])
+
+        
 
           ->actions([
               EditAction::make()
