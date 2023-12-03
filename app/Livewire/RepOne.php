@@ -113,7 +113,7 @@ public $query;
 
         ])
 
-        
+
 
           ->actions([
               EditAction::make()

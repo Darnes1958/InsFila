@@ -45,6 +45,73 @@ class MainResource extends Resource
 
                 ->numeric(),
 
+              Select::make('customer_id')
+                ->afterStateUpdated( function (Forms\Set $set, ?string $state){
+                  $rec=Main::where('customer_id',$state)->get();
+                  if (count($rec)>0) {
+                    $set('bank_id', $rec->first()->bank_id);
+                    $set('acc', $rec->first()->acc);
+                  } else
+                  {
+                    $rec=Main_arc::where('customer_id',$state)->get();
+                    if (count($rec)>0) {
+                      $set('bank_id', $rec->first()->bank_id);
+                      $set('acc', $rec->first()->acc);
+                    }
+                  }
+
+                })
+                ->label('الزبون')
+                ->relationship('Customer','cusName')
+                ->searchable()
+                ->preload()
+                ->createOptionForm([
+                  Forms\Components\Section::make('ادخال زبائن')
+                    ->description('يجب ادخال اسم الزبون والبيانات الاخري اختيارية')
+                    ->schema([
+                      TextInput::make('CusName')
+                        ->required()
+                        ->label('اسم الزبون')
+                        ->maxLength(255),
+                      TextInput::make('address')
+                        ->label('العنوان'),
+                      TextInput::make('mdar')
+                        ->label('مدار'),
+                      TextInput::make('libyana')
+                        ->label('لبيانا'),
+                      TextInput::make('card_no')
+                        ->label('رقم الهوية'),
+                      TextInput::make('others')
+                        ->label('الرقم الوطني'),
+
+                    ])->columns(2)
+                ])
+                ->editOptionForm([
+                  Forms\Components\Section::make('تعديل زبائن')
+                    ->description('يجب ادخال اسم الزبون والبيانات الاخري اختيارية')
+                    ->schema([
+                      TextInput::make('CusName')
+                        ->required()
+                        ->label('اسم الزبون')
+                        ->maxLength(255),
+                      TextInput::make('address')
+                        ->label('العنوان'),
+                      TextInput::make('mdar')
+                        ->label('مدار'),
+                      TextInput::make('libyana')
+                        ->label('لبيانا'),
+                      TextInput::make('card_no')
+                        ->label('رقم الهوية'),
+                      TextInput::make('others')
+                        ->label('الرقم الوطني'),
+
+                    ])->columns(2)
+                ])
+                ->createOptionAction(fn ($action) => $action->color('success'))
+                ->editOptionAction(fn ($action) => $action->color('info'))
+                ->required(),
+
+
               Select::make('bank_id')
                 ->label('المصرف')
                 ->relationship('Bank','BankName')
@@ -77,41 +144,41 @@ class MainResource extends Resource
                   ])
 
                  ])
-                 ->required(),
-              Select::make('customer_id')
-                ->label('الزبون')
-
-                ->relationship('Customer','cusName')
-                ->searchable()
-
-                ->preload()
-                ->createOptionForm([
-                  Forms\Components\Section::make('ادخال زبائن')
-                    ->description('يجب ادخال اسم الزبون والبيانات الاخري اختيارية')
+                ->editOptionForm([
+                  Forms\Components\Section::make('ادخال مصارف')
+                    ->description('ادخال بيانات مصرف .. ويمكن ادخال المصرف التجميعي اذا كان غير موجود بالقائمة')
                     ->schema([
-                      TextInput::make('CusName')
+                      TextInput::make('BankName')
                         ->required()
-                        ->label('اسم الزبون')
+                        ->label('اسم المصرف')
                         ->maxLength(255),
-                      TextInput::make('address')
-                        ->label('العنوان'),
-                      TextInput::make('mdar')
-                        ->label('مدار'),
-                      TextInput::make('libyana')
-                        ->label('لبيانا'),
-                      TextInput::make('card_no')
-                        ->label('رقم الهوية'),
-                      TextInput::make('others')
-                        ->label('الرقم الوطني'),
+                      Select::make('taj_id')
+                        ->relationship('Taj','TajName')
+                        ->label('المصرف التجميعي')
+                        ->searchable()
+                        ->preload()
+                        ->createOptionForm([
+                          TextInput::make('TajName')
+                            ->required()
 
-                    ])->columns(2)
+                            ->label('المصرف التجميعي')
+                            ->maxLength(255),
+                          TextInput::make('TajAcc')
+                            ->label('رقم الحساب')
+                            ->required(),
+                        ])
+                        ->required(),
+                    ])
+
                 ])
+                ->createOptionAction(fn ($action) => $action->color('success'))
+                ->editOptionAction(fn ($action) => $action->color('info'))
                 ->required(),
+
 
               TextInput::make('acc')
                 ->label('رقم الحساب')
                 ->required(),
-
 
               DatePicker::make('sul_begin')
                ->required()
@@ -152,7 +219,34 @@ class MainResource extends Resource
                     ->label('البضاعة')
                     ->relationship('Sell','item_name')
                     ->preload()
-                    ->required()
+                ->createOptionForm([
+                  Forms\Components\Section::make('ادخال بضاعة')
+                    ->description('ادخال بيانات بضاعة او اصناف جديدة')
+
+                    ->schema([
+                      TextInput::make('item_name')
+                        ->required()
+                        ->label('اسم البضاعة')
+                        ->maxLength(255),
+                    ])
+
+
+                ])
+                ->editOptionForm([
+                  Forms\Components\Section::make('ادخال بضاعة')
+                    ->description('ادخال بيانات بضاعة او اصناف جديدة')
+                    ->schema([
+                      TextInput::make('item_name')
+                        ->required()
+                        ->label('اسم البضاعة')
+                        ->maxLength(255),
+                    ])
+
+                ])
+                ->createOptionAction(fn ($action) => $action->color('success'))
+                ->editOptionAction(fn ($action) => $action->color('info'))
+
+                ->required()
                     ->default(1)
                   ->columnSpan(2),
               TextInput::make('notes')

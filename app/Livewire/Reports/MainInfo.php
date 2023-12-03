@@ -23,6 +23,7 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
 use Filament\Infolists\Infolist;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -74,18 +75,18 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable
           Section::make(new HtmlString('<div class="text-danger-600">بيانات الزبون</div>'))
             ->schema([
               TextEntry::make('Customer.CusName')
-                ->label(new HtmlString('<div class="text-primary-400 text-lg">اسم الزبون</div>'))
+                ->label(new HtmlString('<div class="text-primary-400 text-lg font-extrabold">اسم الزبون</div>'))
                 ->color('info')->size(TextEntry\TextEntrySize::Large)
-
+                ->weight(FontWeight::ExtraBold)
                 ->columnSpan(2),
               TextEntry::make('Bank.BankName')
                 ->label('المصرف')
                 ->color('info'),
               TextEntry::make('acc')->label('رقم الحساب')
                 ->color('info'),
-              TextEntry::make('libyana')->label('لبيانا')
+              TextEntry::make('Customer.libyana')->label('لبيانا')
                 ->color('Fuchsia'),
-              TextEntry::make('mdar')->label('المدار')->color('grean')
+              TextEntry::make('Customer.mdar')->label('المدار')->color('grean')
                 ->color('green'),
             ])->columns(3)->collapsible()
         ]),
@@ -97,6 +98,7 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable
                 ->columnSpan(2)
                 ->label(new HtmlString('<div class="text-primary-400 text-lg">رقم العقد</div>'))
                 ->color('info')
+                ->weight(FontWeight::ExtraBold)
                 ->size(TextEntry\TextEntrySize::Large),
               TextEntry::make('sul_begin')->label('تاريخ العقد'),
               TextEntry::make('sul')->label('قيمة العقد')->color('info'),
@@ -104,7 +106,7 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable
               TextEntry::make('kst_count')->label('عدد الأقساط'),
               TextEntry::make('kst')->label('القسط'),
               TextEntry::make('pay')->label('المدفوع'),
-              TextEntry::make('raseed')->label('المتبقي')->color('danger'),
+              TextEntry::make('raseed')->label('المتبقي')->color('danger')->weight(FontWeight::ExtraBold),
             ])->columns(4)->collapsible()
         ]),
         Group::make([
