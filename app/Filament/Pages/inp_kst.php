@@ -14,7 +14,7 @@ class inp_kst extends Page
 
 
     protected static string $view = 'filament.pages.inp_kst';
-  protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 1;
 
 
   public function getTitle():  string|Htmlable

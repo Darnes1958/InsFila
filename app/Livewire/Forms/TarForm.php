@@ -3,14 +3,16 @@
 namespace App\Livewire\Forms;
 
 
+use App\Models\Overkst;
 use App\Models\Tarkst;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Rule;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
 
 class TarForm extends Form
 {
-  public $tar_id;
+
 
   #[Rule('required')]
   public $main_id = '';
@@ -23,9 +25,8 @@ class TarForm extends Form
   public $haf_id = '';
   public $user_id = '';
 
-  public function SetTar($id) {
-    $this->tar_id=$id;
-    $rec=Tarkst::where('id',$this->tar_id)->first();
+  public function SetTar(Tarkst $rec) {
+
     $this->main_id=$rec->main_id;
     $this->tar_date=$rec->over_date;
     $this->kst=$rec->kst;
@@ -34,4 +35,15 @@ class TarForm extends Form
     $this->haf_id=$rec->haf_id;
     $this->user_id=$rec->user_id;
   }
+    public function SetTarFromOver($id) {
+        $rec=Overkst::where('id',$id)->first();
+
+        $this->main_id=$rec->main_id;
+        $this->tar_date=date('Y-m-d');
+        $this->kst=$rec->kst;
+        $this->tar_type='من الفائض';
+        $this->from_id=$rec->id;
+        $this->haf_id=$rec->haf_id;
+        $this->user_id=Auth::id();
+    }
 }

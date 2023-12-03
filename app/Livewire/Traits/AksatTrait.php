@@ -3,11 +3,21 @@ namespace App\Livewire\Traits;
 
 use App\Models\Main;
 use App\Models\Overkst;
+use App\Models\Tarkst;
 use App\Models\Tran;
 
 use DateTime;
 
 trait AksatTrait {
+    public function TarTarseed($main_id){
+        $count=Tarkst::where('main_id',$main_id)->count();
+        $sum=Tarkst::where('main_id',$main_id)->sum('kst');
+        Main::where('id',$main_id)->update([
+            'tar_count'=>$count,
+            'tar_kst'=>$sum,
+        ]);
+
+    }
     public function OverTarseed($main_id){
         $count=Overkst::where('main_id',$main_id)->count();
         $sum=Overkst::where('main_id',$main_id)->sum('kst');
@@ -18,7 +28,6 @@ trait AksatTrait {
 
     }
     public function StoreOver($main_id,$ksm_date,$ksm){
-
         $over=Overkst::create([
             'main_id'=>$main_id,
             'over_date'=>$ksm_date,
