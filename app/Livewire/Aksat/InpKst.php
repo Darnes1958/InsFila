@@ -48,6 +48,7 @@ class InpKst extends Component
     public $mainArcName;
     public $mainArcId;
     public $bankSelected=0;
+    public $old_ksm;
     public function updatedSearch(){
         $this->ShowManyMessage=false;
     }
@@ -159,10 +160,17 @@ class InpKst extends Component
     }
     public function Edit(Tran $transrec){
         $this->Mod='upd';
-        $this->TransForm->SetTrans($transrec);
-        $this->trans_id=$transrec->id;
-        $this->color='bg-blue-100';
-        $this->dispatch('goto', test: 'ksm_date');
+
+        $this->main_id=$transrec->main_id;
+        $this->CloseTable();
+        $this->Main_idGo();
+
+      $this->TransForm->SetTrans($transrec);
+      $this->trans_id=$transrec->id;
+      $this->old_ksm=$transrec->ksm;
+      $this->color='bg-blue-100';
+
+      $this->dispatch('goto', test: 'ksm_date');
     }
     public function cancel(){
         $this->Mod='inp';
@@ -217,14 +225,12 @@ class InpKst extends Component
         }
         $this->wrongForm->reset();
 
-
         if ($this->Mod=='inp'){
             if ($this->mainView->raseed<=0) $this->TransForm->DoOver($this->mainView->id);
             if ($this->mainView->raseed>0){
               if ($this->mainView->raseed<$this->TransForm->ksm) $this->TransForm->DoBaky($this->mainView->id,$this->mainView->raseed);
               $res=Tran::create($this->TransForm->all());
               if ($this->TransForm->over_id!=0) Overkst::where('id',$this->TransForm->over_id)->update(['tran_id'=>$res->id]);
-
               $this->mainView->tarseed($this->TransForm->ksm_date,$this->TransForm->kst_date);
             }
             $this->TransForm->reset();
@@ -234,10 +240,17 @@ class InpKst extends Component
         }
         if ($this->Mod=='upd'){
 
+          if ( ($this->mainView->raseed+$this->old_ksm) < $this->TransForm->ksm ) {
+            $this->TransForm->DoBaky($this->mainView->id , $this->mainView->raseed + $this->old_ksm);
+            Overkst::where('id',$this->TransForm->over_id)->update(['tran_id'=>$this->trans_id]);
+          }
+
             Tran::where('id',$this->trans_id)->update(
                 $this->TransForm->all()
             );
+
             $this->mainView->Tarseed();
+
             $this->Mod='inp';
             $this->color='bg-gray-100';
         }
