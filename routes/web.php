@@ -15,7 +15,8 @@ use App\Http\Controllers\PdfController;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+     return redirect(route('filament.admin.auth.login'));
+
 });
 
 Route::get('/login', function () {

@@ -20,6 +20,7 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Table;
 
+
 use Filament\Forms;
 
 use http\QueryString;
@@ -40,6 +41,11 @@ public $By=1;
 public $is_show=false;
 public $field='id';
 public $query;
+public $rep_name='All';
+public $Date1;
+public $Date2;
+public $Baky=5;
+public $BakyLabel='الباقي';
 
     use InteractsWithTable,InteractsWithForms;
 
@@ -53,8 +59,11 @@ public $query;
   {
     return $form
       ->schema([
+
         Select::make('bank')
+            ->columnSpan(2)
           ->options(Bank::all()->pluck('BankName', 'id')->toArray())
+
           ->searchable()
           ->reactive()
           ->Label('فرع المصرف')
@@ -66,6 +75,7 @@ public $query;
 
           }),
         Select::make('taj')
+            ->columnSpan(2)
           ->options(Taj::all()->pluck('TajName', 'id')->toArray())
           ->searchable()
           ->Label('المصرف التجميعي')
@@ -77,8 +87,11 @@ public $query;
             $this->table($this->table);
           }),
         Select::make('rep_name')
+           ->columnSpan(2)
           ->label('النقرير')
           ->default('All')
+          ->reactive()
+
           ->options([
             'All' => 'كشف بالأسماء',
             'Mosdada' => 'المسددة',
@@ -86,33 +99,57 @@ public $query;
             'Mohasla' => 'المحصلة',
             'Not_Mohasla' => 'الغير محصلة',
           ])
-      ])->columns(2);
+            ->afterStateUpdated(function (callable $get){
+              if ($get('rep_name')=='Mosdada') {$this->Baky=5;$this->BakyLabel='الباقي';}
+              if ($get('rep_name')=='Motakra') {$this->Baky=1;$this->BakyLabel='عدد الأقساط المتأخرة';}
+            })  ,
+          TextInput::make('Baky')
+              ->label($this->BakyLabel)
+              ->reactive()
+          ->numeric()
+              ->visible(fn (Forms\Get $get): bool => $get('rep_name')=='Mosdada' || $get('rep_name')=='Motakra'),
+
+          DatePicker::make('Date1')
+            ->label('من')
+            ->visible(fn (Forms\Get $get): bool => $get('rep_name')=='Mohasla' || $get('rep_name')=='Not_Mohasla'),
+          DatePicker::make('Date2')
+            ->label('إلي')
+              ->visible(fn (Forms\Get $get): bool => $get('rep_name')=='Mohasla' || $get('rep_name')=='Not_Mohasla'),
+
+      ])->columns(7);
   }
 
-    public function render()
-    {
-        return view('livewire.reports.rep-all');
-    }
+
 
     public function table(Table $table):Table
     {
       return $table
         ->query(function (Main $main)  {
-            if ($this->By==1) $main=Main::where('bank_id',$this->bank_id);
-            if ($this->By==2) $main=Main::whereIn('bank_id',function ($q){
-                $q->select('id')->from('banks')->where('taj_id',$this->bank_id);
-            });
+            if ($this->By==1) {
+                 $main=Main::where('bank_id',$this->bank_id)
+                 ->when($this->rep_name=='Mosdada' , function ($q) {
+                     $q->where('raseed','<=',$this->Baky); })
+                 ->when($this->rep_name=='Motakra' , function ($q) {
+                    $q->where('late','>=',$this->Baky); })
+                 ;
+            }
+            if ($this->By==2) {
+                $main=Main::whereIn('bank_id',function ($q){
+                    $q->select('id')->from('banks')->where('taj_id',$this->bank_id);
+                    })
+                    ->when($this->rep_name=='Motakra' , function ($q) {
+                        $q->where('late','>=',$this->Baky); })
+                ;
+            }
             return  $main;
         })
         ->columns([
+            TextColumn::make('id')
+                ->label('رقم العقد'),
+            TextColumn::make('acc')
+                ->label('رقم الحساب'),
             TextColumn::make('Customer.CusName')
              ->label('الاسم'),
-            TextColumn::make('Bank.BankName')
-             ->label('المصرف')
-             ->visible($this->field=='taj_id'),
-            TextColumn::make('Bank.Taj.TajName')
-             ->label('المصرف التجميعي')
-             ->visible($this->field=='id'),
             TextColumn::make('sul')
               ->label('اجمالي العقد'),
             TextColumn::make('kst')
@@ -121,21 +158,24 @@ public $query;
               ->label('المسدد'),
             TextColumn::make('raseed')
               ->label('الرصيد'),
+            TextColumn::make('Late')
+                ->label('متأخرة')
+                ->visible(fn (Forms\Get $get): bool =>$this->rep_name =='Motakra')
+                ->color('danger'),
+
+            TextColumn::make('LastKsm')
+                ->label('ت.أخر قسط')
+                ->visible(fn (Forms\Get $get): bool =>$this->rep_name =='Motakra')
+                ->color('danger'),
         ])
 
-          ->actions([
-              EditAction::make()
-                  ->slideOver()
-                  ->model(Main::class)
-                  ->form(MainForm::schema())
-          ])
-          ->headerActions([
-              CreateAction::make()
-                  ->slideOver()
-                  ->model(Main::class)
-                  ->form(MainForm::schema())
-          ]);
+          ;
 
 
+    }
+
+    public function render()
+    {
+        return view('livewire.reports.rep-all');
     }
 }
