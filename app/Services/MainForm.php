@@ -71,12 +71,9 @@ final class  MainForm
                                 ])->columns(2)
                         ])
                         ->required(),
-
                     TextInput::make('acc')
                         ->label('رقم الحساب')
                         ->required(),
-
-
                     DatePicker::make('sul_begin')
                         ->required()
                         ->label('تاريخ العقد')
@@ -85,7 +82,6 @@ final class  MainForm
                     TextInput::make('sul')
                         ->label('قيمة العقد')
                         ->live(onBlur: true)
-
                         ->afterStateUpdated(function (Forms\Get $get,Forms\Set $set) {
                             if ($get('sul') && $get('kst_count') &&
                                 !$get('kst') && $get('kst')!=0) {
@@ -97,17 +93,14 @@ final class  MainForm
                     TextInput::make('kst_count')
                         ->label('عدد الأقساط')
                         ->live(onBlur: true)
-
                         ->afterStateUpdated(function (Forms\Get $get,Forms\Set $set) {
                             if ($get('sul') && $get('kst_count')
                                 && (!$get('kst') ||  $get('kst')==' ')){
                                 $val=$get('sul') / $get('kst_count');
                                 $set('kst', $val);
                             }
-
                         })
                         ->required(),
-
                     TextInput::make('kst')
                         ->label('القسط')
                         ->required(),
@@ -115,7 +108,6 @@ final class  MainForm
 
                         ->columnSpan(4)
                         ->label('ملاحظات')
-
                 ])
         ];
     }

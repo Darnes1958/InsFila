@@ -267,7 +267,9 @@ class MainResource extends Resource
                 TextColumn::make('Bank.BankName')->label('المصرف')->searchable()->sortable(),
                 TextColumn::make('acc')->label('رقم الحساب')->searchable()->sortable(),
                 TextColumn::make('sul')->label('الاجمالي')->sortable(),
-                TextColumn::make('kst')->label('القسط')->sortable(),
+                TextColumn::make('pay')->label('المسدد')->sortable(),
+                TextColumn::make('raseed')->label('الرصيد')->sortable(),
+
             ])
             ->filters([
                 SelectFilter::make('bank_id')
@@ -275,6 +277,8 @@ class MainResource extends Resource
                  ->label('مصارف'),
                 Tables\Filters\Filter::make('المسددة')
                  ->query(fn(Builder $query): Builder=>$query->where('raseed','=',0))
+
+
 
 
             ])
@@ -285,6 +289,7 @@ class MainResource extends Resource
 
                 EditAction::make()->iconButton()->color('blue'),
             ])
+
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),

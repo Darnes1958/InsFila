@@ -1,3 +1,3 @@
 <x-filament-panels::page  >
- <livewire:rep-one/>
+ <livewire:reports.rep-all/>
 </x-filament-panels::page>

@@ -114,10 +114,10 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable
             ->schema([
               TextEntry::make('LastKsm')->label('تاريخ اخر خصم')->columnSpan(2),
               TextEntry::make('NextKst')->label('تاريخ الخصم القادم')->columnSpan(2),
-              TextEntry::make('over_count')->label('اقسط بالفائض'),
+              TextEntry::make('over_count')->label('اقساط بالفائض'),
               TextEntry::make('over_kst')->label('قيمتها'),
               TextEntry::make('tar_count')->label('اقساط مرجعة'),
-              TextEntry::make('tar_kst')->label('ثيمتها'),
+              TextEntry::make('tar_kst')->label('قيمتها'),
             ])->columns(4)->collapsible()
         ]),
       ]);

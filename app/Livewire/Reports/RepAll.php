@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Reports;
 
 use App\Models\Bank;
 use App\Models\Main;
@@ -30,7 +30,7 @@ use PhpParser\Builder;
 use function PHPUnit\Framework\isFalse;
 
 
-class RepOne extends Component implements HasTable, HasForms
+class RepAll extends Component implements HasTable, HasForms
 {
 
 public $bank_id;
@@ -57,7 +57,7 @@ public $query;
           ->options(Bank::all()->pluck('BankName', 'id')->toArray())
           ->searchable()
           ->reactive()
-          ->hiddenLabel()
+          ->Label('فرع المصرف')
           ->visible($this->By==1)
           ->afterStateUpdated(function (callable $get) {
             $this->bank_id=$get('bank');
@@ -68,20 +68,30 @@ public $query;
         Select::make('taj')
           ->options(Taj::all()->pluck('TajName', 'id')->toArray())
           ->searchable()
-          ->hiddenLabel()
+          ->Label('المصرف التجميعي')
           ->reactive()
           ->visible($this->By==2)
           ->afterStateUpdated(function (callable $get) {
             $this->bank_id=$get('taj');
             $this->field='taj_id';
             $this->table($this->table);
-          })
-      ]);
+          }),
+        Select::make('rep_name')
+          ->label('النقرير')
+          ->default('All')
+          ->options([
+            'All' => 'كشف بالأسماء',
+            'Mosdada' => 'المسددة',
+            'Motakra' => 'المتأخرة',
+            'Mohasla' => 'المحصلة',
+            'Not_Mohasla' => 'الغير محصلة',
+          ])
+      ])->columns(2);
   }
 
     public function render()
     {
-        return view('livewire.rep-one');
+        return view('livewire.reports.rep-all');
     }
 
     public function table(Table $table):Table
@@ -108,12 +118,10 @@ public $query;
             TextColumn::make('kst')
               ->label('القسط'),
             TextColumn::make('pay')
-              ->label('المدفوع'),
-
-
+              ->label('المسدد'),
+            TextColumn::make('raseed')
+              ->label('الرصيد'),
         ])
-
-
 
           ->actions([
               EditAction::make()
