@@ -6,18 +6,14 @@ use App\Livewire\Traits\MainTrait;
 use App\Models\Bank;
 use App\Models\Main;
 use App\Models\Taj;
-use App\Models\Tran;
-use App\Services\MainForm;
 
-use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Tables\Actions\BulkAction;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\EditAction;
+
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Concerns\InteractsWithTable;
@@ -26,12 +22,9 @@ use Filament\Tables\Table;
 
 use Filament\Forms;
 
-use http\QueryString;
-use Illuminate\Database\Eloquent\Collection;
 use Livewire\Component;
 use Filament\Forms\Form;
-use PhpParser\Builder;
-use function PHPUnit\Framework\isFalse;
+
 
 
 class RepAll extends Component implements HasTable, HasForms
@@ -136,6 +129,7 @@ public $BakyLabel='الباقي';
                      $q->where('raseed','<=',$this->Baky); })
                  ->when($this->rep_name=='Motakra' , function ($q) {
                     $q->where('late','>=',$this->Baky); })
+
                  ;
             }
             if ($this->By==2) {
@@ -172,6 +166,8 @@ public $BakyLabel='الباقي';
                 ->label('ت.أخر قسط')
                 ->visible(fn (Forms\Get $get): bool =>$this->rep_name =='Motakra')
                 ->color('danger'),
+
+
         ])
 
           ;

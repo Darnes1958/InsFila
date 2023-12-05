@@ -10,9 +10,15 @@ class Bank extends Model
 {
   protected $connection = 'other';
 
+
   public function Main(){
     return $this->hasMany(Main::class);
   }
+
+    public function WrongKst()
+    {
+        return $this->hasMany(Wrongkst::class);
+    }
 
   public function Taj(){
     return $this->belongsTo(Taj::class);
@@ -23,6 +29,7 @@ class Bank extends Model
     parent::__construct($attributes);
     if (Auth::check()) {
       $this->connection=Auth::user()->company;
+
     }
   }
 

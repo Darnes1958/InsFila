@@ -10,7 +10,9 @@ class Wrongkst extends Model
 {
   protected $connection = 'other';
 
-
+  public function Bank(){
+      return $this->belongsTo(Bank::class);
+  }
   public function __construct(array $attributes = [])
   {
     parent::__construct($attributes);

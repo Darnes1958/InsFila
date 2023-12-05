@@ -5,11 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use mysql_xdevapi\Table;
 
 class Main extends Model
 {
     use HasFactory;
   protected $connection = 'other';
+
 
   public function Bank(){
     return $this->belongsTo(Bank::class);
@@ -32,6 +34,7 @@ class Main extends Model
     parent::__construct($attributes);
     if (Auth::check()) {
       $this->connection=Auth::user()->company;
+
     }
   }
 
