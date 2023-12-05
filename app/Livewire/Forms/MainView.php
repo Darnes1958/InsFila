@@ -3,6 +3,7 @@
 namespace App\Livewire\Forms;
 
 
+use App\Livewire\Traits\MainTrait;
 use App\Models\Main;
 use App\Models\Tran;
 use Carbon\Carbon;
@@ -12,6 +13,7 @@ use App\Livewire\Traits\AksatTrait;
 
 class MainView extends Form
 {
+  use MainTrait;
   use AksatTrait;
     #[Rule('required')]
 
@@ -103,15 +105,6 @@ class MainView extends Form
             $this->LastKsm=$lastksm;
             $this->LastUpd=now();
 
-            $toDate = Carbon::parse($nextkst);
-            $fromDate = Carbon::now();
-
-            if ($fromDate>$toDate)
-             $months = $toDate->diffInMonths($fromDate);
-            else $months=0;
-
-            if ($months>($main->kst_count-$count)) $months=$main->kst_count-$count;
-
             Main::where('id',$this->id)->
             update([
                 'pay'=>$pay,
@@ -119,7 +112,7 @@ class MainView extends Form
                 'LastKsm'=>$lastksm,
                 'LastUpd'=>$this->LastUpd,
                 'NextKst'=>$this->NextKst,
-                'Late'=>$months,
+                'Late'=>$this->RetLate($this->id,$main->kst_count,$this->NextKst),
                 'Kst_baky'=>$main->kst_count-$count,
             ]);
 

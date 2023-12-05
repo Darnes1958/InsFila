@@ -2,11 +2,14 @@
 
 namespace App\Livewire\Reports;
 
+use App\Livewire\Traits\MainTrait;
 use App\Models\Bank;
 use App\Models\Main;
 use App\Models\Taj;
+use App\Models\Tran;
 use App\Services\MainForm;
 
+use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -48,7 +51,7 @@ public $Baky=5;
 public $BakyLabel='الباقي';
 
     use InteractsWithTable,InteractsWithForms;
-
+    use MainTrait;
     public function updatedBy(){
 
       $this->form($this->form);
@@ -104,7 +107,9 @@ public $BakyLabel='الباقي';
               if ($get('rep_name')=='Motakra') {$this->Baky=1;$this->BakyLabel='عدد الأقساط المتأخرة';}
             })  ,
           TextInput::make('Baky')
-              ->label($this->BakyLabel)
+              ->label(function (){
+                return $this->BakyLabel;
+              })
               ->reactive()
           ->numeric()
               ->visible(fn (Forms\Get $get): bool => $get('rep_name')=='Mosdada' || $get('rep_name')=='Motakra'),
@@ -174,6 +179,10 @@ public $BakyLabel='الباقي';
 
     }
 
+    public function mount(){
+
+     $this->LateChk();
+    }
     public function render()
     {
         return view('livewire.reports.rep-all');
