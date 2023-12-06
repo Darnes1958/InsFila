@@ -4,6 +4,7 @@ namespace App\Providers;
 
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use BezhanSalleh\FilamentLanguageSwitch\LanguageSwitch;
 use Filament\Support\Colors\Color;
@@ -31,6 +32,12 @@ class AppServiceProvider extends ServiceProvider
         'blue' =>  Color::Blue,
         'gray' =>  Color::Gray,
       ]);
+        DB::listen(function ($query) {
+          // info($query->sql);
+            // $query->sql
+            // $query->bindings
+            // $query->time
+        });
 
       LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
         $switch

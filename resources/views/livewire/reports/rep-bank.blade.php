@@ -13,6 +13,7 @@
         </div>
         <div class="flex gap-1">
             <span class="text-primary-500">طباعة</span>
+
             <a  href="{{route('pdfbanksum',['By'=>$By])}}"  class="text-primary-500">
                 <x-icon.print/>
             </a>
@@ -27,10 +28,13 @@
 
 
 
-
+    @if($By==1)
     <div class="w-full mt-2">
         {{ $this->table }}
     </div>
+    @else
+    <livewire:reports.rep-taj-sum/>
+    @endif
 
 </div>
 

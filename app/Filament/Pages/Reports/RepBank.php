@@ -6,7 +6,7 @@ use Filament\Pages\Page;
 
 class RepBank extends Page
 {
-    public static ?string $title = 'تقارير عن أقساط';
+    public static ?string $title = 'إجمالي المصارف';
 
     protected static ?string $navigationGroup='تقارير';
 

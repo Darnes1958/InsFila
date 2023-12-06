@@ -73,10 +73,11 @@
       }
       @page {
           size: 21cm 29.7cm ;
-          margin: 30px 40px 30px 40px;
+          margin: 20px 30px 20px 30px;
       }
       table {
           width: 96%;
+
           border-collapse: collapse;
           font-size: 12px;
           direction: ltr;

@@ -103,6 +103,7 @@ return [
         'password' => env('DB_PASSWORD_OTHER', ''),
         'charset' => 'utf8',
         'prefix' => '',
+
         'prefix_indexes' => true,
         'trust_server_certificate' => true,
       ],

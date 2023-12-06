@@ -13,23 +13,36 @@
         </div>
         <div class="flex gap-1">
             <span class="text-primary-500">طباعة</span>
-            <a  href="{{route('pdfbanksum',['By'=>$By])}}"  class="text-primary-500">
-                <x-icon.print/>
-            </a>
+            @if($By==1 && $rep_name=='Mosdada')
+                <a  href="{{route('pdfmosdadabank',['Baky'=>$Baky,'bank_id'=>$bank_id])}}"  class="text-primary-500">
+                    <x-icon.print/>
+                </a>
+            @endif
+            @if($By==1 && $rep_name=='Motakra')
+                <a  href="{{route('pdfmotakrabank',['Baky'=>$Baky,'bank_id'=>$bank_id])}}"  class="text-primary-500">
+                    <x-icon.print/>
+                </a>
+            @endif
+            @if($By==1 && $rep_name=='Mohasla')
+                <a  href="{{route('pdfmotakrabank',['Baky'=>$Baky,'bank_id'=>$bank_id])}}"  class="text-primary-500">
+                    <x-icon.print/>
+                </a>
+            @endif
         </div>
     </div>
         <div class=" mt-2 rounded shadow-inner bg-blue-100">
             {{ $this->form }}
         </div>
-
-
-
-
-
-
-
+    @if($rep_name=='Mosdada' || $rep_name=='Motakra')
     <div class="w-full mt-2">
         {{ $this->table }}
     </div>
+    @endif
+    @if($rep_name=='Mohasla' )
+        <div class="w-full mt-2">
+            <livewire:reports.rep-aksat-get  />
+        </div>
+    @endif
+
 
 </div>

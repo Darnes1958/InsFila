@@ -2,48 +2,34 @@
 
 namespace App\Livewire\Reports;
 
-use App\Livewire\Traits\MainTrait;
 use App\Models\Bank;
 use App\Models\Taj;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
-use Filament\Tables\Columns\Summarizers\Sum;
-use Filament\Tables\Columns\Summarizers\Summarizer;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
-use Illuminate\Database\Query\Builder;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
-
-class RepBank extends Component implements HasTable, HasForms
+class RepTajSum extends Component implements HasTable, HasForms
 {
-
     use InteractsWithTable,InteractsWithForms;
 
-    public $By=1;
+
     public function table(Table $table):Table
     {
         return $table
-            ->query(function (Bank $bank)  {
+            ->query(function (Taj $taj)  {
 
-                 Bank::all();
+                Bank::all();
 
-                return  $bank;
+                return  $taj;
             })
             ->columns([
                 TextColumn::make('id')
                     ->label('رقم المصرف'),
-                TextColumn::make('BankName')
+                TextColumn::make('TajName')
                     ->label('الاسم'),
                 TextColumn::make('main_count')
                     ->counts('Main')
@@ -67,9 +53,8 @@ class RepBank extends Component implements HasTable, HasForms
                     ->label('بالخطأ'),
             ]);
     }
-
     public function render()
     {
-        return view('livewire.reports.rep-bank');
+        return view('livewire.reports.rep-taj-sum');
     }
 }

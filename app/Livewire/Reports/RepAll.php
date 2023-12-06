@@ -24,6 +24,7 @@ use Filament\Forms;
 
 use Livewire\Component;
 use Filament\Forms\Form;
+use App\Http\Controllers\PdfController;
 
 
 
@@ -162,6 +163,10 @@ public $BakyLabel='الباقي';
                 ->visible(fn (Forms\Get $get): bool =>$this->rep_name =='Motakra')
                 ->color('danger'),
 
+            TextColumn::make('sul_begin')
+                ->label('تاريخ العقد')
+                ->visible(fn (Forms\Get $get): bool =>$this->rep_name =='Motakra')
+                ->color('info'),
             TextColumn::make('LastKsm')
                 ->label('ت.أخر قسط')
                 ->visible(fn (Forms\Get $get): bool =>$this->rep_name =='Motakra')
