@@ -1,6 +1,8 @@
 <div>
-    <h3>yes I am here</h3>
+
     <div class="w-full mt-2">
+        {{$Date1}}
+        {{$bank_id}}
         {{ $this->table }}
     </div>
 </div>
