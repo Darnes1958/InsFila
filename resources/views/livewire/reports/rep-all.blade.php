@@ -40,7 +40,9 @@
     @endif
     @if($rep_name=='Mohasla' )
         <div class="w-full mt-2">
-            <livewire:reports.rep-aksat-get  />
+            @livewire('reports.rep-aksat-get', ['Date1' => $Date1,'Date2' => $Date2,'bank_id' => $bank_id])
+
+
         </div>
     @endif
 

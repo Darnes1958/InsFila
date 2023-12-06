@@ -99,6 +99,10 @@ public $BakyLabel='الباقي';
             ->afterStateUpdated(function (callable $get){
               if ($get('rep_name')=='Mosdada') {$this->Baky=5;$this->BakyLabel='الباقي';}
               if ($get('rep_name')=='Motakra') {$this->Baky=1;$this->BakyLabel='عدد الأقساط المتأخرة';}
+              if ($get('rep_name')=='Mohasla') {
+                $this->dispatch('TakeBank', bank_id: $this->bank_id);
+                $this->dispatch('TakeDate1', Date1: $this->Date1);
+                $this->dispatch('TakeDate2', Date2: $this->Date2);}
             })  ,
           TextInput::make('Baky')
               ->label(function (){
@@ -181,7 +185,8 @@ public $BakyLabel='الباقي';
     }
 
     public function mount(){
-
+     $this->Date1=date('Y-m-d');
+     $this->Date2=date('Y-m-d');
      $this->LateChk();
     }
     public function render()
