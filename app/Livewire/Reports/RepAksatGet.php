@@ -13,6 +13,7 @@ use Filament\Tables\Table;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Reactive;
 use Livewire\Component;
+use Filament\Forms\Get;
 
 class RepAksatGet extends Component implements HasTable, HasForms
 {
@@ -25,6 +26,8 @@ public $bank_id;
 public $Date1;
   #[Reactive]
 public $Date2;
+  #[Reactive]
+public $By;
 
 
 
@@ -32,11 +35,19 @@ public $Date2;
     {
         return $table
             ->query(function (Tran $tran)  {
-               $tran= Tran::wherein('main_id',function ($q){
-                    $q->select('id')->from('mains')->where('bank_id',$this->bank_id);
-                })
-               
-               ->whereBetween('ksm_date',[$this->Date1,$this->Date2]);
+               $tran= Tran::whereBetween('ksm_date',[$this->Date1,$this->Date2])
+                   ->when($this->By==1,function ($query){
+                       $query->wherein('main_id',function ($q){
+                           $q->select('id')->from('mains')->where('bank_id',$this->bank_id);
+                       });
+                           })
+                   ->when($this->By==2,function ($query){
+                       $query->wherein('main_id',function ($q){
+                           $q->select('id')->from('mains')->whereIn('bank_id',function ($qq){
+                               $qq->select('id')->from('banks')->where('taj_id',$this->bank_id);
+                           });
+                       });
+                   });
 
                return  $tran;
             })
@@ -45,6 +56,9 @@ public $Date2;
                     ->label('رقم العقد'),
                 TextColumn::make('Main.Customer.CusName')
                     ->label('الاسم'),
+                TextColumn::make('Main.Bank.BankName')
+                    ->label('المصرف')
+                    ->visible(fn (Get $get): bool =>$this->By ==2),
                 TextColumn::make('Main.sul')
                     ->label('اجمالي العقد'),
                 TextColumn::make('Main.pay')

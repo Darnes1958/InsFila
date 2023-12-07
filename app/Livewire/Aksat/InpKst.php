@@ -190,6 +190,7 @@ class InpKst extends Component
 
     }
     public function DoDelete(){
+        $this->mainView->SetMainView($this->main_id);
         if ($this->over_id!=0){
             Overkst::where('id',$this->over_id)->delete();
             $this->OverTarseed($this->main_id);
@@ -231,7 +232,7 @@ class InpKst extends Component
               if ($this->mainView->raseed<$this->TransForm->ksm) $this->TransForm->DoBaky($this->mainView->id,$this->mainView->raseed);
               $res=Tran::create($this->TransForm->all());
               if ($this->TransForm->over_id!=0) Overkst::where('id',$this->TransForm->over_id)->update(['tran_id'=>$res->id]);
-              $this->mainView->tarseed($this->TransForm->ksm_date,$this->TransForm->kst_date);
+              $this->mainView->tarseed();
             }
             $this->TransForm->reset();
             $this->TransForm->ksm_date=date('Y-m-d');

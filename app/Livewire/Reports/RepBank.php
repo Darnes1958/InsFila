@@ -35,7 +35,6 @@ class RepBank extends Component implements HasTable, HasForms
     {
         return $table
             ->query(function (Bank $bank)  {
-
                  Bank::all();
 
                 return  $bank;

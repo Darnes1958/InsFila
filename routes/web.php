@@ -25,7 +25,13 @@ Route::get('/login', function () {
 
 Route::controller(PdfController::class)->group(function (){
   route::get('/pdfbanksum/{By}', 'PdfBankSum')->name('pdfbanksum') ;
-  route::get('/pdfmosdadabank/{Baky?}/{bank_id?}', 'PdfMosdadaBank')->name('pdfmosdadabank') ;
-  route::get('/pdfmotakrabank/{Baky?}/{bank_id?}', 'PdfMotakraBank')->name('pdfmotakrabank') ;
+
+  route::get('/pdfall/{bank_id?}/{By?}', 'PdfAll')->name('pdfall') ;
+
+  route::get('/pdfmosdadabank/{Baky?}/{bank_id?}/{By?}', 'PdfMosdadaBank')->name('pdfmosdadabank') ;
+  route::get('/pdfmotakrabank/{Baky?}/{bank_id?}/{By?}', 'PdfMotakraBank')->name('pdfmotakrabank') ;
+
+  route::get('/pdfmohasla/{bank_id?}/{Date1?}/{Date2?}/{By?}', 'PdfMohasla')->name('pdfmohasla') ;
+  route::get('/pdfnotmohasla/{bank_id?}/{Date1?}/{Date2?}/{By?}', 'PdfNotMohasla')->name('pdfnotmohasla') ;
 
 });

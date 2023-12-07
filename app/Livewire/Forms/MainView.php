@@ -95,33 +95,29 @@ class MainView extends Form
         $this->tar_count=$rec->tar_count;
         $this->tar_kst=$rec->tar_kst;
     }
-    public function Tarseed($lastksm =null,$nextkst=null){
+    public function Tarseed(){
         $pay=Tran::where('main_id',$this->id)->sum('ksm');
         $count=Tran::where('main_id',$this->id)->count();
+        $lastksm=Tran::where('main_id',$this->id)->max('ksm_date');
+        $nextkst=Tran::where('main_id',$this->id)->max('kst_date');
         $main=Main::where('id',$this->id)->first();
+        $this->LastUpd=now();
 
-        if ($lastksm) {
-            $this->NextKst= date('Y-m-d', strtotime($nextkst . "+1 month"));
-            $this->LastKsm=$lastksm;
-            $this->LastUpd=now();
+        if ($nextkst)
+         $this->NextKst= date('Y-m-d', strtotime($nextkst . "+1 month"));
+        else $this->NextKst=$this->setMonth($main->sul_begin);
 
-            Main::where('id',$this->id)->
-            update([
-                'pay'=>$pay,
-                'raseed'=>$main->sul-$pay,
-                'LastKsm'=>$lastksm,
-                'LastUpd'=>$this->LastUpd,
-                'NextKst'=>$this->NextKst,
-                'Late'=>$this->RetLate($this->id,$main->kst_count,$this->NextKst),
-                'Kst_baky'=>$main->kst_count-$count,
-            ]);
+        Main::where('id',$this->id)->
+        update([
+            'pay'=>$pay,
+            'raseed'=>$main->sul-$pay,
+            'LastKsm'=>$lastksm,
+            'LastUpd'=>$this->LastUpd,
+            'NextKst'=>$this->NextKst,
+            'Late'=>$this->RetLate($this->id,$main->kst_count,$this->NextKst),
+            'Kst_baky'=>$main->kst_count-$count,
+        ]);
 
-        } else
-            Main::where('id',$this->id)->
-            update([
-                'pay'=>$pay,
-                'raseed'=>$main->sul-$pay,
-            ]);
 
         $this->pay=$pay;
         $this->raseed=$main->sul-$pay;

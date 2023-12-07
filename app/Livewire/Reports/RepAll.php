@@ -143,6 +143,8 @@ public $BakyLabel='الباقي';
                 $main=Main::whereIn('bank_id',function ($q){
                     $q->select('id')->from('banks')->where('taj_id',$this->bank_id);
                     })
+                    ->when($this->rep_name=='Mosdada' , function ($q) {
+                        $q->where('raseed','<=',$this->Baky); })
                     ->when($this->rep_name=='Motakra' , function ($q) {
                         $q->where('late','>=',$this->Baky); })
                 ;
@@ -164,11 +166,11 @@ public $BakyLabel='الباقي';
               ->label('المسدد'),
             TextColumn::make('raseed')
               ->label('الرصيد'),
+
             TextColumn::make('Late')
                 ->label('متأخرة')
                 ->visible(fn (Forms\Get $get): bool =>$this->rep_name =='Motakra')
                 ->color('danger'),
-
             TextColumn::make('sul_begin')
                 ->label('تاريخ العقد')
                 ->visible(fn (Forms\Get $get): bool =>$this->rep_name =='Motakra')
