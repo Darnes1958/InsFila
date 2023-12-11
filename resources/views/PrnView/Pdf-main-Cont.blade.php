@@ -48,9 +48,9 @@
     <label  style="display:inline-block;">و قيمة الإستقطاع الشهري</label>
     <label  id="mainlabel" style="width: 30px;">{{$res->kst_count}}</label>
     <label  style="display:inline-block;">عدد الاشهر </label>
-    <label  id="mainlabel" style="width: 70px;">{{$mindate}}</label>
-    <label  style="display:inline-block;">إلي شهر</label>
     <label  id="mainlabel" style="width: 70px;">{{$maxdate}}</label>
+    <label  style="display:inline-block;">إلي شهر</label>
+    <label  id="mainlabel" style="width: 70px;">{{$mindate}}</label>
     <label  style="display:inline-block;padding-right: 4px;">علي أن يبدا الإستقطاع من شهر </label>
 </div>
 <div style="text-align: right;font-size: 11pt;">
