@@ -11,8 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::connection('other')->table('overksts', function (Blueprint $table) {
-            $table->bigInteger('tran_id')->default(0);
+        Schema::create('stops', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('main_id')->constrained('mains')->cascadeOnDelete();
+            $table->date('stop_date');
+            $table->timestamps();
         });
     }
 
@@ -21,8 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('overksts', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('stops');
     }
 };

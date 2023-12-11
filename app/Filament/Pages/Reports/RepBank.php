@@ -6,18 +6,19 @@ use Filament\Pages\Page;
 
 class RepBank extends Page
 {
-    public static ?string $title = 'إجمالي المصارف';
+  protected ?string $heading = '';
+  public function getBreadcrumbs(): array
+  {
+    return [""];
+  }
+   public static ?string $title = 'إجمالي المصارف';
 
     protected static ?string $navigationGroup='تقارير';
-
+  protected static ?int $navigationSort=3;
 
 
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
-    public static function getPluralModelLabel(): string
-    {
-        return __('تقرير');
-    }
 
     protected static string $view = 'filament.pages.reports.rep-bank';
 }

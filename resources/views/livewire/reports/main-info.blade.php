@@ -3,6 +3,10 @@
         <div class="w-1/4 mb-2">
             {{ $this->form }}
         </div>
+        <div class="w-1/4 mb-2 px-4 gap-4">
+            {{ $this->printAction }}
+            {{ $this->printContAction }}
+        </div>
         <div x-show="$wire.montahy" wire:click="DoArc" class="flex w-1/4 mb-4 justify-end">
             <x-button>
                 نقل للأرشيف

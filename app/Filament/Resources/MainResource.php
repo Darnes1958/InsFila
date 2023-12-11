@@ -277,19 +277,17 @@ class MainResource extends Resource
                  ->label('مصارف'),
                 Tables\Filters\Filter::make('المسددة')
                  ->query(fn(Builder $query): Builder=>$query->where('raseed','=',0))
-
-
-
-
             ])
             ->actions([
-
                 ViewAction::make('View Information')->iconButton()->color('primary'),
                 DeleteAction::make()->iconButton(),
-
                 EditAction::make()->iconButton()->color('blue'),
+              Tables\Actions\Action::make('print')
+                ->hiddenLabel()
+                ->iconButton()->color('success')
+                ->icon('heroicon-m-printer')
+                ->url(fn (Main $record): string => route('pdfmaincont', $record)),
             ])
-
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),

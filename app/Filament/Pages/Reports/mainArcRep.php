@@ -14,6 +14,7 @@ class mainArcRep extends Page
     protected static ?string $pluralModelLabel='تقرير عن عقد من الأرشيف';
     public static ?string $title = ' تقارير عن عقد من الأرشيف';
     protected static ?string $navigationGroup='تقارير';
+  protected static ?int $navigationSort=2;
 
 
   public function getTitle():  string|Htmlable

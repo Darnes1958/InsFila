@@ -6,23 +6,16 @@ use App\Livewire\Traits\MainTrait;
 use App\Models\Bank;
 use App\Models\Main;
 use App\Models\Taj;
-
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-
-use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Table;
-
-
 use Filament\Forms;
-
-use Livewire\Attributes\On;
 use Livewire\Component;
 use Filament\Forms\Form;
 use App\Http\Controllers\PdfController;
@@ -60,7 +53,8 @@ public $BakyLabel='الباقي';
       ->schema([
 
         Select::make('bank')
-            ->columnSpan(2)
+          ->columnSpan(2)
+          ->inlineLabel()
           ->options(Bank::all()->pluck('BankName', 'id')->toArray())
 
           ->searchable()
@@ -75,6 +69,7 @@ public $BakyLabel='الباقي';
           }),
         Select::make('taj')
             ->columnSpan(2)
+          ->inlineLabel()
           ->options(Taj::all()->pluck('TajName', 'id')->toArray())
           ->searchable()
           ->Label('المصرف التجميعي')
@@ -87,7 +82,8 @@ public $BakyLabel='الباقي';
           }),
         Select::make('rep_name')
            ->columnSpan(2)
-          ->label('النقرير')
+          ->inlineLabel()
+          ->label('التقرير')
           ->default('All')
           ->reactive()
 
@@ -105,6 +101,7 @@ public $BakyLabel='الباقي';
             }),
 
           TextInput::make('Baky')
+              ->inlineLabel()
               ->label(function (){
                 return $this->BakyLabel;
               })
@@ -113,10 +110,12 @@ public $BakyLabel='الباقي';
               ->visible(fn (Forms\Get $get): bool => $get('rep_name')=='Mosdada' || $get('rep_name')=='Motakra'),
 
           DatePicker::make('Date1')
+            ->inlineLabel()
             ->label('من')
             ->reactive()
             ->visible(fn (Forms\Get $get): bool => $get('rep_name')=='Mohasla' || $get('rep_name')=='Not_Mohasla'),
           DatePicker::make('Date2')
+            ->inlineLabel()
             ->label('إلي')
             ->reactive()
               ->visible(fn (Forms\Get $get): bool => $get('rep_name')=='Mohasla' || $get('rep_name')=='Not_Mohasla'),

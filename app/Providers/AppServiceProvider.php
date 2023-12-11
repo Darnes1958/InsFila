@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 
+use Filament\Facades\Filament;
+use Filament\Navigation\NavigationGroup;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
@@ -26,6 +28,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+
+
+
       FilamentColor::register([
         'Fuchsia' =>  Color::Fuchsia,
         'green' =>  Color::Green,

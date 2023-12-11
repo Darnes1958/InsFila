@@ -14,6 +14,9 @@ use App\Models\Overkst;
 use App\Models\Overkst_arc;
 use App\Models\Tran;
 use App\Models\Trans_arc;
+use Filament\Actions\Action;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -34,9 +37,9 @@ use Livewire\Component;
 use Filament\Forms\Form;
 
 
-class   MainInfo extends Component implements HasInfolists,HasForms,HasTable
+class   MainInfo extends Component implements HasInfolists,HasForms,HasTable,HasActions
 {
-  use InteractsWithInfolists,InteractsWithForms,InteractsWithTable;
+  use InteractsWithInfolists,InteractsWithForms,InteractsWithTable,InteractsWithActions;
 
   public $mainId;
   public Main $mainRec;
@@ -45,6 +48,26 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable
   public TransForm $transForm;
   public OverForm $overForm;
 
+  public function printAction(): Action
+  {
+    return Action::make('print')
+      ->label('طباعة')
+      ->button()
+      ->color('info')
+      ->icon('heroicon-m-printer')
+      ->color('info')
+      ->url(fn (): string => route('pdfmain', ['id'=>$this->mainId]));
+  }
+  public function printContAction(): Action
+  {
+    return Action::make('print')
+      ->label('طباعة نموذج العقد')
+      ->button()
+      ->color('info')
+      ->icon('heroicon-m-printer')
+      ->color('info')
+      ->url(fn (): string => route('pdfmaincont', ['id'=>$this->mainId]));
+  }
 
   public function form(Form $form): Form
   {
@@ -55,13 +78,10 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable
           ->searchable()
           ->reactive()
           ->hiddenLabel()
-
-
           ->afterStateUpdated(function (callable $get) {
             if (Main::where('id',$get('mainId'))->exists())
              $this->mainId=$get('mainId');
             else $this->mainId=null;
-
           }),
       ]);
   }

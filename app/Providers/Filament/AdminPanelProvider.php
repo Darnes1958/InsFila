@@ -27,6 +27,7 @@ class AdminPanelProvider extends PanelProvider
         return $panel
 
             ->sidebarFullyCollapsibleOnDesktop()
+
             ->breadcrumbs(false)
             ->maxContentWidth('Full')
 

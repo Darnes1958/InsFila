@@ -34,4 +34,10 @@ Route::controller(PdfController::class)->group(function (){
   route::get('/pdfmohasla/{bank_id?}/{Date1?}/{Date2?}/{By?}', 'PdfMohasla')->name('pdfmohasla') ;
   route::get('/pdfnotmohasla/{bank_id?}/{Date1?}/{Date2?}/{By?}', 'PdfNotMohasla')->name('pdfnotmohasla') ;
 
+  route::get('/pdfstopall/{bank_id?}/{Date1?}/{Date2?}/{By?}', 'PdfStopALL')->name('pdfstopall') ;
+  route::get('/pdfstopone/{record}/', 'PdfStopOne')->name('pdfstopone') ;
+
+  route::get('/pdfmaincont/{id}/', 'PdfMainCont')->name('pdfmaincont') ;
+  route::get('/pdfmain/{id}/', 'PdfMain')->name('pdfmain') ;
+
 });

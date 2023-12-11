@@ -64,7 +64,8 @@ class RepBank extends Component implements HasTable, HasForms
                 TextColumn::make('wrong_kst_sum_kst')
                     ->sum('WrongKst','kst')
                     ->label('بالخطأ'),
-            ]);
+            ])
+           ;
     }
 
     public function render()
