@@ -22,7 +22,7 @@ class Main extends Model
   }
 
   public function Sell(){
-        return $this->hasMany(Sell::class);
+        return $this->belongsTo(Sell::class);
     }
 
     public function Tran(){

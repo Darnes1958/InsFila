@@ -7,6 +7,7 @@ use App\Filament\Resources\MainResource\Pages;
 use App\Models\Main;
 
 use App\Models\Main_arc;
+use App\Services\MainForm;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
@@ -34,7 +35,9 @@ class MainResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
+
             ->schema([
+
               TextInput::make('id')
                 ->label('رقم العقد')
                 ->required()
@@ -253,7 +256,9 @@ class MainResource extends Resource
                 ->label('ملاحظات')->columnSpanFull()
 
 
-            ]);
+            ])
+
+            ;
     }
 
 
@@ -292,7 +297,19 @@ class MainResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+
+      ->headerActions([
+      Tables\Actions\Action::make('testaction')
+        ->slideOver()
+        ->record(Main::find(17))
+        ->model(Main::class)
+        ->modelLabel('عقد')
+        ->label('ضم عقد')
+        ->model(Main::class)
+        ->form(MainForm::schema())
+    ]);
+
     }
 
     public static function getRelations(): array
@@ -311,4 +328,5 @@ class MainResource extends Resource
             'view' => Pages\ViewMain::route('/{record}'),
         ];
     }
+
 }

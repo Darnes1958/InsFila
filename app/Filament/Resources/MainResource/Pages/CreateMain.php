@@ -7,15 +7,18 @@ use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\HtmlString;
+use function Filament\Support\get_model_label;
 
 class CreateMain extends CreateRecord
 {
     protected static string $resource = MainResource::class;
 
-    public function getTitle():  string|Htmlable
-    {
-        return  new HtmlString('<div class="leading-3 h-0 text-md mb-2  text-primary-400">ادخال عقود</div>');
-    }
+  protected ?string $heading = '';
+  public function getBreadcrumbs(): array
+  {
+    return [""];
+  }
+
   protected function getRedirectUrl(): string
   {
     return $this->previousUrl ?? $this->getResource()::getUrl('list');
