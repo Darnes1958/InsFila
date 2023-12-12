@@ -13,7 +13,7 @@ class InpTar extends Page
 
     protected static string $view = 'filament.pages.inp-tar';
     protected static ?string $navigationLabel='ترجيع أقساط';
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 4;
   protected ?string $heading = '';
   public function getBreadcrumbs(): array
   {

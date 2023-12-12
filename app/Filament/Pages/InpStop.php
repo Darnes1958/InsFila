@@ -9,7 +9,7 @@ class InpStop extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
   protected static ?string $navigationLabel='ايقاف خصم';
-  protected static ?int $navigationSort = 4;
+  protected static ?int $navigationSort = 5;
   protected ?string $heading = '';
   public function getBreadcrumbs(): array
   {
