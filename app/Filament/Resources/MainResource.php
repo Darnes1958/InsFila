@@ -297,18 +297,8 @@ class MainResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ])
+            ]);
 
-      ->headerActions([
-      Tables\Actions\Action::make('testaction')
-        ->slideOver()
-        ->record(Main::find(17))
-        ->model(Main::class)
-        ->modelLabel('عقد')
-        ->label('ضم عقد')
-        ->model(Main::class)
-        ->form(MainForm::schema())
-    ]);
 
     }
 
