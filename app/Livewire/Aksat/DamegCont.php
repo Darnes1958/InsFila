@@ -96,7 +96,7 @@ class DamegCont extends Component implements HasInfolists,HasForms
             $this->data->last_cont=$this->mainRec->id;
             Main::create($this->data->all());
             Tran::create($this->tranForm->all());
-
+            $this->MainTarseed($this->the_main_id);
 
             $this->toArc($this->the_main_id,$this->data,$this->tranForm,$this->overForm);
 

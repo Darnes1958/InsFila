@@ -46,10 +46,12 @@ trait MainTrait {
   }
 
   public function toArc($main_id,MainForm $TmainForm,TransForm $TtransForm,OverForm $ToverForm){
+      $this->MainTarseed($main_id);
       $TmainForm->reset();
       $TtransForm->reset();
       $ToverForm->reset();
       $TmainForm->SetMain($main_id);
+
       Main_arc::create(
           $TmainForm->all()
       );
@@ -72,9 +74,40 @@ trait MainTrait {
               $ToverForm->all()
           );
       }
-      $main_id=Main::latest()->first()->id;
+
+
+
       Overkst::where('main_id',$main_id)->delete();
       Tran::where('main_id',$main_id)->delete();
       Main::where('id',$main_id)->delete();
+  }
+
+  public function MainTarseed($id){
+    $pay=Tran::where('main_id',$id)->sum('ksm');
+    $count=Tran::where('main_id',$id)->count();
+    $lastksm=Tran::where('main_id',$id)->max('ksm_date');
+    $nextkst=Tran::where('main_id',$id)->max('kst_date');
+    $main=Main::where('id',$id)->first();
+    $LastUpd=now();
+
+    if ($nextkst)
+      $NextKst= date('Y-m-d', strtotime($nextkst . "+1 month"));
+    else $NextKst=$this->setMonth($main->sul_begin);
+
+    Main::where('id',$id)->
+    update([
+      'pay'=>$pay,
+      'raseed'=>$main->sul-$pay,
+      'LastKsm'=>$lastksm,
+      'LastUpd'=>$LastUpd,
+      'NextKst'=>$NextKst,
+      'Late'=>$this->RetLate($id,$main->kst_count,$NextKst),
+      'Kst_baky'=>$main->kst_count-$count,
+    ]);
+
+
+    $this->pay=$pay;
+    $this->raseed=$main->sul-$pay;
+
   }
 }
