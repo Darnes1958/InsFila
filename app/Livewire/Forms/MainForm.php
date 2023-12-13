@@ -57,21 +57,22 @@ class MainForm extends Form
 
     public $LastKsm;
     public $NextKst;
-    public $Late;
+    public $Late=0;
     public $sell_id=1;
     public $LastUpd;
     public $kst_baky;
     public $last_cont;
-    public $over_count;
-    public $over_kst;
-    public $tar_count;
-    public $tar_kst;
+    public $over_count=0;
+    public $over_kst=0;
+    public $tar_count=0;
+    public $tar_kst=0;
     public $notes = '';
 
     public $user_id;
 
 
     public function FillRec($rec){
+
       $this->customer_id=$rec->customer_id;
       $this->bank_id=$rec->bank_id;
       $this->acc=$rec->acc;
@@ -107,6 +108,5 @@ class MainForm extends Form
     $this->id=$id;
     $this->FillRec($rec);
   }
-
 
 }

@@ -1,12 +1,16 @@
 <div>
     @if($show)
-    {{$this->mainInfolist}}
-    @endif
+      <div class="mb-4">
+          {{$this->mainInfolist}}
+      </div>
+
+
     <form wire:submit="create">
         {{ $this->form }}
 
-        <button type="submit">
-            Submit
-        </button>
+        <x-button type="submit" class="mt-2 bg-primary-500">
+            تخزين
+        </x-button>
     </form>
+    @endif
 </div>

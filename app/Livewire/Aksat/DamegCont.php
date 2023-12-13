@@ -2,9 +2,14 @@
 
 namespace App\Livewire\Aksat;
 
+use App\Livewire\Forms\MainForm;
+use App\Livewire\Forms\OverForm;
+use App\Livewire\Forms\TransForm;
+use App\Livewire\Traits\MainTrait;
 use App\Models\Main;
 use App\Models\Main_arc;
-use App\Services\MainForm;
+
+use App\Models\Tran;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -18,32 +23,40 @@ use Filament\Infolists\Contracts\HasInfolists;
 use Filament\Infolists\Infolist;
 use Filament\Support\Enums\FontWeight;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
 use Livewire\Component;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Forms\Components\Section;
 use Livewire\Attributes\On;
+use Filament\Notifications\Notification;
+
 
 
 class DamegCont extends Component implements HasInfolists,HasForms
 {
-    use InteractsWithInfolists,InteractsWithForms;
+    use InteractsWithInfolists,InteractsWithForms,MainTrait;
     public Main $mainRec;
+
     public $the_main_id;
 
     public $show=false;
-    public \App\Livewire\Forms\MainForm $data;
-    public $acc='00000000';
-
-
+    public MainForm $data;
+    public TransForm $tranForm;
+    public OverForm $overForm;
     #[On('TakeMainId')]
     public function updateMainList($id)
     {
-       $this->the_main_id=$id;
+        $this->the_main_id=$id;
         $this->mainRec=Main::find($this->the_main_id);
+
         $this->show=true;
-        $this->data->SetMain($this->the_main_id);
+        $this->data->id=Main::max('id')+1;
+        $this->data->customer_id=$this->mainRec->customer_id;
+        $this->data->acc=$this->mainRec->acc;
+        $this->data->bank_id=$this->mainRec->bank_id;
+        $this->data->sul_begin=date('Y-m-d');
 
     }
 
@@ -52,11 +65,59 @@ class DamegCont extends Component implements HasInfolists,HasForms
         if ($this->the_main_id==null) $this->the_main_id=Main::min('id');
         $this->mainRec=Main::find($this->the_main_id);
 
-       // $this->form->fill($main->find(17)->toArray());
     }
     public function create(): void
     {
-        dd($this->form->getState());
+        $this->tranForm->reset();
+        $this->tranForm->FillTrans($this->the_main_id);
+        $this->tranForm->ksm_date=$this->data->sul_begin;
+        $this->tranForm->ksm=$this->mainRec->raseed;
+        $this->tranForm->ksm_notes='قيمة تم ضمها للعقد رقم : '.$this->data->id ;
+        $this->overForm->FillAny();
+        try {
+            $this->validate();
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $validator = $e->validator;
+            info($validator->errors());
+            throw $e;
+        }
+        if ($this->data->sul<$this->mainRec->raseed) {
+            Notification::make()
+                ->title('لا يجوز أن يكون إجمالي العقد الجديد أصغر من السابق')
+                ->icon('heroicon-o-x-circle')
+                ->body('يرجي مراجعة قيمة العقد السابق والحالي.')
+                ->color('danger')
+                ->danger()
+                ->send();
+            return;
+        }
+        DB::connection(Auth()->user()->company)->beginTransaction();
+        try {
+            $this->data->last_cont=$this->mainRec->id;
+            Main::create($this->data->all());
+            Tran::create($this->tranForm->all());
+
+
+            $this->toArc($this->the_main_id,$this->data,$this->tranForm,$this->overForm);
+
+            DB::connection(Auth()->user()->company)->commit();
+            $this->show=false;
+            Notification::make()
+                ->title('تمت عملية ضم العقد بنجاح')
+                ->color('success')
+                ->icon('heroicon-o-check-circle')
+                ->success()
+                ->send();
+        } catch (\Exception $e) {
+            Notification::make()
+                ->title('حدث خطأ !!')
+                ->color('danger')
+                ->icon('heroicon-o-x-circle')
+                ->danger()
+                ->send();
+            info($e);
+            DB::connection(Auth()->user()->company)->rollback();
+        }
     }
     public static function form(Form $form): Form
     {
@@ -180,7 +241,7 @@ class DamegCont extends Component implements HasInfolists,HasForms
             ->record($this->mainRec)
             ->schema([
                 Group::make([
-                    Section::make(new HtmlString('<div class="text-danger-600">بيانات العقد السابق</div>'))
+                    \Filament\Infolists\Components\Section::make(new HtmlString('<div class="text-danger-600">بيانات العقد السابق</div>'))
                         ->schema([
                             TextEntry::make('sul')->label('قيمة العقد')->color('info'),
                             TextEntry::make('kst')->label('القسط'),

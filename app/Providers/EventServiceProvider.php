@@ -58,6 +58,7 @@ class EventServiceProvider extends ServiceProvider
         $blog->user_id = auth()->id();
         $blog->sul_end = date('Y-m-d', strtotime($blog->sul_begin . "+".$blog->kst_count." month"));
         $blog->NextKst=$this->setMonth($blog->sul_begin);
+        $blog->LastUpd=now();
         $blog->kst_baky=$blog->kst_count;
         $blog->raseed=$blog->sul;
       });
