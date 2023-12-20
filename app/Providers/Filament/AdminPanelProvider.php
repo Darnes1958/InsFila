@@ -25,17 +25,17 @@ class AdminPanelProvider extends PanelProvider
     {
 
         return $panel
+            
+            ->brandName('نظام التقسيط')
+            ->login()
+            ->profile()
 
             ->sidebarFullyCollapsibleOnDesktop()
-
             ->breadcrumbs(false)
             ->maxContentWidth('Full')
-
-
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login()
             ->colors([
                 'primary' => Color::Amber,
             ])
