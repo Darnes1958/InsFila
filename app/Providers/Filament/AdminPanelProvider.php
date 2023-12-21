@@ -26,7 +26,7 @@ class AdminPanelProvider extends PanelProvider
     {
 
         return $panel
-            
+
             ->brandName('نظام التقسيط')
             ->login()
             ->profile(EditProfile::class)
