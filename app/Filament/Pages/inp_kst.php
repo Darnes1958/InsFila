@@ -8,7 +8,11 @@ use Illuminate\Support\HtmlString;
 
 class inp_kst extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+  public static function shouldRegisterNavigation(): bool
+  {
+    return  auth()->user()->hasAnyPermission('ادخال اقساط','تعديل اقساط','الغاء اقساط');
+  }
+    protected static ?string $navigationIcon = 'heroicon-o-document-arrow-down';
 
     protected static ?string $navigationLabel='أقساط';
 

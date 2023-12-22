@@ -6,6 +6,8 @@ use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
+use Filament\Tables\Columns\Summarizers\Summarizer;
+
 use Livewire\Component;
 use App\Livewire\Traits\MainTrait;
 use App\Models\Bank;
@@ -134,13 +136,42 @@ class RepStop extends Component implements HasTable, HasForms,HasActions
       })
       ->columns([
         TextColumn::make('id')
-          ->label('رقم العقد'),
+          ->label('رقم العقد')
+          ,
         TextColumn::make('acc')
-          ->label('رقم الحساب'),
+          ->label('رقم الحساب')
+          ->summarize(
+            Summarizer::make()
+              ->using(function (){
+                return Main::when($this->By==1,function ($q){
+                  $q->where('bank_id',$this->bank_id);
+                })
+                  ->when($this->By==2,function ($q){
+                    $q->whereIn('bank_id',function ($q){
+                      $q->select('id')->from('banks')->where('taj_id',$this->bank_id);
+                    });
+                  })
+                  ->count();})
+              ->label('العدد')
+
+          ),
         TextColumn::make('Customer.CusName')
           ->label('الاسم'),
         TextColumn::make('sul')
-          ->label('اجمالي العقد'),
+          ->label('اجمالي العقد')
+          ->summarize(
+            Summarizer::make()
+              ->using(function (){
+                return Main::when($this->By==1,function ($q){
+                  $q->where('bank_id',$this->bank_id);
+                })
+                  ->when($this->By==2,function ($q){
+                    $q->whereIn('bank_id',function ($q){
+                      $q->select('id')->from('banks')->where('taj_id',$this->bank_id);
+                    });
+                  })
+                  ->sum('sul');})
+          ),
         TextColumn::make('kst')
           ->label('القسط'),
         TextColumn::make('pay')

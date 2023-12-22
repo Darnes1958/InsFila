@@ -31,6 +31,9 @@
             </tr>
             </thead>
             <tbody id="addRow" class="addRow">
+
+            @php $sumpay=0;$sumsul=0; @endphp
+
             @foreach($RepTable as $key=> $item)
                 <tr >
                     <td style="text-align: center"> {{ $item->LastKsm }} </td>
@@ -41,7 +44,17 @@
                     <td style="text-align: center"> {{ $item->id }} </td>
                     <td> {{ $item->Customer->CusName }} </td>
                 </tr>
+                @php $sumpay+=$item->pay;$sumsul+=$item->sul; @endphp
             @endforeach
+            <tr class="font-size-12 " style="font-weight: bold">
+                <td></td>
+                <td>   </td>
+                <td> {{number_format($sumpay, 2, '.', ',')}}  </td>
+                <td> {{number_format($sumsul, 2, '.', ',')}}  </td>
+                <td> </td>
+                <td> </td>
+                <td style="font-weight:normal;">الإجمــــــــالي  </td>
+            </tr>
             </tbody>
         </table>
 

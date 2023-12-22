@@ -12,14 +12,16 @@ use Filament\Panel;
 use Filament\Models\Contracts\HasAvatar;
 use Spatie\Permission\Traits\HasRoles;
 
+
 class User extends Authenticatable implements FilamentUser
 {
 
  use HasRoles;
+
     public function canAccessPanel(Panel $panel): bool
     {
 
-        return str_ends_with($this->email, '@alwaseetlite.ly') && $this->hasVerifiedEmail();
+      return  true;
     }
     /**
      * The attributes that are mass assignable.

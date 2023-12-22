@@ -3,6 +3,8 @@
 namespace App\Livewire\Reports;
 
 use App\Models\Main;
+use Filament\Tables\Columns\Summarizers\Summarizer;
+use Illuminate\Database\Query\Builder;
 use Livewire\Component;
 use App\Models\Tran;
 
@@ -29,6 +31,10 @@ class RepAksatNotGet extends Component implements HasTable, HasForms
     #[Reactive]
     public $By;
 
+    public $sul;
+    public $pay;
+    public $raseed;
+
 
     public function table(Table $table):Table
     {
@@ -46,7 +52,9 @@ class RepAksatNotGet extends Component implements HasTable, HasForms
                         ->whereNotin('id',function ($q){
                             $q->select('main_id')->from('trans')->whereBetween('ksm_date',[$this->Date1,$this->Date2]);
                         });
-
+                $this->sul=$main->sum('sul');
+                $this->pay=$main->sum('pay');
+                $this->raseed=$main->sum('raseed');
                 return  $main;
             })
             ->columns([
@@ -58,11 +66,23 @@ class RepAksatNotGet extends Component implements HasTable, HasForms
                     ->label('المصرف')
                     ->visible(fn (Get $get): bool =>$this->By ==2),
                 TextColumn::make('sul')
-                    ->label('اجمالي العقد'),
+                    ->label('اجمالي العقد')
+                  ->summarize(
+                    Summarizer::make()
+                      ->using(function (){return $this->sul;})
+                  ),
                 TextColumn::make('pay')
-                    ->label('المسدد'),
+                    ->label('المسدد')
+                  ->summarize(
+                    Summarizer::make()
+                      ->using(function (){return $this->pay;})
+                  ),
                 TextColumn::make('raseed')
-                    ->label('الرصيد'),
+                    ->label('الرصيد')
+                  ->summarize(
+                    Summarizer::make()
+                      ->using(function (){return $this->raseed;})
+                  ),
                 TextColumn::make('kst')
                     ->label('القسط'),
                 TextColumn::make('LastKsm')
@@ -74,6 +94,7 @@ class RepAksatNotGet extends Component implements HasTable, HasForms
         $this->Date1=$Date1;
         $this->Date2=$Date2;
         $this->bank_id=$bank_id;
+
 
     }
 

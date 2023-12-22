@@ -19,9 +19,14 @@ use Filament\Forms\Components\Select;
 
 class RoleResource extends Resource
 {
-    protected static ?string $model = \Spatie\Permission\Models\Role::class;
+  public static function shouldRegisterNavigation(): bool
+  {
+    return  auth()->user()->id==1;
+  }
+  protected static ?string $model = \Spatie\Permission\Models\Role::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
 
     public static function form(Form $form): Form
     {
@@ -47,6 +52,7 @@ class RoleResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+              Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

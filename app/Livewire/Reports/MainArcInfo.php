@@ -104,7 +104,7 @@ class   MainArcInfo extends Component implements HasInfolists,HasForms,HasTable
               TextEntry::make('kst')->label('القسط'),
               TextEntry::make('pay')->label('المدفوع'),
               TextEntry::make('raseed')->label('المتبقي')->color('danger'),
-            ])->columns(3)->collapsible()
+            ])->columns(3)->collapsible()->collapsed()
         ]),
         Group::make([
           Section::make('بيانات عامة')
@@ -115,7 +115,7 @@ class   MainArcInfo extends Component implements HasInfolists,HasForms,HasTable
               TextEntry::make('over_kst')->label('قيمتها'),
               TextEntry::make('tar_count')->label('اقساط مرجعة'),
               TextEntry::make('tar_kst')->label('قيمتها'),
-            ])->columns(4)->collapsible()
+            ])->columns(4)->collapsible()->collapsed()
         ]),
       ]);
   }

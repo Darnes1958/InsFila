@@ -30,6 +30,7 @@
             </tr>
             </thead>
             <tbody id="addRow" class="addRow">
+            @php $sumraseed=0;$sumpay=0;$sumsul=0; @endphp
             @foreach($RepTable as $key=> $item)
                 <tr >
                     <td> {{ number_format($item->raseed,2, '.', ',') }} </td>
@@ -39,7 +40,18 @@
                     <td> {{ $item->id }} </td>
                     <td> {{ $item->Customer->CusName }} </td>
                 </tr>
+                @php $sumraseed+=$item->raseed;$sumpay+=$item->pay;$sumsul+=$item->sul; @endphp
             @endforeach
+
+            <tr class="font-size-12 " style="font-weight: bold">
+
+                <td> {{number_format($sumraseed, 2, '.', ',')}}  </td>
+                <td> {{number_format($sumpay, 2, '.', ',')}}  </td>
+                <td> {{number_format($sumsul, 2, '.', ',')}}  </td>
+                <td> </td>
+                <td> </td>
+                <td style="font-weight:normal;">الإجمــــــــالي  </td>
+            </tr>
             </tbody>
         </table>
 

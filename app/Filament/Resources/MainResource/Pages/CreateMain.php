@@ -21,6 +21,6 @@ class CreateMain extends CreateRecord
 
   protected function getRedirectUrl(): string
   {
-    return $this->previousUrl ?? $this->getResource()::getUrl('list');
+    return $this->previousUrl ?? $this->getResource()::getUrl('create');
   }
 }

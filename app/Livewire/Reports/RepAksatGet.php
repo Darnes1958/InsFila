@@ -2,10 +2,12 @@
 
 namespace App\Livewire\Reports;
 
+use App\Models\Main;
 use App\Models\Tran;
 
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Tables\Columns\Summarizers\Summarizer;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -29,9 +31,14 @@ public $Date2;
   #[Reactive]
 public $By;
 
+  public $sul;
+  public $pay;
+  public $raseed;
 
 
-    public function table(Table $table):Table
+
+
+  public function table(Table $table):Table
     {
         return $table
             ->query(function (Tran $tran)  {
@@ -48,6 +55,9 @@ public $By;
                            });
                        });
                    });
+              $this->sul=0;
+              $this->pay=0;
+
 
                return  $tran;
             })
@@ -60,10 +70,14 @@ public $By;
                     ->label('المصرف')
                     ->visible(fn (Get $get): bool =>$this->By ==2),
                 TextColumn::make('Main.sul')
-                    ->label('اجمالي العقد'),
-                TextColumn::make('Main.pay')
-                    ->label('المسدد'),
-                TextColumn::make('ksm_date')
+                    ->label('اجمالي العقد')
+                 ,
+
+              TextColumn::make('Main.pay')
+                    ->label('المسدد')
+                ,
+
+              TextColumn::make('ksm_date')
                     ->label('تاريخ الخصم'),
                 TextColumn::make('ksm')
                     ->label('الخصم'),

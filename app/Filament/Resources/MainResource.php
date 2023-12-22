@@ -22,16 +22,21 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 
 class MainResource extends Resource
 {
     protected static ?string $model = Main::class;
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
     protected static ?string $pluralModelLabel='عقود';
     protected static ?int $navigationSort = 1;
 
 
+  public static function shouldRegisterNavigation(): bool
+  {
+    return  auth()->user()->hasAnyPermission('ادخال عقود','تعديل عقود','الغاء عقود');
+  }
     public static function form(Form $form): Form
     {
         return $form
@@ -41,7 +46,7 @@ class MainResource extends Resource
               TextInput::make('id')
                 ->label('رقم العقد')
                 ->required()
-                ->unique()
+                ->unique(ignoreRecord: true)
                 ->unique(table: Main_arc::class)
                 ->default(Main::max('id')+1)
                 ->autofocus()
@@ -285,9 +290,9 @@ class MainResource extends Resource
             ])
             ->actions([
                 ViewAction::make('View Information')->iconButton()->color('primary'),
-                DeleteAction::make()->iconButton(),
-                EditAction::make()->iconButton()->color('blue'),
-              Tables\Actions\Action::make('print')
+                DeleteAction::make()->iconButton()->hidden(! auth()->user()->can('الغاء عقود')),
+                EditAction::make()->iconButton()->color('blue')->hidden(! auth()->user()->can('تعديل عقود')),
+                Tables\Actions\Action::make('print')
                 ->hiddenLabel()
                 ->iconButton()->color('success')
                 ->icon('heroicon-m-printer')
@@ -295,9 +300,17 @@ class MainResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                      ->hidden(! auth()->user()->can('الغاء عقود')),
                 ]),
-            ]);
+            ])
+          ->recordClasses(fn (Model $record) => match ($record->status) {
+            'td' => 'leading-3',
+            'reviewing' => 'border-s-2 border-orange-600 dark:border-orange-300',
+            'published' => 'border-s-2 border-green-600 dark:border-green-300',
+            default => null,
+          });
+          ;
 
 
     }

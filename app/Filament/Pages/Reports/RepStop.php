@@ -15,7 +15,10 @@ class RepStop extends Page
 
   protected static ?string $navigationGroup='تقارير';
   protected static ?int $navigationSort=5;
-
+  public static function shouldRegisterNavigation(): bool
+  {
+    return  auth()->user()->can('تقرير ايقاف الخصم');
+  }
 
   protected static ?string $navigationIcon = 'heroicon-o-document-text';
 

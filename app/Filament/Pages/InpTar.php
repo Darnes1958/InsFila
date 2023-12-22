@@ -9,7 +9,7 @@ use Illuminate\Support\HtmlString;
 
 class InpTar extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static ?string $navigationIcon = 'heroicon-o-document-arrow-up';
 
     protected static string $view = 'filament.pages.inp-tar';
     protected static ?string $navigationLabel='ترجيع أقساط';
@@ -20,7 +20,10 @@ class InpTar extends Page
     return [""];
   }
 
-
+  public static function shouldRegisterNavigation(): bool
+  {
+    return  auth()->user()->can('ترجيع قسط');
+  }
     public function getTitle():  string|Htmlable
     {
         return  new HtmlString('<div class="leading-3 h-0 text-sm py-1 text-primary-400">ترجيع مبالغ مخصومة بالفائض</div>');

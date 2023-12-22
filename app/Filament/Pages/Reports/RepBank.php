@@ -16,7 +16,10 @@ class RepBank extends Page
     protected static ?string $navigationGroup='تقارير';
   protected static ?int $navigationSort=3;
 
-
+  public static function shouldRegisterNavigation(): bool
+  {
+    return  auth()->user()->can('اجمالي المصارف');
+  }
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 

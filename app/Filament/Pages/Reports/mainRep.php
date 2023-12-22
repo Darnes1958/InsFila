@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Reports;
 
+use App\Models\Main;
 use Filament\Pages\Page;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\HtmlString;
@@ -13,7 +14,14 @@ class mainRep extends Page
   {
     return [""];
   }
-
+  public static function shouldRegisterNavigation(): bool
+  {
+    return  auth()->user()->can('تقرير عن عقد');
+  }
+  public static function getNavigationBadge(): ?string
+  {
+    return Main::count();
+  }
 
     protected static string $view = 'filament.pages.reports.main-rep';
 

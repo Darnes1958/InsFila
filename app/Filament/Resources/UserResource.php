@@ -6,6 +6,7 @@ use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\OurCompany;
 use App\Models\User;
+use Filament\Actions\CreateAction;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -17,11 +18,19 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 
+use Filament\Navigation\NavigationItem;
+
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
+  public static function shouldRegisterNavigation(): bool
+  {
+    return  auth()->user()->id==1;
+  }
+
 
     public static function form(Form $form): Form
     {
@@ -33,17 +42,24 @@ class UserResource extends Resource
                     ->options(OurCompany::all()->pluck('CompanyName', 'Company'))
                     ->preload()
                     ->required(),
-                TextInput::make('password')->required(),
+                TextInput::make('password')->required()->visibleOn('create'),
                 Select::make('roles')
+                    ->searchable()
                     ->multiple()
                     ->relationship('roles','name')
                     ->preload(),
+              Select::make('permissions')
+                ->searchable()
+                ->multiple()
+                ->relationship('permissions','name')
+                ->preload(),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
+
             ->columns([
                 TextColumn::make('id'),
                 TextColumn::make('name'),

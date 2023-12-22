@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\PermissionResource\Pages;
-use App\Filament\Resources\PermissionResource\RelationManagers;
-use App\Models\Permission;
+use App\Filament\Resources\OurCompanyResource\Pages;
+use App\Filament\Resources\OurCompanyResource\RelationManagers;
+use App\Models\OurCompany;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -14,15 +14,14 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
 
-class PermissionResource extends Resource
+class OurCompanyResource extends Resource
 {
   public static function shouldRegisterNavigation(): bool
   {
-    return  auth()->user()->id==1;
+    return  auth()->user()->hasRole('Super');
   }
-    protected static ?string $model = \Spatie\Permission\Models\Permission::class;
+    protected static ?string $model = OurCompany::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -30,7 +29,10 @@ class PermissionResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('name')->unique(ignoreRecord: true),
+              TextInput::make('Company')->unique(),
+              TextInput::make('CompanyName')->unique(),
+              TextInput::make('CompanyNameSuffix')->unique(),
+              TextInput::make('CompCode')->unique(),
             ]);
     }
 
@@ -38,8 +40,10 @@ class PermissionResource extends Resource
     {
         return $table
             ->columns([
-
-                TextColumn::make('name')
+              TextColumn::make('Company'),
+              TextColumn::make('CompanyName'),
+              TextColumn::make('CompanyNameSuffix'),
+              TextColumn::make('CompCode'),
             ])
             ->filters([
                 //
@@ -64,9 +68,9 @@ class PermissionResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPermissions::route('/'),
-            'create' => Pages\CreatePermission::route('/create'),
-            'edit' => Pages\EditPermission::route('/{record}/edit'),
+            'index' => Pages\ListOurCompanies::route('/'),
+            'create' => Pages\CreateOurCompany::route('/create'),
+            'edit' => Pages\EditOurCompany::route('/{record}/edit'),
         ];
     }
 }

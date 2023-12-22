@@ -11,6 +11,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Concerns\InteractsWithTable;
@@ -19,6 +20,8 @@ use Filament\Forms;
 use Livewire\Component;
 use Filament\Forms\Form;
 use App\Http\Controllers\PdfController;
+use Illuminate\Database\Query\Builder;
+use Filament\Tables\Columns\Summarizers\Summarizer;
 
 
 
@@ -158,18 +161,59 @@ public $BakyLabel='الباقي';
             TextColumn::make('Customer.CusName')
              ->label('الاسم'),
             TextColumn::make('sul')
-              ->label('اجمالي العقد'),
+              ->label('اجمالي العقد')
+              ->summarize(Summarizer::make()
+              ->using(fn (Builder $query): string =>
+                 Main::when($this->By==1,function ($q) {
+                   $q->where('bank_id',$this->bank_id); })
+                   ->when($this->By==2,function ($q) {
+                       $q->whereIn('bank_id',function ($qq){
+                         $qq->select('id')->from('banks')->where('taj_id',$this->bank_id);
+                       });
+                   })->sum('sul'))
+              )
+              ,
             TextColumn::make('kst')
               ->label('القسط'),
             TextColumn::make('pay')
-              ->label('المسدد'),
+              ->label('المسدد')
+              ->summarize(Summarizer::make()
+                ->using(fn (Builder $query): string =>
+                Main::when($this->By==1,function ($q) {
+                  $q->where('bank_id',$this->bank_id); })
+                  ->when($this->By==2,function ($q) {
+                    $q->whereIn('bank_id',function ($qq){
+                      $qq->select('id')->from('banks')->where('taj_id',$this->bank_id);
+                    });
+                  })->sum('pay'))
+              ),
             TextColumn::make('raseed')
-              ->label('الرصيد'),
+              ->label('الرصيد')
+              ->summarize(Summarizer::make()
+                ->using(fn (Builder $query): string =>
+                Main::when($this->By==1,function ($q) {
+                  $q->where('bank_id',$this->bank_id); })
+                  ->when($this->By==2,function ($q) {
+                    $q->whereIn('bank_id',function ($qq){
+                      $qq->select('id')->from('banks')->where('taj_id',$this->bank_id);
+                    });
+                  })->sum('raseed'))
+              ),
 
             TextColumn::make('Late')
                 ->label('متأخرة')
                 ->visible(fn (Forms\Get $get): bool =>$this->rep_name =='Motakra')
-                ->color('danger'),
+                ->color('danger')
+              ->summarize(Summarizer::make()
+                ->using(fn (Builder $query): string =>
+                Main::when($this->By==1,function ($q) {
+                  $q->where('bank_id',$this->bank_id); })
+                  ->when($this->By==2,function ($q) {
+                    $q->whereIn('bank_id',function ($qq){
+                      $qq->select('id')->from('banks')->where('taj_id',$this->bank_id);
+                    });
+                  })->sum('late'))
+              ),
             TextColumn::make('sul_begin')
                 ->label('تاريخ العقد')
                 ->visible(fn (Forms\Get $get): bool =>$this->rep_name =='Motakra')

@@ -6,7 +6,7 @@ use Filament\Pages\Page;
 
 class DamegCont extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static ?string $navigationIcon = 'heroicon-o-share';
 
     protected static string $view = 'filament.pages.dameg-cont';
 
@@ -15,7 +15,10 @@ class DamegCont extends Page
     {
         return [""];
     }
-
+  public static function shouldRegisterNavigation(): bool
+  {
+    return  auth()->user()->can('ضم عقد');
+  }
     protected static ?string $navigationLabel='ضم عقد';
     protected static ?int $navigationSort = 3;
 }
