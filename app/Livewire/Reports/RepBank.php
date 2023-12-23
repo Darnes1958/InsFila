@@ -6,6 +6,8 @@ namespace App\Livewire\Reports;
 use App\Models\Bank;
 
 use App\Models\Main;
+use App\Models\Overkst;
+use App\Models\Tarkst;
 use App\Models\Wrongkst;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -27,12 +29,36 @@ class RepBank extends Component implements HasTable, HasForms
     use InteractsWithTable,InteractsWithForms;
 
     public $By=1;
+  public $sul;
+  public $pay;
+  public $count;
+  public $over;
+  public $tar;
+  public $wrong;
+  public array $data_list= [
+    'calc_columns' => [
+      'main_count',
+      'main_sum_sul',
+      'main_sum_pay',
+      'main_sum_over_kst',
+      'main_sum_tar_kst',
+      'wrong_kst_sum_kst',
+      'BankName'
+    ],
+  ];
     public function table(Table $table):Table
     {
         return $table
             ->query(function (Bank $bank)  {
                  Bank::all();
 
+              $this->sul=number_format(Main::sum('sul'),0, '', ',')  ;
+              $this->pay=number_format(Main::sum('pay'),0, '', ',')  ;
+
+              $this->count=number_format(Main::count(),0, '', ',')  ;
+              $this->over=number_format(Overkst::sum('kst'),0, '', ',')  ;
+              $this->tar=number_format(Tarkst::sum('kst'),0, '', ',')  ;
+              $this->wrong=number_format(Wrongkst::sum('kst'),0, '', ',')  ;
                 return  $bank;
             })
             ->columns([
@@ -43,81 +69,31 @@ class RepBank extends Component implements HasTable, HasForms
                 TextColumn::make('main_count')
                     ->counts('Main')
                     ->label('عدد العقود')
-                  ->summarize(
-                    Summarizer::make()
-                      ->using(function (){return Main::count();})
-
-                  ),
+                 ,
                 TextColumn::make('main_sum_sul')
                     ->sum('Main','sul')
                     ->label('اجمالي العقود')
-                  ->summarize(
-                    Summarizer::make()
-                      ->using(function (){return Main::sum('sul');})
-                      ->numeric(
-                        decimalPlaces: 0,
-                        decimalSeparator: '.',
-                        thousandsSeparator: ',',
-                      )
-
-                  ),
+                  ,
                 TextColumn::make('main_sum_pay')
                     ->sum('Main','pay')
                     ->label('المسدد')
-                  ->summarize(
-                    Summarizer::make()
-                      ->using(function (){return Main::sum('pay');})
-                      ->numeric(
-                        decimalPlaces: 0,
-                        decimalSeparator: '.',
-                        thousandsSeparator: ',',
-                      )
-
-                  ),
+                  ,
 
 
                 TextColumn::make('main_sum_over_kst')
                     ->sum('Main','over_kst')
                     ->label('الفائض')
-                  ->summarize(
-                    Summarizer::make()
-                      ->using(function (){return Main::sum('over_kst');})
-                      ->numeric(
-                        decimalPlaces: 0,
-                        decimalSeparator: '.',
-                        thousandsSeparator: ',',
-                      )
-
-                  ),
+                 ,
                 TextColumn::make('main_sum_tar_kst')
                     ->sum('Main','tar_kst')
                     ->label('الترجيع')
-                  ->summarize(
-                    Summarizer::make()
-                      ->using(function (){return Main::sum('tar_kst');})
-
-                      ->numeric(
-                        decimalPlaces: 0,
-                        decimalSeparator: '.',
-                        thousandsSeparator: ',',
-                      )
-
-                  ),
+                  ,
                 TextColumn::make('wrong_kst_sum_kst')
                     ->sum('WrongKst','kst')
-                  ->summarize(
-                    Summarizer::make()
-                      ->using(function (){return Wrongkst::sum('kst');})
-                      ->numeric(
-                        decimalPlaces: 0,
-                        decimalSeparator: '.',
-                        thousandsSeparator: ',',
-                      )
 
-
-                  )
                     ->label('بالخطأ'),
             ])
+          ->contentFooter(view('sum-footer',$this->data_list))
            ;
     }
 

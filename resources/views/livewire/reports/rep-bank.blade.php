@@ -23,11 +23,6 @@
         {{ $this->form }}
     </div>
 
-
-
-
-
-
     @if($By==1)
     <div class="w-full mt-2">
         {{ $this->table }}

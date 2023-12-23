@@ -3,9 +3,12 @@
 namespace App\Livewire\Reports;
 
 use App\Models\Bank;
+use App\Models\Main;
 use App\Models\Taj;
+use App\Models\Wrongkst;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Tables\Columns\Summarizers\Summarizer;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -24,6 +27,7 @@ class RepTajSum extends Component implements HasTable, HasForms
 
                 Bank::all();
 
+
                 return  $taj;
             })
             ->columns([
@@ -33,25 +37,82 @@ class RepTajSum extends Component implements HasTable, HasForms
                     ->label('الاسم'),
                 TextColumn::make('main_count')
                     ->counts('Main')
-                    ->label('عدد العقود'),
+                    ->label('عدد العقود')
+                  ->summarize(
+                    Summarizer::make()
+                      ->using(function (){return Main::count();})
+
+                  ),
                 TextColumn::make('main_sum_sul')
                     ->sum('Main','sul')
-                    ->label('اجمالي العقود'),
+                    ->label('اجمالي العقود')
+                  ->summarize(
+                    Summarizer::make()
+                      ->using(function (){return Main::sum('sul');})
+                      ->numeric(
+                        decimalPlaces: 0,
+                        decimalSeparator: '.',
+                        thousandsSeparator: ',',
+                      )
+
+                  ),
                 TextColumn::make('main_sum_pay')
                     ->sum('Main','pay')
-                    ->label('المسدد'),
+                    ->label('المسدد')
+                  ->summarize(
+                    Summarizer::make()
+                      ->using(function (){return Main::sum('pay');})
+                      ->numeric(
+                        decimalPlaces: 0,
+                        decimalSeparator: '.',
+                        thousandsSeparator: ',',
+                      )
+
+                  ),
 
 
                 TextColumn::make('main_sum_over_kst')
                     ->sum('Main','over_kst')
-                    ->label('الفائض'),
+                    ->label('الفائض')
+                  ->summarize(
+                    Summarizer::make()
+                      ->using(function (){return Main::sum('over_kst');})
+                      ->numeric(
+                        decimalPlaces: 0,
+                        decimalSeparator: '.',
+                        thousandsSeparator: ',',
+                      )
+
+                  ),
                 TextColumn::make('main_sum_tar_kst')
                     ->sum('Main','tar_kst')
-                    ->label('الترجيع'),
+                    ->label('الترجيع')
+                  ->summarize(
+                    Summarizer::make()
+                      ->using(function (){return Main::sum('tar_kst');})
+
+                      ->numeric(
+                        decimalPlaces: 0,
+                        decimalSeparator: '.',
+                        thousandsSeparator: ',',
+                      )
+
+                  ),
                 TextColumn::make('wrong_kst_sum_kst')
                     ->sum('WrongKst','kst')
-                    ->label('بالخطأ'),
-            ]);
+                    ->label('بالخطأ')
+                  ->summarize(
+                    Summarizer::make()
+                      ->using(function (){return Wrongkst::sum('kst');})
+                      ->numeric(
+                        decimalPlaces: 0,
+                        decimalSeparator: '.',
+                        thousandsSeparator: ',',
+                      )
+                  ),
+            ])
+
+          ;
     }
     public function render()
     {
