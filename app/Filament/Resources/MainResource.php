@@ -303,16 +303,7 @@ class MainResource extends Resource
                     Tables\Actions\DeleteBulkAction::make()
                       ->hidden(! auth()->user()->can('الغاء عقود')),
                 ]),
-            ])
-          ->recordClasses(fn (Model $record) => match ($record->status) {
-            'td' => 'leading-3',
-            'reviewing' => 'border-s-2 border-orange-600 dark:border-orange-300',
-            'published' => 'border-s-2 border-green-600 dark:border-green-300',
-            default => null,
-          });
-          ;
-
-
+            ]) ;
     }
 
     public static function getRelations(): array
