@@ -24,3 +24,4 @@ class CreateMain extends CreateRecord
     return $this->previousUrl ?? $this->getResource()::getUrl('create');
   }
 }
+

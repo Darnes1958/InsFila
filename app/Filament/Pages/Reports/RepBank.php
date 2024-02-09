@@ -13,7 +13,7 @@ class RepBank extends Page
   }
    public static ?string $title = 'إجمالي المصارف';
 
-    protected static ?string $navigationGroup='تقارير';
+  protected static ?string $navigationGroup='تقارير';
   protected static ?int $navigationSort=3;
 
   public static function shouldRegisterNavigation(): bool

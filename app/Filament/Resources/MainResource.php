@@ -7,6 +7,7 @@ use App\Filament\Resources\MainResource\Pages;
 use App\Models\Main;
 
 use App\Models\Main_arc;
+use App\Models\Tran;
 use App\Services\MainForm;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
@@ -186,7 +187,10 @@ class MainResource extends Resource
 
               TextInput::make('acc')
                 ->label('رقم الحساب')
-                ->required(),
+                ->required()
+                ->extraAttributes([
+                  'wire:keydown.enter'=>'$dispatch("goto", {test: "wrong_kst"})',
+                ]),
 
               DatePicker::make('sul_begin')
                ->required()
@@ -290,7 +294,10 @@ class MainResource extends Resource
             ])
             ->actions([
                 ViewAction::make('View Information')->iconButton()->color('primary'),
-                DeleteAction::make()->iconButton()->hidden(! auth()->user()->can('الغاء عقود')),
+                DeleteAction::make()->iconButton()->hidden(! auth()->user()->can('الغاء عقود'))
+              ->before(function (Main $record){
+                Tran::where('main_id',$record->id)->delete();
+              }),
                 EditAction::make()->iconButton()->color('blue')->hidden(! auth()->user()->can('تعديل عقود')),
                 Tables\Actions\Action::make('print')
                 ->hiddenLabel()
