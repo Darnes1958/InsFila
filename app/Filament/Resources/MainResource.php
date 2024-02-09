@@ -7,6 +7,8 @@ use App\Filament\Resources\MainResource\Pages;
 use App\Models\Main;
 
 use App\Models\Main_arc;
+use App\Models\Overkst;
+use App\Models\Tarkst;
 use App\Models\Tran;
 use App\Services\MainForm;
 use Filament\Tables\Actions\DeleteAction;
@@ -297,6 +299,8 @@ class MainResource extends Resource
                 DeleteAction::make()->iconButton()->hidden(! auth()->user()->can('الغاء عقود'))
               ->before(function (Main $record){
                 Tran::where('main_id',$record->id)->delete();
+                Overkst::where('main_id',$record->id)->delete();
+                Tarkst::where('main_id',$record->id)->delete();
               }),
                 EditAction::make()->iconButton()->color('blue')->hidden(! auth()->user()->can('تعديل عقود')),
                 Tables\Actions\Action::make('print')
