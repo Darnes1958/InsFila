@@ -308,13 +308,8 @@ class MainResource extends Resource
                 ->iconButton()->color('success')
                 ->icon('heroicon-m-printer')
                 ->url(fn (Main $record): string => route('pdfmaincont', $record)),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()
-                      ->hidden(! auth()->user()->can('الغاء عقود')),
-                ]),
-            ]) ;
+            ]);
+
     }
 
     public static function getRelations(): array
