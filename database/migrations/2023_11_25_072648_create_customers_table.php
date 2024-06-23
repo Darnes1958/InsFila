@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::connection('other')->create('customers', function (Blueprint $table) {
             $table->id();
-            $table->string('CusName');
+            $table->string('name');
             $table->string('mdar')->nullable();
             $table->string('libyana')->nullable();
             $table->string('address')->nullable();

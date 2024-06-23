@@ -3,6 +3,7 @@
 namespace App\Livewire\Forms;
 
 
+use App\Models\Customer;
 use App\Models\INS\Cust;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
@@ -14,7 +15,7 @@ class CustForm extends Form
 {
 
     #[Rule('required',message: 'يجب ادخال الاسم')]
-    public $CusName = '';
+    public $name = '';
     public $address = '';
     public $mdar = '';
     public $libyana = '';
@@ -22,9 +23,9 @@ class CustForm extends Form
     public $other = '';
     public $user_id='';
 
-    public function SetCust(Cust $cust){
+    public function SetCust(Customer $cust){
 
-        $this->cust_name=$cust->cust_name;
+        $this->name=$cust->name;
         $this->address=$cust->address;
         $this->mdar=$cust->mdar;
         $this->libyana=$cust->libyana;

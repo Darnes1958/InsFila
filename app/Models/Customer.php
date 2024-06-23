@@ -8,11 +8,11 @@ use Illuminate\Support\Facades\Auth;
 
 class Customer extends Model
 {
-    use HasFactory;
+
   protected $connection = 'other';
 
-  public function Main(){
-    return $this->hasMany(Main::class);
+  public function Sell(){
+    return $this->hasMany(Sell::class);
   }
 
 

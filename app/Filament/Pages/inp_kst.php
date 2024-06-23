@@ -16,7 +16,6 @@ class inp_kst extends Page
 
     protected static ?string $navigationLabel='أقساط';
 
-
     protected static string $view = 'filament.pages.inp_kst';
     protected static ?int $navigationSort = 1;
 

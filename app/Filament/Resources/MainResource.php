@@ -8,6 +8,7 @@ use App\Models\Main;
 
 use App\Models\Main_arc;
 use App\Models\Overkst;
+use App\Models\Sell;
 use App\Models\Tarkst;
 use App\Models\Tran;
 use App\Services\MainForm;
@@ -45,7 +46,6 @@ class MainResource extends Resource
         return $form
 
             ->schema([
-
               TextInput::make('id')
                 ->label('رقم العقد')
                 ->required()
@@ -53,7 +53,6 @@ class MainResource extends Resource
                 ->unique(table: Main_arc::class)
                 ->default(Main::max('id')+1)
                 ->autofocus()
-
                 ->numeric(),
 
               Select::make('customer_id')
@@ -73,14 +72,14 @@ class MainResource extends Resource
 
                 })
                 ->label('الزبون')
-                ->relationship('Customer','cusName')
+                ->relationship('Customer','name')
                 ->searchable()
                 ->preload()
                 ->createOptionForm([
                   Forms\Components\Section::make('ادخال زبائن')
                     ->description('يجب ادخال اسم الزبون والبيانات الاخري اختيارية')
                     ->schema([
-                      TextInput::make('CusName')
+                      TextInput::make('name')
                         ->required()
                         ->label('اسم الزبون')
                         ->maxLength(255),
@@ -101,7 +100,7 @@ class MainResource extends Resource
                   Forms\Components\Section::make('تعديل زبائن')
                     ->description('يجب ادخال اسم الزبون والبيانات الاخري اختيارية')
                     ->schema([
-                      TextInput::make('CusName')
+                      TextInput::make('name')
                         ->required()
                         ->label('اسم الزبون')
                         ->maxLength(255),
@@ -231,37 +230,11 @@ class MainResource extends Resource
                 ->required(),
               Select::make('sell_id')
                     ->label('البضاعة')
-                    ->relationship('Sell','item_name')
+                    ->options(Sell::with('Customer')->pluck('customers.name','id'))
                     ->preload()
-                ->createOptionForm([
-                  Forms\Components\Section::make('ادخال بضاعة')
-                    ->description('ادخال بيانات بضاعة او اصناف جديدة')
-
-                    ->schema([
-                      TextInput::make('item_name')
-                        ->required()
-                        ->label('اسم البضاعة')
-                        ->maxLength(255),
-                    ])
-
-
-                ])
-                ->editOptionForm([
-                  Forms\Components\Section::make('ادخال بضاعة')
-                    ->description('ادخال بيانات بضاعة او اصناف جديدة')
-                    ->schema([
-                      TextInput::make('item_name')
-                        ->required()
-                        ->label('اسم البضاعة')
-                        ->maxLength(255),
-                    ])
-
-                ])
-                ->createOptionAction(fn ($action) => $action->color('success'))
-                ->editOptionAction(fn ($action) => $action->color('info'))
 
                 ->required()
-                    ->default(1)
+
                   ->columnSpan(2),
               TextInput::make('notes')
                 ->label('ملاحظات')->columnSpanFull()
@@ -278,7 +251,7 @@ class MainResource extends Resource
         return $table
 
             ->columns([
-                TextColumn::make('Customer.CusName')->label('الاسم')->searchable()->sortable(),
+                TextColumn::make('Customer.name')->label('الاسم')->searchable()->sortable(),
 
                 TextColumn::make('Bank.BankName')->label('المصرف')->searchable()->sortable(),
                 TextColumn::make('acc')->label('رقم الحساب')->searchable()->sortable(),

@@ -46,14 +46,14 @@ final class  MainForm
                     Select::make('customer_id')
                         ->columnSpan(2)
                         ->label('الزبون')
-                        ->relationship('Customer','cusName')
+                        ->relationship('Customer','name')
                         ->searchable()
                         ->preload()
                         ->createOptionForm([
                             Forms\Components\Section::make('Publishing')
                                 ->description('Settings for publishing this post.')
                                 ->schema([
-                                    TextInput::make('CusName')
+                                    TextInput::make('name')
                                         ->required()
                                         ->label('اسم الزبون')
                                         ->maxLength(255),
