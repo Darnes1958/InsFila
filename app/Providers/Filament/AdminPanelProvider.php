@@ -26,7 +26,7 @@ class AdminPanelProvider extends PanelProvider
     {
 
         return $panel
-
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->brandName('نظام التقسيط')
             ->login()
             ->profile(EditProfile::class)
@@ -64,7 +64,7 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-           ->viteTheme('resources/css/filament/admin/theme.css')
+
           ;
     }
 }

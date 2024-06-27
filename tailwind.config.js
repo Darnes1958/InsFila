@@ -1,25 +1,15 @@
 import preset from './vendor/filament/support/tailwind.config.preset'
-const colors = require('tailwindcss/colors')
 
- module.exports = {
-     presets: [preset],
+export default {
+    presets: [preset],
     content: [
+        './resources/**/*.blade.php',
+        './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
+        './storage/framework/views/*.php',
         './app/Filament/**/*.php',
         './resources/views/filament/**/*.blade.php',
+        './resources/views/filament/user/pages/*.blade.php',
         './vendor/filament/**/*.blade.php',
-
-        './app/Livewire/**/*.php',
-        './resources/views/livewire/**/*.blade.php',
-    ],
-    theme: {
-        extend: {
-            colors: {
-                // you can either spread `colors` to apply all the colors
-                ...colors,
-
-                // or add them one by one and name whatever you want
-
-            }
-        }
-    }
+    ]
 }
+

@@ -44,7 +44,6 @@ class MainResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
-
             ->schema([
               TextInput::make('id')
                 ->label('رقم العقد')
@@ -143,7 +142,6 @@ class MainResource extends Resource
                           ->createOptionForm([
                             TextInput::make('TajName')
                               ->required()
-
                               ->label('المصرف التجميعي')
                               ->maxLength(255),
                             TextInput::make('TajAcc')
@@ -152,7 +150,6 @@ class MainResource extends Resource
                           ])
                           ->required(),
                   ])
-
                  ])
                 ->editOptionForm([
                   Forms\Components\Section::make('ادخال مصارف')
@@ -179,20 +176,16 @@ class MainResource extends Resource
                         ])
                         ->required(),
                     ])
-
                 ])
                 ->createOptionAction(fn ($action) => $action->color('success'))
                 ->editOptionAction(fn ($action) => $action->color('info'))
                 ->required(),
-
-
               TextInput::make('acc')
                 ->label('رقم الحساب')
                 ->required()
                 ->extraAttributes([
                   'wire:keydown.enter'=>'$dispatch("goto", {test: "wrong_kst"})',
                 ]),
-
               DatePicker::make('sul_begin')
                ->required()
                ->label('تاريخ العقد')
@@ -232,14 +225,10 @@ class MainResource extends Resource
                     ->label('البضاعة')
                     ->options(Sell::with('Customer')->pluck('customers.name','id'))
                     ->preload()
-
-                ->required()
-
-                  ->columnSpan(2),
+                    ->required()
+                    ->columnSpan(2),
               TextInput::make('notes')
                 ->label('ملاحظات')->columnSpanFull()
-
-
             ])
 
             ;
@@ -249,16 +238,13 @@ class MainResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-
             ->columns([
                 TextColumn::make('Customer.name')->label('الاسم')->searchable()->sortable(),
-
                 TextColumn::make('Bank.BankName')->label('المصرف')->searchable()->sortable(),
                 TextColumn::make('acc')->label('رقم الحساب')->searchable()->sortable(),
                 TextColumn::make('sul')->label('الاجمالي')->sortable(),
                 TextColumn::make('pay')->label('المسدد')->sortable(),
                 TextColumn::make('raseed')->label('الرصيد')->sortable(),
-
             ])
             ->filters([
                 SelectFilter::make('bank_id')
@@ -282,7 +268,6 @@ class MainResource extends Resource
                 ->icon('heroicon-m-printer')
                 ->url(fn (Main $record): string => route('pdfmaincont', $record)),
             ]);
-
     }
 
     public static function getRelations(): array
@@ -298,7 +283,8 @@ class MainResource extends Resource
             'index' => Pages\ListMains::route('/'),
             'create' => Pages\CreateMain::route('/create'),
             'edit' => Pages\EditMain::route('/{record}/edit'),
-            'view' => Pages\ViewMain::route('/{record}'),
+
+            'maincreate' => Pages\MainCreate::route('/maincreate'),
         ];
     }
 

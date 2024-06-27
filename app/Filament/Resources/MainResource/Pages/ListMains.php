@@ -3,13 +3,17 @@
 namespace App\Filament\Resources\MainResource\Pages;
 
 use App\Filament\Resources\MainResource;
-use App\Models\Customer;
+
 use App\Models\Main;
-use Filament\Actions;
+use App\Models\Setting;
+
+
+use Filament\Actions\Action;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Resources\Components\Tab;
+
 use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Database\Eloquent\Builder;
+
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\HtmlString;
 
@@ -24,9 +28,20 @@ class ListMains extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()
-          ->label('عقد جديد')
-          ->visible(Auth::user()->can('ادخال عقود')),
+           CreateAction::make()
+                ->label('عقد جديد')
+                ->visible(
+                    Auth::user()->can('ادخال عقود')
+                    && ! Setting::find(Auth::user()->company)->is_together
+                ),
+
+            Action::make('Maincreate')
+                ->label('ادخال عقد')
+                ->icon('heroicon-m-users')
+                ->color('danger')
+
+                ->url( 'mains/maincreate'),
+
         ];
     }
 }
