@@ -5,6 +5,8 @@ namespace App\Providers;
 
 use Filament\Facades\Filament;
 use Filament\Navigation\NavigationGroup;
+use Filament\Support\Facades\FilamentAsset;
+use Filament\Support\Facades\FilamentView;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -14,6 +16,7 @@ use Filament\Support\Colors\Color;
 use Filament\Support\Facades\FilamentColor;
 
 use Filament\Tables\Columns\Column;
+use Illuminate\View\View;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -33,7 +36,19 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
 
+        FilamentView::registerRenderHook(
+            'panels::page.end',
+            fn (): View => view('analytics'),
+            scopes: [
+                \App\Filament\Resources\MainResource::class,
 
+
+            ]
+        );
+        FilamentAsset::register([
+            \Filament\Support\Assets\Js::make('example-external-script', 'https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js'),
+
+        ]);
 
       FilamentColor::register([
         'Fuchsia' =>  Color::Fuchsia,

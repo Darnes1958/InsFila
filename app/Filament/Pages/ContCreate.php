@@ -29,6 +29,7 @@ class ContCreate extends Page
   public $contData;
   public $sell_id;
   public $Sell;
+  public $bank_id;
   public function mount(): void
   {
     $this->contForm->fill([]);
@@ -52,6 +53,10 @@ class ContCreate extends Page
         ->schema([
           Select::make('sell_id')
             ->label('فاتورة المبيعات')
+            ->afterStateHydrated(function($state){
+                info('hydrate');
+                info($state);
+            })
             ->afterStateUpdated(function ($state,Set $set){
               info($state);
               info('yes I am here');
@@ -101,6 +106,7 @@ class ContCreate extends Page
             //->relationship('Bank','BankName')
             ->searchable()
             ->live()
+
             ->preload()
             ->createOptionForm([
               Section::make('ادخال مصارف')

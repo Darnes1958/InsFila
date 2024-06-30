@@ -4,6 +4,7 @@ namespace App\Filament\Resources\MainResource\Pages;
 
 use App\Filament\Resources\MainResource;
 
+use App\Models\Bank;
 use App\Models\Main;
 use App\Models\Main_arc;
 use App\Models\Sell;
@@ -31,7 +32,7 @@ class MainCreate extends Page
     public $Sell;
     public function mount(): void
     {
-        $this->contForm->fill([]);
+        $this->contForm->fill(['sul_begin'=>now()]);
     }
 
     protected function getForms(): array
@@ -40,36 +41,37 @@ class MainCreate extends Page
            'contForm'=> $this->makeForm()
             ->model(Main::class)
             ->schema($this->getContFormSchema())
-            ->statePath('mainData'),
+            ->statePath('contData'),
         ]);
     }
-
+public function go(){
+    $this->dispatch('gotoitem', test: 'kst');
+}
     protected function getContFormSchema(): array
     {
         return [
-
                 Section::make()
                  ->schema([
                    Select::make('sell_id')
                      ->label('فاتورة المبيعات')
-                     ->afterStateUpdated(function ($state,Set $set){
-                       info($state);
-                       info('yes I am here');
-                       $this->Sell=Sell::find($state);
-                       $set('total',$this->Sell->total);
-                       $set('pay',$this->Sell->pay);
-                       $set('baky',$this->Sell->baky);
-                     })
 
-                  //   ->relationship('Sell','name')
-                    // ->getOptionLabelFromRecordUsing(fn (Model $record) => "{$record->id} {$record->Customer->name} {$record->total}")
-                     //->options(Sell::all()->pluck('tot','id'))
-                  ->relationship('Customer','name')
+                    ->relationship('Sell','name')
+                     ->getOptionLabelFromRecordUsing(fn (Model $record) => "{$record->id} {$record->Customer->name} {$record->total}")
+               //      ->options(Sell::all()->pluck('tot','id'))
+             //     ->relationship('Customer','name')
                      ->searchable()
                      ->preload()
                      ->live()
                      ->required()
-                     ->columnSpan(2),
+                     ->columnSpan(2)
+                     ->afterStateUpdated(function ($state,Set $set){
+
+                           $this->Sell=Sell::find($state);
+                           $set('total',$this->Sell->total);
+                           $set('pay',$this->Sell->pay);
+                           $set('baky',$this->Sell->baky);
+                         $set('sul',$this->Sell->baky);
+                       }),
                    TextInput::make('total')
                     ->label('الاجمالي')
                     ->disabled(),
@@ -93,9 +95,6 @@ class MainCreate extends Page
                      ->numeric(),
                    Select::make('bank_id')
                      ->label('المصرف')
-                     ->afterStateUpdated(function(){
-                       info('yes');
-                     })
                      ->columnSpan(2)
                      ->relationship('Bank','BankName')
                      ->searchable()
@@ -163,34 +162,33 @@ class MainCreate extends Page
                    DatePicker::make('sul_begin')
                      ->required()
                      ->label('تاريخ العقد')
+
                      ->maxDate(now())
-                     ->default(now()),
+                     ,
                    TextInput::make('sul')
                      ->label('قيمة العقد')
+                     ->readOnly()
                      ->live(onBlur: true)
                      ->readOnly()
-                     ->afterStateUpdated(function (Get $get,Set $set) {
-                       if ($get('sul') && $get('kst_count') &&
-                         !$get('kst') && $get('kst')!=0) {
-                         $val = $get('sul') / $get('kst_count');
-                         $set('kst', $val);
-                       }
-                     })
                      ->required(),
                    TextInput::make('kst_count')
                      ->label('عدد الأقساط')
                      ->live(onBlur: true)
                      ->afterStateUpdated(function (Get $get,Set $set) {
-                       if ($get('sul') && $get('kst_count')
-                         && (!$get('kst') ||  $get('kst')==' ')){
+
                          $val=$get('sul') / $get('kst_count');
                          $set('kst', $val);
-                       }
                      })
-                     ->required(),
+                     ->required()
+                       ->extraAttributes([
+                           'wire:keydown.enter'=>'$dispatch("gotoitem", {test: "kst"})',
+                       ])
+              //       ->extraAttributes([                           'wire:keydown.enter'=>'$go)',                       ])
+                     ->id('kst_count'),
 
                    TextInput::make('kst')
                      ->label('القسط')
+                     ->id('kst')
                      ->required(),
                    TextInput::make('notes')
                      ->label('ملاحظات')->columnSpanFull()
