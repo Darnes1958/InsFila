@@ -8,7 +8,9 @@ use App\Models\Bank;
 use App\Models\Main;
 use App\Models\Main_arc;
 use App\Models\Sell;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -16,6 +18,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Illuminate\Database\Eloquent\Model;
 
@@ -44,8 +47,8 @@ class MainCreate extends Page
             ->statePath('contData'),
         ]);
     }
-public function go(){
-    $this->dispatch('gotoitem', test: 'kst');
+public function go($who){
+    $this->dispatch('gotoitem', test: $who);
 }
     protected function getContFormSchema(): array
     {
@@ -54,24 +57,24 @@ public function go(){
                  ->schema([
                    Select::make('sell_id')
                      ->label('فاتورة المبيعات')
-
-                    ->relationship('Sell','name')
+                     ->relationship('Sell','name')
                      ->getOptionLabelFromRecordUsing(fn (Model $record) => "{$record->id} {$record->Customer->name} {$record->total}")
-               //      ->options(Sell::all()->pluck('tot','id'))
-             //     ->relationship('Customer','name')
                      ->searchable()
                      ->preload()
                      ->live()
                      ->required()
                      ->columnSpan(2)
                      ->afterStateUpdated(function ($state,Set $set){
-
-                           $this->Sell=Sell::find($state);
-                           $set('total',$this->Sell->total);
-                           $set('pay',$this->Sell->pay);
-                           $set('baky',$this->Sell->baky);
+                         $this->Sell=Sell::find($state);
+                         $set('total',$this->Sell->total);
+                         $set('pay',$this->Sell->pay);
+                         $set('baky',$this->Sell->baky);
                          $set('sul',$this->Sell->baky);
+                         $set('id',Main::Max('id')+1);
+                         $set('customer_id',$this->Sell->customer_id);
+                         $this->go('main_id');
                        }),
+                   Hidden::make('customer_id'),
                    TextInput::make('total')
                     ->label('الاجمالي')
                     ->disabled(),
@@ -92,7 +95,12 @@ public function go(){
                      ->unique(ignoreRecord: true)
                      ->unique(table: Main_arc::class)
                      ->default(Main::max('id')+1)
-                     ->numeric(),
+                     ->numeric()
+                     ->extraAttributes([
+                         'wire:keydown.enter'=>'$dispatch("gotoitem", {test: "acc"})',
+                         'onClick' => 'this.select()',
+                         'color'=>'success'])
+                     ->id('main_id'),
                    Select::make('bank_id')
                      ->label('المصرف')
                      ->columnSpan(2)
@@ -152,30 +160,31 @@ public function go(){
                      ])
                      ->createOptionAction(fn ($action) => $action->color('success'))
                      ->editOptionAction(fn ($action) => $action->color('info'))
+                     ->afterStateUpdated(function (){
+                         $this->go('acc');
+                     })
+                     ->id('bank_id')
                      ->required(),
                    TextInput::make('acc')
                      ->label('رقم الحساب')
                      ->required()
-                     ->extraAttributes([
-                       'wire:keydown.enter'=>'$dispatch("goto", {test: "wrong_kst"})',
-                     ]),
+                     ->id('acc')
+                     ->extraAttributes(['wire:keydown.enter'=>'$dispatch("gotoitem", {test: "sul_begin"})',]),
                    DatePicker::make('sul_begin')
                      ->required()
                      ->label('تاريخ العقد')
-
                      ->maxDate(now())
-                     ,
+                     ->extraAttributes(['wire:keydown.enter'=>'$dispatch("gotoitem", {test: "kst_count"})',])
+                     ->id('sul_begin'),
                    TextInput::make('sul')
                      ->label('قيمة العقد')
                      ->readOnly()
                      ->live(onBlur: true)
-                     ->readOnly()
-                     ->required(),
+                     ->readOnly()                     ,
                    TextInput::make('kst_count')
                      ->label('عدد الأقساط')
                      ->live(onBlur: true)
                      ->afterStateUpdated(function (Get $get,Set $set) {
-
                          $val=$get('sul') / $get('kst_count');
                          $set('kst', $val);
                      })
@@ -191,7 +200,30 @@ public function go(){
                      ->id('kst')
                      ->required(),
                    TextInput::make('notes')
-                     ->label('ملاحظات')->columnSpanFull()
+                     ->label('ملاحظات')->columnSpanFull(),
+                     \Filament\Forms\Components\Actions::make([
+                       Action::make('store')
+                         ->label('تخزين')
+                         ->color('success')
+                         ->action(function (){
+                             $this->validate();
+
+                             Main:: create(collect($this->contData)->except(['total','pay','baky'])->toArray());
+                             Notification::make()
+                                 ->title('تم تحزين البانات بنجاح')
+                                 ->success()
+                                 ->send();
+                             $this->mount();
+                         })
+                        ,
+                       Action::make('cancel')
+                         ->label('تجاهل')
+                         ->color('info')
+                         ->action(function (){
+                             //
+                         }),
+
+                   ])
 
                  ])
                  ->columns(4),
