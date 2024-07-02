@@ -20,6 +20,7 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class MainCreate extends Page
@@ -50,6 +51,16 @@ class MainCreate extends Page
 public function go($who){
     $this->dispatch('gotoitem', test: $who);
 }
+public function store(){
+  $this->validate();
+  Main:: create(collect($this->contData)->except(['total','pay','baky'])->toArray());
+  Notification::make()
+    ->title('تم تحزين البانات بنجاح')
+    ->success()
+    ->send();
+  $this->mount();
+
+}
     protected function getContFormSchema(): array
     {
         return [
@@ -57,7 +68,7 @@ public function go($who){
                  ->schema([
                    Select::make('sell_id')
                      ->label('فاتورة المبيعات')
-                     ->relationship('Sell','name')
+                     ->relationship('Sell','name',modifyQueryUsing: fn (Builder $query) => $query->WhereDoesntHave('Main'),)
                      ->getOptionLabelFromRecordUsing(fn (Model $record) => "{$record->id} {$record->Customer->name} {$record->total}")
                      ->searchable()
                      ->preload()
@@ -98,8 +109,8 @@ public function go($who){
                      ->numeric()
                      ->extraAttributes([
                          'wire:keydown.enter'=>'$dispatch("gotoitem", {test: "acc"})',
-                         'onClick' => 'this.select()',
-                         'color'=>'success'])
+
+                         ])
                      ->id('main_id'),
                    Select::make('bank_id')
                      ->label('المصرف')
@@ -189,38 +200,30 @@ public function go($who){
                          $set('kst', $val);
                      })
                      ->required()
-                       ->extraAttributes([
-                           'wire:keydown.enter'=>'$dispatch("gotoitem", {test: "kst"})',
-                       ])
-              //       ->extraAttributes([                           'wire:keydown.enter'=>'$go)',                       ])
+                       ->extraAttributes(['wire:keydown.enter'=>'$dispatch("gotoitem", {test: "kst"})',])
                      ->id('kst_count'),
-
                    TextInput::make('kst')
                      ->label('القسط')
                      ->id('kst')
+                     ->extraAttributes(['wire:keydown.enter'=>'$dispatch("gotoitem", {test: "notes"})',])
                      ->required(),
                    TextInput::make('notes')
-                     ->label('ملاحظات')->columnSpanFull(),
+                     ->label('ملاحظات')
+                     ->extraAttributes(['x-on:keyup.enter'=>"\$wire.store",])
+                     ->id('notes')
+                     ->columnSpanFull(),
                      \Filament\Forms\Components\Actions::make([
                        Action::make('store')
                          ->label('تخزين')
                          ->color('success')
                          ->action(function (){
-                             $this->validate();
-
-                             Main:: create(collect($this->contData)->except(['total','pay','baky'])->toArray());
-                             Notification::make()
-                                 ->title('تم تحزين البانات بنجاح')
-                                 ->success()
-                                 ->send();
-                             $this->mount();
-                         })
-                        ,
+                            $this->store();
+                         }),
                        Action::make('cancel')
                          ->label('تجاهل')
                          ->color('info')
                          ->action(function (){
-                             //
+                             $this->mount();
                          }),
 
                    ])
