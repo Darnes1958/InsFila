@@ -39,7 +39,10 @@ class ListMains extends ListRecords
                 ->label('ادخال عقد')
                 ->icon('heroicon-m-users')
                 ->color('danger')
-
+                ->visible(
+                    Auth::user()->can('ادخال عقود')
+                    &&  Setting::find(Auth::user()->company)->is_together
+                )
                 ->url( 'mains/maincreate'),
 
         ];

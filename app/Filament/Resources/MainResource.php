@@ -9,6 +9,7 @@ use App\Models\Main;
 use App\Models\Main_arc;
 use App\Models\Overkst;
 use App\Models\Sell;
+use App\Models\Setting;
 use App\Models\Tarkst;
 use App\Models\Tran;
 use App\Services\MainForm;
@@ -27,6 +28,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 
 class MainResource extends Resource
@@ -223,7 +225,8 @@ class MainResource extends Resource
                 ->required(),
               Select::make('sell_id')
                     ->label('البضاعة')
-                    ->options(Sell::with('Customer')->pluck('customers.name','id'))
+                    ->relationship('Sell','name',)
+                    ->getOptionLabelFromRecordUsing(fn (Model $record) => "{$record->id} {$record->Customer->name} ")
                     ->preload()
                     ->required()
                     ->columnSpan(2),
@@ -239,6 +242,7 @@ class MainResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('id')->label('رقم العقد')->sortable()->searchable(),
                 TextColumn::make('Customer.name')->label('الاسم')->searchable()->sortable(),
                 TextColumn::make('Bank.BankName')->label('المصرف')->searchable()->sortable(),
                 TextColumn::make('acc')->label('رقم الحساب')->searchable()->sortable(),
@@ -261,7 +265,21 @@ class MainResource extends Resource
                 Overkst::where('main_id',$record->id)->delete();
                 Tarkst::where('main_id',$record->id)->delete();
               }),
-                EditAction::make()->iconButton()->color('blue')->hidden(! auth()->user()->can('تعديل عقود')),
+                EditAction::make()->iconButton()->color('blue')
+                    ->visible(
+                        Auth::user()->can('تعديل عقود')
+                        && ! Setting::find(Auth::user()->company)->is_together
+                    )
+                   ,
+                Tables\Actions\Action::make('mainedit')
+                    ->iconButton()
+                    ->icon('heroicon-m-pencil')
+                    ->color('info')
+                    ->visible(
+                        Auth::user()->can('تعديل عقود')
+                        &&  Setting::find(Auth::user()->company)->is_together
+                    )
+                    ->url(fn(Model $record) => self::getUrl('mainedit', ['record' => $record])),
                 Tables\Actions\Action::make('print')
                 ->hiddenLabel()
                 ->iconButton()->color('success')
@@ -285,6 +303,7 @@ class MainResource extends Resource
             'edit' => Pages\EditMain::route('/{record}/edit'),
 
             'maincreate' => Pages\MainCreate::route('/maincreate'),
+            'mainedit' => Pages\MainEdit::route('/{record}/mainedit'),
         ];
     }
 
