@@ -142,7 +142,7 @@ class InpKst extends Component
                 $this->overForm->user_id=Auth::id();
                 $this->isOverArc=true;
                 $this->mainArcId=$rec->first()->id;
-                $this->mainArcName=$rec->first()->Customer->CusName;
+                $this->mainArcName=$rec->first()->Customer->name;
                 $this->dispatch('goto', test: 'over_date');
               } else {
 
@@ -273,7 +273,7 @@ class InpKst extends Component
             'Table'=>Tran::where('main_id',$this->main_id)->paginate(10, pageName: 'Trans-page'),
             'MainSearch' => Main::
             whereHas('customer', function($custQuery) {
-                $custQuery->where('CusName', 'LIKE', '%'.$this->search.'%' );
+                $custQuery->where('name', 'LIKE', '%'.$this->search.'%' );
             })
                 ->orwhere('acc', 'like', '%'.$this->search.'%')
                 ->orwhere('id', 'like', '%'.$this->search.'%')

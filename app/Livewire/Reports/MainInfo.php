@@ -74,7 +74,7 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable,Has
     return $form
       ->schema([
         Select::make('mainId')
-          ->options(Main::all()->pluck('Customer.CusName', 'id')->toArray())
+          ->options(Main::all()->pluck('Customer.name', 'id')->toArray())
           ->searchable()
           ->reactive()
           ->hiddenLabel()
@@ -94,7 +94,7 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable,Has
         Group::make([
           Section::make(new HtmlString('<div class="text-danger-600">بيانات الزبون</div>'))
             ->schema([
-              TextEntry::make('Customer.CusName')
+              TextEntry::make('Customer.name')
                 ->label(new HtmlString('<div class="text-primary-400 text-lg font-extrabold">اسم الزبون</div>'))
                 ->color('info')->size(TextEntry\TextEntrySize::Large)
                 ->weight(FontWeight::ExtraBold)

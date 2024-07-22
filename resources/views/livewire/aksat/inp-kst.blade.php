@@ -166,7 +166,7 @@
                                             </x-table.cell>
                                             <x-table.cell>
                                                 <x-button.link class="text-xs text-blue-400" wire:click="selectItem({{ $item->id }})">
-                                                    {{$item->customer->CusName}}
+                                                    {{$item->customer->name}}
                                                 </x-button.link>
                                             </x-table.cell>
                                             <x-table.cell>

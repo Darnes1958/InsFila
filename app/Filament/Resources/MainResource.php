@@ -221,15 +221,35 @@ class MainResource extends Resource
 
               TextInput::make('kst')
                 ->label('القسط')
-
                 ->required(),
               Select::make('sell_id')
                     ->label('البضاعة')
-                    ->relationship('Sell','name',)
-                    ->getOptionLabelFromRecordUsing(fn (Model $record) => "{$record->id} {$record->Customer->name} ")
+                    ->relationship('Sell','notes')
                     ->preload()
                     ->required()
-                    ->columnSpan(2),
+                ->createOptionForm([
+                  Forms\Components\Section::make('ادخال بضاعة')
+                    ->schema([
+                      TextInput::make('notes')
+                        ->required()
+                        ->label('البيان')
+                        ->maxLength(255),
+                    ])
+                ])
+                ->editOptionForm([
+                  Forms\Components\Section::make('ادخال بضاعة')
+                    ->schema([
+                      TextInput::make('notes')
+                        ->required()
+                        ->label('البيان ')
+                        ->maxLength(255)
+                        ->required(),
+                        ])
+
+                    ])
+                ->createOptionAction(fn ($action) => $action->color('success'))
+                ->editOptionAction(fn ($action) => $action->color('info'))
+                ->columnSpan(2),
               TextInput::make('notes')
                 ->label('ملاحظات')->columnSpanFull()
             ])

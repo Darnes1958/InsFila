@@ -24,12 +24,11 @@ class MainSelect extends Component implements HasForms
          return $form
              ->schema([
                  Select::make('the_main_id')
-                     ->options(Main::all()->pluck('Customer.CusName', 'id')->toArray())
+                     ->options(Main::all()->pluck('Customer.name', 'id')->toArray())
                      ->searchable()
                      ->reactive()
                      ->label('رقم العقد')
                      ->afterStateUpdated(function (callable  $get) {
-                         info($get('the_main_id'));
                          $this->dispatch('TakeMainId',$get('the_main_id'));
                      })
                     ->dispatchEvent('TakeMainId',$this->the_main_id)
