@@ -14,7 +14,7 @@
 <div style="display:flex; flex-direction: row; justify-content:
      center; align-items: center; margin-right: 80px; font-size: 14pt;">
     <label style="font-weight: bold;font-family: DejaVu Sans, sans-serif;
-           font-size: 11pt;"> {{$record->Customer->CusName}}</label>
+           font-size: 11pt;"> {{$record->Customer->name}}</label>
     <label >نأمل منكم إيقاف خصم الأقساط من حساب السيد / </label>
 </div>
 <div style="display:flex; flex-direction: row; justify-content:

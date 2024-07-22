@@ -141,7 +141,7 @@ class DamegCont extends Component implements HasInfolists,HasForms
 
                 Select::make('customer_id')
                     ->label('الزبون')
-                    ->relationship('Customer','cusName')
+                    ->relationship('Customer','name')
                  ->disabled(),
 
 

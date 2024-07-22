@@ -65,7 +65,7 @@
       <tr >
         <td style="text-align: center;"> {{ $item->Stop->stop_date }} </td>
           <td> {{ $item->kst }} </td>
-        <td> {{ $item->Customer->CusName }} </td>
+        <td> {{ $item->Customer->name }} </td>
         <td > {{ $item->acc }} </td>
         <td> {{ $item->id }} </td>
         <td style="text-align: center;">{{++$i}}</td>

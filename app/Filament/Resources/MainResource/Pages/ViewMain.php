@@ -38,7 +38,7 @@ class ViewMain extends ViewRecord
 
                     ->schema([
 
-                          TextEntry::make('Customer.CusName')
+                          TextEntry::make('Customer.name')
                             ->label(new HtmlString('<div class="text-primary-400 text-lg">اسم الزبون</div>'))
                             ->color('info')->size(TextEntry\TextEntrySize::Large)
                             ->columnSpanFull(),

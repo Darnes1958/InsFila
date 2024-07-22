@@ -16,7 +16,7 @@
                 <td class="order-td" style="width: 15%; text-align: center"> {{$res->sul_begin}} </td>
                 <td style="border: none;width: 12%;font-size: 12pt; "> تاريخ العقد </td>
                 <td style="border: none;width: 2%; ">  </td>
-                <td class="order-td" style="width: 30%;"> {{$res->Customer->CusName}} </td>
+                <td class="order-td" style="width: 30%;"> {{$res->Customer->name}} </td>
                 <td style="border: none;width: 15%;font-size: 14pt; "> اسم الزبون </td>
             </tr>
             <tr style="border: none; line-height: 18px;">

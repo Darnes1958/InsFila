@@ -56,7 +56,7 @@ class InpStop extends Component implements HasForms,HasTable,HasActions
         TextColumn::make('id')
          ->label('رقم العقد')
          ->sortable(),
-        TextColumn::make('Customer.CusName')->sortable()->searchable()
+        TextColumn::make('Customer.name')->sortable()->searchable()
           ->label('الاسم')
           ->sortable()
           ->searchable(),

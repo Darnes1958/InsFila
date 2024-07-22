@@ -155,7 +155,7 @@ class RepStop extends Component implements HasTable, HasForms,HasActions
               ->label('العدد')
 
           ),
-        TextColumn::make('Customer.CusName')
+        TextColumn::make('Customer.name')
           ->label('الاسم'),
         TextColumn::make('sul')
           ->label('اجمالي العقد')

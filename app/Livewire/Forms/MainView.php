@@ -81,7 +81,7 @@ class MainView extends Form
         $this->raseed=$rec->raseed;
         $this->notes=$rec->notes;
         $this->user_id=$rec->user_id;
-        $this->CusName=$rec->customer->CusName;
+        $this->CusName=$rec->customer->name;
         $this->BankName=$rec->bank->BankName;
         $this->LastKsm=$rec->LastKsm;
         $this->NextKst=$rec->NextKst;

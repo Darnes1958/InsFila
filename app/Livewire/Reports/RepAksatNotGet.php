@@ -60,7 +60,7 @@ class RepAksatNotGet extends Component implements HasTable, HasForms
             ->columns([
                 TextColumn::make('id')
                     ->label('رقم العقد'),
-                TextColumn::make('Customer.CusName')
+                TextColumn::make('Customer.name')
                     ->label('الاسم'),
                 TextColumn::make('Bank.BankName')
                     ->label('المصرف')

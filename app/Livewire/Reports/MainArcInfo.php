@@ -50,7 +50,7 @@ class   MainArcInfo extends Component implements HasInfolists,HasForms,HasTable
     return $form
       ->schema([
         Select::make('mainId')
-          ->options(Main_arc::all()->pluck('Customer.CusName', 'id')->toArray())
+          ->options(Main_arc::all()->pluck('Customer.name', 'id')->toArray())
           ->searchable()
           ->reactive()
           ->hiddenLabel()
@@ -73,7 +73,7 @@ class   MainArcInfo extends Component implements HasInfolists,HasForms,HasTable
         Group::make([
           Section::make(new HtmlString('<div class="text-danger-600">بيانات الزبون</div>'))
             ->schema([
-              TextEntry::make('Customer.CusName')
+              TextEntry::make('Customer.name')
                 ->label(new HtmlString('<div class="text-primary-400 text-lg">اسم الزبون</div>'))
                 ->color('info')->size(TextEntry\TextEntrySize::Large)
                 ->columnSpan(2),

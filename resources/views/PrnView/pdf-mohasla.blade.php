@@ -42,7 +42,7 @@
                     <td> {{ number_format($item->Main->sul,2, '.', ',') }} </td>
                     <td style="text-align: center"> {{ $item->Main->acc }} </td>
                     <td style="text-align: center"> {{ $item->Main->id }} </td>
-                    <td> {{ $item->Main->Customer->CusName }} </td>
+                    <td> {{ $item->Main->Customer->name }} </td>
                 </tr>
                 @php $sumraseed+=$item->Main->raseed;$sumpay+=$item->Main->pay;$sumsul+=$item->Main->sul;$sumkst+=$item->ksm @endphp
             @endforeach

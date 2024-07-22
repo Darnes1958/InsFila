@@ -38,7 +38,7 @@
                     <td> {{ number_format($item->sul,2, '.', ',') }} </td>
                     <td> {{ $item->acc }} </td>
                     <td> {{ $item->id }} </td>
-                    <td> {{ $item->Customer->CusName }} </td>
+                    <td> {{ $item->Customer->name }} </td>
                 </tr>
                 @php $sumraseed+=$item->raseed;$sumpay+=$item->pay;$sumsul+=$item->sul; @endphp
             @endforeach

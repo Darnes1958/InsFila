@@ -204,7 +204,7 @@
                     <div class="gap-4 mt-2  ">
                         <div class="flex gap-1 w-full">
                             <x-label class="w-3/12"  value="{{ __('الاسم') }}"/>
-                            <x-input  wire:model="mainView.CusName"
+                            <x-input  wire:model="mainView.name"
                                       disabled class="w-full leading-none text-indigo-800 text-md py-1 bg-gray-200"
                                       type="text"/>
                         </div>

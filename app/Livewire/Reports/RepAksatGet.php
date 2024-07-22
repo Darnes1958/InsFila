@@ -64,7 +64,7 @@ public $By;
             ->columns([
                 TextColumn::make('main_id')
                     ->label('رقم العقد'),
-                TextColumn::make('Main.Customer.CusName')
+                TextColumn::make('Main.Customer.name')
                     ->label('الاسم'),
                 TextColumn::make('Main.Bank.BankName')
                     ->label('المصرف')

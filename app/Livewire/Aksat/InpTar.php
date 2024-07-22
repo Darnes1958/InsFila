@@ -65,7 +65,7 @@ class InpTar extends Component implements HasForms,HasTable,HasActions
                 return  $tran;
             })
             ->columns([
-                TextColumn::make('Main.Customer.CusName')->sortable()->searchable()
+                TextColumn::make('Main.Customer.name')->sortable()->searchable()
                     ->label('الاسم'),
                 TextColumn::make('main.acc')->sortable()->searchable()
                     ->label('رقم الحساب'),

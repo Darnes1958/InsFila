@@ -39,7 +39,7 @@
     <label  style="display:inline-block;">دينار ليبي</label>
     <label  id="mainlabel" style="width: 80px;">{{$res->sul}}</label>
     <label  style="display:inline-block;">لصالح هذه الشركة علماً بان القيمة الإجمالية المترتبة علي هذه الاقساط</label>
-    <label  id="mainlabel" style="width: 160px;">{{$res->Customer->CusName}}</label>
+    <label  id="mainlabel" style="width: 160px;">{{$res->Customer->name}}</label>
     <label  style="display:inline-block;padding-right: 4px;">الأخ / </label>
 </div>
 
@@ -72,7 +72,7 @@
 
             <label  id="mainlabel" style="width: 160px;">{{$res->Customer->card_no}}</label>
             <label  style="display:inline-block;">بطاقة شخصية رقم </label>
-            <label  id="mainlabel" style="width: 300px;">{{$res->Customer->CusName}}</label>
+            <label  id="mainlabel" style="width: 300px;">{{$res->Customer->name}}</label>
             <label  style="display:inline-block;padding-right: 4px;">انا الموقع أدناه </label>
         </div>
 <div style="text-align: right;font-size: 11pt;">
@@ -111,7 +111,7 @@
 <div style="text-align: right;font-size: 11pt;">
     <label  id="mainlabel" style="width: 280px;"></label>
     <label  style="display:inline-block;padding-right: 4px;"> التوقيع </label>
-    <label  id="mainlabel" style="width: 300px;">{{$res->Customer->CusName}}</label>
+    <label  id="mainlabel" style="width: 300px;">{{$res->Customer->name}}</label>
     <label  style="display:inline-block;padding-right: 4px;"> الإسم </label>
 </div>
         <div style="text-align: right;font-size: 11pt;">

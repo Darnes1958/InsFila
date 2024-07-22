@@ -168,7 +168,7 @@ public $raseed;
                 ->label('رقم العقد'),
             TextColumn::make('acc')
                 ->label('رقم الحساب'),
-            TextColumn::make('Customer.CusName')
+            TextColumn::make('Customer.name')
              ->label('الاسم'),
             TextColumn::make('sul')
               ->label('اجمالي العقد')
