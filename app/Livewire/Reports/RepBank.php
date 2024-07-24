@@ -40,6 +40,7 @@ class RepBank extends Component implements HasTable, HasForms
       'main_count',
       'main_sum_sul',
       'main_sum_pay',
+      'main_sum_raseed',
       'main_sum_over_kst',
       'main_sum_tar_kst',
       'wrong_kst_sum_kst',
@@ -78,7 +79,10 @@ class RepBank extends Component implements HasTable, HasForms
                     ->sum('Main','pay')
                     ->label('المسدد')
                   ,
-
+              TextColumn::make('main_sum_raseed')
+                ->sum('Main','raseed')
+                ->label('الرصيد')
+              ,
 
                 TextColumn::make('main_sum_over_kst')
                     ->sum('Main','over_kst')
