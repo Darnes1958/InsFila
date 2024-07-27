@@ -51,7 +51,7 @@ class RepBank extends Component implements HasTable, HasForms
     {
         return $table
             ->query(function (Bank $bank)  {
-                 Bank::all();
+               $bank=  Bank::has('main');
 
               $this->sul=number_format(Main::sum('sul'),0, '', ',')  ;
               $this->pay=number_format(Main::sum('pay'),0, '', ',')  ;
@@ -70,31 +70,30 @@ class RepBank extends Component implements HasTable, HasForms
                 TextColumn::make('main_count')
                     ->counts('Main')
                     ->label('عدد العقود')
-                 ,
+                ,
                 TextColumn::make('main_sum_sul')
                     ->sum('Main','sul')
                     ->label('اجمالي العقود')
-                  ,
+                ,
                 TextColumn::make('main_sum_pay')
                     ->sum('Main','pay')
                     ->label('المسدد')
-                  ,
-              TextColumn::make('main_sum_raseed')
-                ->sum('Main','raseed')
-                ->label('الرصيد')
-              ,
+                ,
+                TextColumn::make('main_sum_raseed')
+                    ->sum('Main','raseed')
+                    ->label('الرصيد')
+                ,
 
                 TextColumn::make('main_sum_over_kst')
                     ->sum('Main','over_kst')
                     ->label('الفائض')
-                 ,
+                ,
                 TextColumn::make('main_sum_tar_kst')
                     ->sum('Main','tar_kst')
                     ->label('الترجيع')
-                  ,
+                ,
                 TextColumn::make('wrong_kst_sum_kst')
                     ->sum('WrongKst','kst')
-
                     ->label('بالخطأ'),
             ])
           ->contentFooter(view('sum-footer',$this->data_list))
