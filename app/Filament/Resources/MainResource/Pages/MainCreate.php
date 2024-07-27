@@ -68,7 +68,8 @@ public function store(){
                  ->schema([
                    Select::make('sell_id')
                      ->label('فاتورة المبيعات')
-                     ->relationship('Sell','name',modifyQueryUsing: fn (Builder $query) => $query->WhereDoesntHave('Main'),)
+                     ->relationship('Sell','name',modifyQueryUsing: fn (Builder $query) =>
+                        $query->WhereDoesntHave('Main')->where('price_type_id','=',3),)
                      ->getOptionLabelFromRecordUsing(fn (Model $record) => "{$record->id} {$record->Customer->name} {$record->total}")
                      ->searchable()
                      ->preload()

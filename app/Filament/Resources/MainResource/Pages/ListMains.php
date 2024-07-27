@@ -30,18 +30,23 @@ class ListMains extends ListRecords
         return [
            CreateAction::make()
                 ->label('عقد جديد')
-                ->visible(
-                    Auth::user()->can('ادخال عقود')
-                    && ! Setting::find(Auth::user()->company)->is_together
+                ->visible( function (){
+                  info(Setting::find(Auth::user()->company)->is_together);
+                  return Auth::user()->can('ادخال عقود')
+                  && ! Setting::find(Auth::user()->company)->is_together;
+                }
+
                 ),
 
             Action::make('Maincreate')
                 ->label('ادخال عقد')
                 ->icon('heroicon-m-users')
                 ->color('danger')
-                ->visible(
-                    Auth::user()->can('ادخال عقود')
-                    &&  Setting::find(Auth::user()->company)->is_together
+                ->visible( function (){
+                  return  Auth::user()->can('ادخال عقود')
+                    &&  Setting::find(Auth::user()->company)->is_together;
+                }
+
                 )
                 ->url( 'mains/maincreate'),
 
