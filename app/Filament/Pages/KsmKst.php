@@ -12,6 +12,10 @@ class KsmKst extends Page
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     protected static string $view = 'filament.pages.ksm-kst';
+  public static function shouldRegisterNavigation(): bool
+  {
+    return  auth()->id()==1;
+  }
 
     public $tranData;
     public $main_id;
