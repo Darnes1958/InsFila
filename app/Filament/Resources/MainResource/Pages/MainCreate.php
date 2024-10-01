@@ -172,11 +172,16 @@ public function store(){
                      ])
                      ->createOptionAction(fn ($action) => $action->color('success'))
                      ->editOptionAction(fn ($action) => $action->color('info'))
-                     ->afterStateUpdated(function (){
+                     ->afterStateUpdated(function ($state,Set $set){
+                         $set('taj_id',Bank::find($state)->taj_id);
                          $this->go('acc');
+
                      })
                      ->id('bank_id')
                      ->required(),
+
+                   Hidden::make('taj_id'),
+
                    TextInput::make('acc')
                      ->label('رقم الحساب')
                      ->required()

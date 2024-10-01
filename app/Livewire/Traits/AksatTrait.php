@@ -1,14 +1,61 @@
 <?php
 namespace App\Livewire\Traits;
 
+use App\Livewire\Forms\TransForm;
 use App\Models\Main;
 use App\Models\Overkst;
 use App\Models\Tarkst;
 use App\Models\Tran;
 
+use App\Models\Wrongkst;
 use DateTime;
+use Illuminate\Support\Facades\Auth;
 
 trait AksatTrait {
+    use MainTrait;
+
+
+    public function Fill_From_Excel($main_id,$ksm,$ksm_date)
+    {
+        $main=Main::find($main_id);
+
+
+
+        if ($main->raseed<=0) $this->StoreOver($main_id,$ksm_date,$ksm);
+        if ($main->raseed>0){
+            $over_id=0;
+            if ($main->raseed<$ksm)
+            {
+                $over_id=$this->StoreOver($main_id,$ksm_date,$ksm-$main->raseed);
+                $baky=$ksm-$main->raseed;
+                $ksm=$main->raseed;
+            }
+
+           $res= Tran::insert([
+                'main_id'=>$main->id,
+                'ksm'=>$ksm,
+                'ksm_type_id'=>2,
+                'ksm_date'=>$ksm_date,
+                'user_id'=>Auth::id(),
+                'ser'=>Tran::where('main_id',$main_id)->max('ser')+1,
+                'kst_date'=>$this->getKst_date($main_id),
+            ]);
+            if ($over_id!=0)
+               Overkst::where('id',$over_id)->update(['tran_id'=>$res->id]);
+            $this->MainTarseed($main_id);
+        }
+
+
+    }
+    public function StoreWrong($bank,$acc,$date,$ksm){
+        Wrongkst::insert([
+            'bank_id'=>$bank,
+            'acc'=>$acc,
+            'wrong_date'=>$date,
+            'kst'=>$ksm,
+            'user_id'=>Auth::id(),
+        ]);
+    }
     public function TarTarseed($main_id){
         $count=Tarkst::where('main_id',$main_id)->count();
         $sum=Tarkst::where('main_id',$main_id)->sum('kst');
