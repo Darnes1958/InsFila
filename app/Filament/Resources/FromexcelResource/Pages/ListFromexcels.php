@@ -9,6 +9,7 @@ use App\Imports\FromExcelImport;
 use App\Livewire\Traits\AksatTrait;
 use App\Models\Dateofexcel;
 use App\Models\Fromexcel;
+use App\Models\Hafitha;
 use App\Models\Main;
 use App\Models\Taj;
 use App\Models\User;
@@ -78,16 +79,38 @@ class ListFromexcels extends ListRecords
             Actions\Action::make('link')
              ->label('ربط بالعقود')
             ->action(function (){
-                $fromexcel=Fromexcel::query()->get();
+                $fromexcel=Fromexcel::query()->where('haf_id',null)->get();
+                if ($fromexcel->count()>0){
+                  $haf=Hafitha::create([
+                      'from_date'=>$fromexcel->min('ksm_date'),
+                      'to_date'=>$fromexcel->max('ksm_date'),
+                      ]);
+                } else return;
 
                 foreach ($fromexcel as $item){
                     $main=Main::where('taj_id',$item->taj_id)->where('acc',$item->acc)->first();
+
                     if ($main){
+                        $type=$this->Fill_From_Excel($main->id,$item->ksm,$item->ksm_date,$haf->id,$item->id);
                         $item->main_id=$main->id;
+                        $item->main_name=$main->name;
+                        $item->kst_type=$type;
                         $item->save();
-                        $this->Fill_From_Excel($main->id,$item->ksm,$item->ksm_date);
-                    } else $this->StoreWrong($item->taj_id,$item->acc,$item->ksm_date,$item->ksm);
+                    } else {
+                        $this->StoreWrong($item->taj_id,$item->acc,$item->name,$item->ksm_date,$item->ksm,$haf->id);
+                        $item->kst_type='wrong';
+                        $item->save();
+                    }
                 }
+
+                Fromexcel::where('haf_id',null)->update(['haf_id'=>$haf->id]);
+
+                $haf->tot=Fromexcel::where('haf_id',$haf->id)->sum('ksm');
+                $haf->morahel=Fromexcel::where('haf_id',$haf->id)->where('kst_type','normal')->sum('ksm');
+                $haf->over_kst=Fromexcel::where('haf_id',$haf->id)->where('kst_type','over')->sum('ksm');
+                $haf->over_kst_arc=Fromexcel::where('haf_id',$haf->id)->where('kst_type','over_arc')->sum('ksm');
+                $haf->wrong_kst=Fromexcel::where('haf_id',$haf->id)->where('kst_type','wrong')->sum('ksm');
+                $haf->save();
             })
         ];
     }

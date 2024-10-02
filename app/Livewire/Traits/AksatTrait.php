@@ -2,6 +2,7 @@
 namespace App\Livewire\Traits;
 
 use App\Livewire\Forms\TransForm;
+use App\Models\Fromexcel;
 use App\Models\Main;
 use App\Models\Overkst;
 use App\Models\Tarkst;
@@ -9,51 +10,68 @@ use App\Models\Tran;
 
 use App\Models\Wrongkst;
 use DateTime;
+use http\Header;
 use Illuminate\Support\Facades\Auth;
 
 trait AksatTrait {
     use MainTrait;
 
 
-    public function Fill_From_Excel($main_id,$ksm,$ksm_date)
+    public function Fill_From_Excel($main_id,$ksm,$ksm_date,$haf,$from_id)
     {
+
         $main=Main::find($main_id);
 
+        if ($main->raseed<=0) {
+            $this->StoreOver($main_id,$ksm_date,$ksm,$haf);
+            Fromexcel::find($from_id)->update(['kst'=>$ksm]);
+            $wtype='over';
+        }
 
-
-        if ($main->raseed<=0) $this->StoreOver($main_id,$ksm_date,$ksm);
         if ($main->raseed>0){
             $over_id=0;
             if ($main->raseed<$ksm)
             {
-                $over_id=$this->StoreOver($main_id,$ksm_date,$ksm-$main->raseed);
+                $over_id=$this->StoreOver($main_id,$ksm_date,$ksm-$main->raseed,$haf);
                 $baky=$ksm-$main->raseed;
                 $ksm=$main->raseed;
-            }
+                Fromexcel::find($from_id)->update(['baky'=>$baky]);
+                $wtype='half';
+            } else $wtype='normal';
 
-           $res= Tran::insert([
-                'main_id'=>$main->id,
-                'ksm'=>$ksm,
-                'ksm_type_id'=>2,
-                'ksm_date'=>$ksm_date,
-                'user_id'=>Auth::id(),
-                'ser'=>Tran::where('main_id',$main_id)->max('ser')+1,
-                'kst_date'=>$this->getKst_date($main_id),
-            ]);
+           $res= $this->StoreTran($main_id,$ksm_date,$ksm,$haf);
+            Fromexcel::find($from_id)->update(['kst'=>$ksm]);
             if ($over_id!=0)
                Overkst::where('id',$over_id)->update(['tran_id'=>$res->id]);
-            $this->MainTarseed($main_id);
+
         }
 
-
+      return $wtype;
     }
-    public function StoreWrong($bank,$acc,$date,$ksm){
-        Wrongkst::insert([
+    public function StoreTran($main_id,$ksm_date,$ksm,$haf)
+    {
+        $res= Tran::create([
+            'main_id'=>$main_id,
+            'ksm'=>$ksm,
+            'ksm_type_id'=>2,
+            'ksm_date'=>$ksm_date,
+            'user_id'=>Auth::id(),
+            'ser'=>Tran::where('main_id',$main_id)->max('ser')+1,
+            'kst_date'=>$this->getKst_date($main_id),
+            'haf_id'=>$haf,
+        ]);
+        $this->MainTarseed($main_id);
+        return $res;
+    }
+    public function StoreWrong($bank,$acc,$name,$date,$ksm,$haf){
+        Wrongkst::create([
             'bank_id'=>$bank,
             'acc'=>$acc,
+            'name'=>$name,
             'wrong_date'=>$date,
             'kst'=>$ksm,
             'user_id'=>Auth::id(),
+            'haf_id'=>$haf,
         ]);
     }
     public function TarTarseed($main_id){
@@ -74,11 +92,12 @@ trait AksatTrait {
         ]);
 
     }
-    public function StoreOver($main_id,$ksm_date,$ksm){
+    public function StoreOver($main_id,$ksm_date,$ksm,$haf=0){
         $over=Overkst::create([
             'main_id'=>$main_id,
             'over_date'=>$ksm_date,
             'kst'=>$ksm,
+            'haf_id'=>$haf,
             ]);
         $this->OverTarseed($main_id);
         return $over->id;

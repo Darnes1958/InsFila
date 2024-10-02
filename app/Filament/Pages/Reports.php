@@ -15,7 +15,7 @@ class Reports extends Page
    }
   public static function shouldRegisterNavigation(): bool
   {
-    return  auth()->user()->can('تقرير عن مصرف');
+    return  false;
   }
 
     public static ?string $title = 'تقرير عن مصرف';
