@@ -31,6 +31,7 @@ class RepBank extends Component implements HasTable, HasForms
     public $By=1;
   public $sul;
   public $pay;
+  public $raseed;
   public $count;
   public $over;
   public $tar;
@@ -55,7 +56,7 @@ class RepBank extends Component implements HasTable, HasForms
 
               $this->sul=number_format(Main::sum('sul'),0, '', ',')  ;
               $this->pay=number_format(Main::sum('pay'),0, '', ',')  ;
-
+              $this->raseed=number_format(Main::sum('raseed'),0, '', ',')  ;
               $this->count=number_format(Main::count(),0, '', ',')  ;
               $this->over=number_format(Overkst::sum('kst'),0, '', ',')  ;
               $this->tar=number_format(Tarkst::sum('kst'),0, '', ',')  ;

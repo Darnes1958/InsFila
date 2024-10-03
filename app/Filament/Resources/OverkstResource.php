@@ -6,6 +6,7 @@ use App\Filament\Resources\OverkstResource\Pages;
 use App\Filament\Resources\OverkstResource\RelationManagers;
 use App\Livewire\Forms\TarForm;
 use App\Livewire\Traits\AksatTrait;
+use App\Models\Main;
 use App\Models\Overkst;
 use App\Models\Tarkst;
 use Filament\Forms;
@@ -104,6 +105,13 @@ class OverkstResource extends Resource
                                     'user_id' => Auth::id(),
                                 ]);
                                 $item->update(['tar_id'=>$res->id,'status'=>'مرجع']);
+                                $item->update(['tar_id'=>$res->id,'status'=>'مرجع']);
+                                $count=Tarkst::where('main_id',$item->main_id)->count();
+                                $sum=Tarkst::where('main_id',$item->main_id)->sum('kst');
+                                Main::where('id',$item->main_id)->update([
+                                    'tar_count'=>$count,
+                                    'tar_kst'=>$sum,
+                                ]);
                             }
 
                     }),

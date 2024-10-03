@@ -146,7 +146,7 @@ class WrongkstResource extends Resource
                                 'haf_id' => $item->haf_id,
                                 'user_id' => Auth::id(),
                             ]);
-                            $item->update(['tar_id'=>$res->id,'status'=>'مرجع']);
+
                         }
 
                     }),

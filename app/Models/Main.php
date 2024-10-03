@@ -29,7 +29,7 @@ class Main extends Model
         return $this->hasMany(Tran::class);
     }
 
-    public function TarKst(){
+    public function Tarkst(){
      return $this->hasMany(Tarkst::class);
     }
     public function Overkst(){
