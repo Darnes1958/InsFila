@@ -2,6 +2,7 @@ import preset from './vendor/filament/support/tailwind.config.preset'
 
 export default {
     presets: [preset],
+    darkMode : 'class',
     content: [
         './resources/**/*.blade.php',
         './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',

@@ -10,6 +10,10 @@ class Taj extends Model
 {
     use HasFactory;
   protected $connection = 'other';
+    public function WrongKst()
+    {
+        return $this->hasMany(Wrongkst::class);
+    }
 
   public function Bank(){
     return $this->hasMany(Bank::class);
@@ -18,10 +22,7 @@ class Taj extends Model
   {
     return $this->hasManyThrough('App\Models\main', 'App\Models\bank');
   }
-    public function wrongkst()
-    {
-        return $this->hasManyThrough('App\Models\wrongkst', 'App\Models\bank');
-    }
+
   public function __construct(array $attributes = [])
   {
     parent::__construct($attributes);

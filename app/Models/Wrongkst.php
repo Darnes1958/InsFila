@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Status;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
@@ -10,9 +11,13 @@ class Wrongkst extends Model
 {
   protected $connection = 'other';
 
-  public function Bank(){
-      return $this->belongsTo(Bank::class);
+  public function Taj(){
+      return $this->belongsTo(Taj::class);
   }
+
+  protected $casts = [
+      'status' => Status::class,
+  ];
   public function __construct(array $attributes = [])
   {
     parent::__construct($attributes);

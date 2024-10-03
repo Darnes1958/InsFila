@@ -63,9 +63,9 @@ trait AksatTrait {
         $this->MainTarseed($main_id);
         return $res;
     }
-    public function StoreWrong($bank,$acc,$name,$date,$ksm,$haf){
+    public function StoreWrong($taj,$acc,$name,$date,$ksm,$haf){
         Wrongkst::create([
-            'bank_id'=>$bank,
+            'taj_id'=>$taj,
             'acc'=>$acc,
             'name'=>$name,
             'wrong_date'=>$date,

@@ -20,5 +20,5 @@ class DamegCont extends Page
     return  auth()->user()->can('ضم عقد');
   }
     protected static ?string $navigationLabel='ضم عقد';
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 2;
 }

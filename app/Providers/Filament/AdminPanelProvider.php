@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Pages\Auth\EditProfile;
 use App\Filament\Widgets\StatsOverView;
+use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -27,6 +28,8 @@ class AdminPanelProvider extends PanelProvider
     {
 
         return $panel
+       //     ->darkMode(true,true)
+            ->defaultThemeMode(ThemeMode::Dark)
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->brandName('نظام التقسيط')
             ->login()

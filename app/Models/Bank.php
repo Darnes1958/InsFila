@@ -15,10 +15,6 @@ class Bank extends Model
     return $this->hasMany(Main::class);
   }
 
-    public function WrongKst()
-    {
-        return $this->hasMany(Wrongkst::class);
-    }
 
   public function Taj(){
     return $this->belongsTo(Taj::class);

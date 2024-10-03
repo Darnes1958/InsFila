@@ -110,4 +110,5 @@ trait MainTrait {
     $this->raseed=$main->sul-$pay;
 
   }
+
 }

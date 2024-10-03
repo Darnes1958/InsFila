@@ -32,6 +32,9 @@ class Main extends Model
     public function TarKst(){
      return $this->hasMany(Tarkst::class);
     }
+    public function Overkst(){
+        return $this->hasMany(Overkst::class);
+    }
     public function Stop(){
         return $this->hasOne(Stop::class);
 }

@@ -10,10 +10,5 @@ class ListWrongksts extends ListRecords
 {
     protected static string $resource = WrongkstResource::class;
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\CreateAction::make(),
-        ];
-    }
+    protected ?string $heading='أقساط واردة بالخطأ';
 }
