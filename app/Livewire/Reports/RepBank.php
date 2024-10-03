@@ -43,7 +43,7 @@ class RepBank extends Component implements HasTable, HasForms
       'main_sum_raseed',
       'main_sum_over_kst',
       'main_sum_tar_kst',
-      'wrong_kst_sum_kst',
+      'wrong_kst',
       'BankName'
     ],
   ];
@@ -92,8 +92,11 @@ class RepBank extends Component implements HasTable, HasForms
                     ->sum('Main','tar_kst')
                     ->label('الترجيع')
                 ,
-                TextColumn::make('wrong_kst_sum_kst')
-                    ->sum('WrongKst','kst')
+                TextColumn::make('wrong_kst')
+                    ->state(function (Bank $record){
+                        return Wrongkst::where('taj_id',$record->taj_id)->sum('kst');
+                    })
+
                     ->label('بالخطأ'),
             ])
           ->contentFooter(view('sum-footer',$this->data_list))
