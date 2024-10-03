@@ -85,7 +85,7 @@ class WrongkstResource extends Resource
 
             ])
             ->checkIfRecordIsSelectableUsing(
-                fn (Model $record): bool => $record->status === 'غير مرجع',
+                fn (Model $record): bool => $record->status->value === 'غير مرجع',
             )
             ->filters([
                 //
@@ -96,7 +96,7 @@ class WrongkstResource extends Resource
                 ->icon('heroicon-o-check')
                 ->iconButton()
                 ->visible(function (Model $record): bool {
-                    return $record->status=='غير مرجع';
+                    return $record->status->value=='غير مرجع';
                 })
                 ->color('success')
                     ->form([
@@ -112,20 +112,26 @@ class WrongkstResource extends Resource
                         ->required()
                     ])
                 ->action(function (Model $record,array $data) {
-                    $res= Tran::create([
-                        'main_id'=>$data['main_id'],
-                        'ksm'=>$record->kst,
-                        'ksm_type_id'=>2,
-                        'ksm_date'=>$record->wrong_date,
-                        'user_id'=>Auth::id(),
-                        'ser'=>Tran::where('main_id',$data['main_id'])->max('ser')+1,
-                        'kst_date'=>self::getKst_date($data['main_id']),
-                        'haf_id'=>$record->haf_id,
-                    ]);
+                    $wrong=Wrongkst::where('acc',$record->acc)->get();
+                    foreach ($wrong as $wr) {
+                        $res= Tran::create([
+                            'main_id'=>$data['main_id'],
+                            'ksm'=>$wr->kst,
+                            'ksm_type_id'=>2,
+                            'ksm_date'=>$wr->wrong_date,
+                            'user_id'=>Auth::id(),
+                            'ser'=>Tran::where('main_id',$data['main_id'])->max('ser')+1,
+                            'kst_date'=>self::getKst_date($data['main_id']),
+                            'haf_id'=>$wr->haf_id,
+                        ]);
+                        $wr->status='مصحح';
+                        $wr->save();
+
+                    }
 
                     Main::find($data['main_id'])->update(['acc'=>$record->acc]);
-                    $record->status='مصحح';
-                    $record->save();
+
+
 
 
                 })

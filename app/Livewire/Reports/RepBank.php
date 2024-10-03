@@ -60,7 +60,7 @@ class RepBank extends Component implements HasTable, HasForms
               $this->count=number_format(Main::count(),0, '', ',')  ;
               $this->over=number_format(Overkst::sum('kst'),0, '', ',')  ;
               $this->tar=number_format(Tarkst::sum('kst'),0, '', ',')  ;
-              $this->wrong=number_format(Wrongkst::sum('kst'),0, '', ',')  ;
+              $this->wrong=number_format(Wrongkst::where('status','غير مرجع')->sum('kst'),0, '', ',')  ;
                 return  $bank;
             })
             ->columns([
@@ -95,7 +95,7 @@ class RepBank extends Component implements HasTable, HasForms
                 ,
                 TextColumn::make('wrong_kst')
                     ->state(function (Bank $record){
-                        return Wrongkst::where('taj_id',$record->taj_id)->sum('kst');
+                        return Wrongkst::where('taj_id',$record->taj_id)->where('status','غير مرجع')->sum('kst');
                     })
 
                     ->label('بالخطأ'),
