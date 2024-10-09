@@ -321,7 +321,7 @@ class MainResource extends Resource
             'index' => Pages\ListMains::route('/'),
             'create' => Pages\CreateMain::route('/create'),
             'edit' => Pages\EditMain::route('/{record}/edit'),
-
+            'view' => Pages\ViewMain::route('/{record}'),
             'maincreate' => Pages\MainCreate::route('/maincreate'),
             'mainedit' => Pages\MainEdit::route('/{record}/mainedit'),
         ];

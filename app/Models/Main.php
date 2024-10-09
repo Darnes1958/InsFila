@@ -28,6 +28,9 @@ class Main extends Model
     public function Tran(){
         return $this->hasMany(Tran::class);
     }
+    public function trans(){
+        return $this->hasMany(Tran::class);
+    }
 
     public function Tarkst(){
      return $this->hasMany(Tarkst::class);

@@ -7,6 +7,7 @@ use App\Models\Tran;
 
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\Summarizers\Summarizer;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
@@ -41,6 +42,7 @@ public $By;
   public function table(Table $table):Table
     {
         return $table
+            ->pluralModelLabel('العقود')
             ->query(function (Tran $tran)  {
                $tran= Tran::whereBetween('ksm_date',[$this->Date1,$this->Date2])
                    ->when($this->By==1,function ($query){
@@ -70,16 +72,29 @@ public $By;
                     ->label('المصرف')
                     ->visible(fn (Get $get): bool =>$this->By ==2),
                 TextColumn::make('Main.sul')
-                    ->label('اجمالي العقد')
-                 ,
+                    ->summarize(Sum::make()->label('')->numeric(
+                        decimalPlaces: 2,
+                        decimalSeparator: '.',
+                        thousandsSeparator: ',',
+                    ))
+                    ->label('اجمالي العقد'),
 
               TextColumn::make('Main.pay')
-                    ->label('المسدد')
-                ,
+                  ->summarize(Sum::make()->label('')->numeric(
+                      decimalPlaces: 2,
+                      decimalSeparator: '.',
+                      thousandsSeparator: ',',
+                  ))
+                    ->label('المسدد'),
 
               TextColumn::make('ksm_date')
                     ->label('تاريخ الخصم'),
                 TextColumn::make('ksm')
+                    ->summarize(Sum::make()->label('')->numeric(
+                        decimalPlaces: 2,
+                        decimalSeparator: '.',
+                        thousandsSeparator: ',',
+                    ))
                     ->label('الخصم'),
             ]);
     }

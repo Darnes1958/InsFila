@@ -39,6 +39,7 @@ class RepAksatNotGet extends Component implements HasTable, HasForms
     public function table(Table $table):Table
     {
         return $table
+            ->pluralModelLabel('العقود')
             ->query(function (Main $main)  {
                 if ($this->By==1)
                  $main= Main::where('bank_id',$this->bank_id)

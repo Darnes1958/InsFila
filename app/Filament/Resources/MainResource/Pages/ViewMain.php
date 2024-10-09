@@ -82,7 +82,7 @@ class ViewMain extends ViewRecord
   {
     return $table
       ->query(function (Tran $tran)  {
-         $tran=Main::all();
+         $tran=Tran::all();
         return  $tran;
       })
       ->columns([

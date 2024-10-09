@@ -18,6 +18,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Pages\Page;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -175,6 +176,7 @@ class AllReports extends Page implements HasTable, HasForms
     public function table(Table $table):Table
     {
         return $table
+            ->pluralModelLabel('العقود')
             ->query(function (Main $main)  {
                 if ($this->By==1) {
                     $main=Main::where('bank_id',$this->bank_id)
@@ -209,14 +211,34 @@ class AllReports extends Page implements HasTable, HasForms
                 TextColumn::make('Customer.name')
                     ->label('الاسم'),
                 TextColumn::make('sul')
+                    ->summarize(Sum::make()->label('')->numeric(
+                        decimalPlaces: 2,
+                        decimalSeparator: '.',
+                        thousandsSeparator: ',',
+                    ))
                     ->label('اجمالي العقد'),
                 TextColumn::make('kst')
                     ->label('القسط'),
                 TextColumn::make('pay')
+                    ->summarize(Sum::make()->label('')->numeric(
+                        decimalPlaces: 2,
+                        decimalSeparator: '.',
+                        thousandsSeparator: ',',
+                    ))
                     ->label('المسدد'),
                 TextColumn::make('raseed')
+                    ->summarize(Sum::make()->label('')->numeric(
+                        decimalPlaces: 2,
+                        decimalSeparator: '.',
+                        thousandsSeparator: ',',
+                    ))
                     ->label('الرصيد'),
                 TextColumn::make('Late')
+                    ->summarize(Sum::make()->label('')->numeric(
+                        decimalPlaces: 2,
+                        decimalSeparator: '.',
+                        thousandsSeparator: ',',
+                    ))
                     ->label('متأخرة')
                     ->visible(fn (Get $get): bool =>$this->rep_name =='Motakra')
                     ->color('danger'),
@@ -229,7 +251,7 @@ class AllReports extends Page implements HasTable, HasForms
                     ->visible(fn (Get $get): bool =>$this->rep_name =='Motakra')
                     ->color('danger'),
             ])
-            ->contentFooter(view('sum-footer', $this->data_list));
+           ;
     }
 
     public function mount(){
