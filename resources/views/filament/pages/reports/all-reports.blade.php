@@ -1,6 +1,6 @@
 <x-filament-panels::page>
 {{$this->form}}
-    @if($rep_name=='Mosdada' || $rep_name=='Motakra' || $rep_name=='All')
+    @if($rep_name=='Mosdada' || $rep_name=='NotMosdada' || $rep_name=='Motakra' || $rep_name=='All')
         <div class="w-full mt-2">
             {{ $this->table }}
         </div>

@@ -36,21 +36,15 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-
-
-
         FilamentView::registerRenderHook(
             'panels::page.end',
             fn (): View => view('analytics'),
             scopes: [
                 \App\Filament\Resources\MainResource::class,
-
-
             ]
         );
         FilamentAsset::register([
             \Filament\Support\Assets\Js::make('example-external-script', 'https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js'),
-
         ]);
 
       FilamentColor::register([

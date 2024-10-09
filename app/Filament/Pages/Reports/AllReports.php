@@ -86,11 +86,11 @@ class AllReports extends Page implements HasTable, HasForms
                     }),
                 Select::make('bank')
                     ->columnSpan(2)
-                    ->inlineLabel()
                     ->options(Bank::all()->pluck('BankName', 'id')->toArray())
                     ->searchable()
                     ->reactive()
-                    ->Label('فرع المصرف')
+                    ->prefix('فرع المصرف')
+                    ->hiddenLabel()
                     ->visible($this->By==1)
                     ->afterStateUpdated(function (callable $get) {
                         $this->bank_id=$get('bank');
@@ -100,10 +100,11 @@ class AllReports extends Page implements HasTable, HasForms
                     }),
                 Select::make('taj')
                     ->columnSpan(2)
-                    ->inlineLabel()
+
                     ->options(Taj::all()->pluck('TajName', 'id')->toArray())
                     ->searchable()
-                    ->Label('المصرف التجميعي')
+                    ->hiddenLabel()
+                    ->prefix('المصرف التجميعي')
                     ->reactive()
                     ->visible($this->By==2)
                     ->afterStateUpdated(function (callable $get) {
@@ -113,14 +114,16 @@ class AllReports extends Page implements HasTable, HasForms
                     }),
                 Select::make('rep_name')
                     ->columnSpan(2)
-                    ->inlineLabel()
-                    ->label('التقرير')
+
+                    ->hiddenLabel()
+                    ->prefix('التقرير')
                     ->default('All')
                     ->reactive()
 
                     ->options([
                         'All' => 'كشف بالأسماء',
                         'Mosdada' => 'المسددة',
+                        'NotMosdada' => 'لم تسدد بعد',
                         'Motakra' => 'المتأخرة',
                         'Mohasla' => 'المحصلة',
                         'Not_Mohasla' => 'الغير محصلة',
@@ -131,8 +134,8 @@ class AllReports extends Page implements HasTable, HasForms
                     }),
 
                 TextInput::make('Baky')
-                    ->inlineLabel()
-                    ->label(function (){
+                    ->hiddenLabel()
+                    ->prefix(function (){
                         return $this->BakyLabel;
                     })
                     ->reactive()
@@ -156,6 +159,7 @@ class AllReports extends Page implements HasTable, HasForms
                  ->url( function ():string {
                     if ($this->rep_name=='All') return route('pdfall',['bank_id'=>$this->bank_id,'By'=>$this->By]);
                     if ($this->rep_name=='Mosdada') return route('pdfmosdadabank',['Baky'=>$this->Baky,'bank_id'=>$this->bank_id,'By'=>$this->By]);
+                     if ($this->rep_name=='NotMosdada') return route('pdfnotmosdadabank',['bank_id'=>$this->bank_id,'By'=>$this->By]);
                     if ($this->rep_name=='Motakra') return route('pdfmotakrabank',['Baky'=>$this->Baky,'bank_id'=>$this->bank_id,'By'=>$this->By]);
                     if ($this->rep_name=='Mohasla') return route('pdfmohasla',['bank_id'=>$this->bank_id,'Date1'=>$this->Date1,'Date2'=>$this->Date2,'By'=>$this->By]);
                     if ($this->rep_name=='Not_Mohasla') return route('pdfnotmohasla',['bank_id'=>$this->bank_id,'Date1'=>$this->Date1,'Date2'=>$this->Date2,'By'=>$this->By]);
@@ -176,6 +180,8 @@ class AllReports extends Page implements HasTable, HasForms
                     $main=Main::where('bank_id',$this->bank_id)
                         ->when($this->rep_name=='Mosdada' , function ($q) {
                             $q->where('raseed','<=',$this->Baky); })
+                        ->when($this->rep_name=='NotMosdada' , function ($q) {
+                            $q->where('pay',0); })
                         ->when($this->rep_name=='Motakra' , function ($q) {
                             $q->where('late','>=',$this->Baky); }) ;
                 }
@@ -185,6 +191,8 @@ class AllReports extends Page implements HasTable, HasForms
                     })
                         ->when($this->rep_name=='Mosdada' , function ($q) {
                             $q->where('raseed','<=',$this->Baky); })
+                        ->when($this->rep_name=='NotMosdada' , function ($q) {
+                            $q->where('pay',0); })
                         ->when($this->rep_name=='Motakra' , function ($q) {
                             $q->where('late','>=',$this->Baky); }) ;
                 }

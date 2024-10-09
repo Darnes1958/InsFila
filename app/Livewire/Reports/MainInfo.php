@@ -7,6 +7,7 @@ use App\Livewire\Forms\MainForm;
 use App\Livewire\Forms\OverForm;
 use App\Livewire\Forms\TarForm;
 use App\Livewire\Forms\TransForm;
+use App\Models\Customer;
 use App\Models\Main;
 
 use App\Models\Main_arc;
@@ -20,6 +21,7 @@ use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Get;
 use Filament\Infolists\Components\Group;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
@@ -31,6 +33,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
 use Livewire\Component;
@@ -41,13 +45,17 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable,Has
 {
   use InteractsWithInfolists,InteractsWithForms,InteractsWithTable,InteractsWithActions;
 
-  public $mainId;
+  public $main_id;
   public Main $mainRec;
   public $montahy=false;
   public MainForm $mainForm;
   public TransForm $transForm;
   public OverForm $overForm;
 
+  public function mount()
+  {
+      $this->form->fill([]);
+  }
   public function printAction(): Action
   {
     return Action::make('print')
@@ -56,7 +64,7 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable,Has
       ->color('info')
       ->icon('heroicon-m-printer')
       ->color('info')
-      ->url(fn (): string => route('pdfmain', ['id'=>$this->mainId]));
+      ->url(fn (): string => route('pdfmain', ['id'=>$this->main_id]));
   }
   public function printContAction(): Action
   {
@@ -66,22 +74,27 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable,Has
       ->color('info')
       ->icon('heroicon-m-printer')
       ->color('info')
-      ->url(fn (): string => route('pdfmaincont', ['id'=>$this->mainId]));
+      ->url(fn (): string => route('pdfmaincont', ['id'=>$this->main_id]));
   }
 
   public function form(Form $form): Form
   {
     return $form
+      ->model(Tran::class)
       ->schema([
-        Select::make('mainId')
-          ->options(Main::all()->pluck('Customer.name', 'id')->toArray())
+        Select::make('main_id')
+
+          ->relationship('Main', 'id')
+          ->getOptionLabelFromRecordUsing(fn (Main $record) => "{$record->Customer->name} {$record->acc}")
+          ->live()
           ->searchable()
-          ->reactive()
+          ->preload()
           ->hiddenLabel()
-          ->afterStateUpdated(function (callable $get) {
-            if (Main::where('id',$get('mainId'))->exists())
-             $this->mainId=$get('mainId');
-            else $this->mainId=null;
+          ->afterStateUpdated(function (Get $get) {
+            info($get('main_id'));
+            if (Main::where('id',$get('main_id'))->exists())
+             $this->main_id=$get('main_id');
+            else $this->main_id=null;
           }),
       ]);
   }
@@ -147,7 +160,7 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable,Has
   {
     return $table
       ->query(function (Tran $tran)  {
-          $tran=Tran::where('main_id',$this->mainId);
+          $tran=Tran::where('main_id',$this->main_id);
         return  $tran;
       })
       ->columns([
@@ -164,12 +177,12 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable,Has
   public function DoArc(){
     DB::connection(Auth()->user()->company)->beginTransaction();
     try {
-        $this->mainForm->SetMain($this->mainId);
+        $this->mainForm->SetMain($this->main_id);
         Main_arc::create(
           $this->mainForm->all()
         );
 
-        $res=Tran::where('main_id',$this->mainId)->get();
+        $res=Tran::where('main_id',$this->main_id)->get();
 
         foreach ($res as $item){
           $this->transForm->SetTrans($item);
@@ -181,7 +194,7 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable,Has
 
         }
 
-        $res=Overkst::where('main_id',$this->mainId)->get();
+        $res=Overkst::where('main_id',$this->main_id)->get();
         foreach ($res as $item){
           $this->overForm->SetOver($item);
           $this->overForm->user_id=$item->user_id;
@@ -191,8 +204,8 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable,Has
 
         }
 
-        $old=$this->mainId;
-        $this->mainId=Main::latest()->first()->id;
+        $old=$this->main_id;
+        $this->main_id=Main::latest()->first()->id;
       Overkst::where('main_id',$old)->delete();
       Tran::where('main_id',$old)->delete();
       Main::where('id',$old)->delete();
@@ -210,9 +223,9 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable,Has
   public function render()
     {
 
-        if (!$this->mainId) $this->mainId=Main::latest()->first()->id;
+        if (!$this->main_id) $this->main_id=Main::latest()->first()->id;
 
-        $this->mainRec=Main::where('id',$this->mainId)->first();
+        $this->mainRec=Main::where('id',$this->main_id)->first();
         $this->montahy=$this->mainRec->raseed<=0;
 
         return view('livewire.reports.main-info');

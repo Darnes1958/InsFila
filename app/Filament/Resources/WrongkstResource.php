@@ -9,6 +9,7 @@ use App\Models\Main;
 use App\Models\Tarkst;
 use App\Models\Tran;
 use App\Models\Wrongkst;
+use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Forms\Components\TextInput;
@@ -23,6 +24,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Facades\Auth;
+use DateTime;
+
 
 class WrongkstResource extends Resource
 {
@@ -35,6 +38,7 @@ class WrongkstResource extends Resource
         $month = date('m', strtotime($begin));
         $year = date('Y', strtotime($begin));
         $date=$year.$month.'28';
+
         $date = DateTime::createFromFormat('Ymd',$date);
         $date=$date->format('Y-m-d');
         return $date;
@@ -52,6 +56,43 @@ class WrongkstResource extends Resource
             return self::setMonth($begin);
 
         }
+    }
+    public static function MainTarseed($id){
+        $pay=Tran::where('main_id',$id)->sum('ksm');
+        $count=Tran::where('main_id',$id)->count();
+        $lastksm=Tran::where('main_id',$id)->max('ksm_date');
+        $nextkst=Tran::where('main_id',$id)->max('kst_date');
+        $main=Main::where('id',$id)->first();
+        $LastUpd=now();
+
+        if ($nextkst)
+            $NextKst= date('Y-m-d', strtotime($nextkst . "+1 month"));
+        else $NextKst=self::setMonth($main->sul_begin);
+
+        Main::where('id',$id)->
+        update([
+            'pay'=>$pay,
+            'raseed'=>$main->sul-$pay,
+            'LastKsm'=>$lastksm,
+            'LastUpd'=>$LastUpd,
+            'NextKst'=>$NextKst,
+            'Late'=>self::RetLate($id,$main->kst_count,$NextKst),
+            'Kst_baky'=>$main->kst_count-$count,
+        ]);
+    }
+    public static function RetLate($main_id,$kst_count,$nextKst){
+        $toDate = Carbon::parse($nextKst);
+        $fromDate = Carbon::now();
+
+        if ($fromDate>$toDate)
+            $months = $toDate->diffInMonths($fromDate);
+        else $months=0;
+
+        $count=Tran::where('main_id',$main_id)->count();
+        if ($months>($kst_count-$count)) $months=$kst_count-$count;
+
+        return $months;
+
     }
     public static function form(Form $form): Form
     {
@@ -99,7 +140,7 @@ class WrongkstResource extends Resource
                     return $record->status->value=='غير مرجع';
                 })
                 ->color('success')
-                    ->form([
+                ->form([
                         Forms\Components\Select::make('main_id')
                          ->label('العقد')
                          ->options(function (Model $record) {
@@ -131,6 +172,7 @@ class WrongkstResource extends Resource
 
                     Main::find($data['main_id'])->update(['acc'=>$record->acc]);
 
+                    self::MainTarseed($data['main_id']);
 
 
 

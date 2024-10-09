@@ -106,6 +106,33 @@ class PdfController extends Controller
         );
         return response()->streamDownload(fn () => print($pdf), "invoice.pdf", $headers );
     }
+    function PdfNotMosdadaBank(Request $request)
+    {
+        $RepDate = date('Y-m-d');
+        $cus = OurCompany::where('Company', Auth::user()->company)->first();
+        if ($request->By==1)
+            $res = Main::where('pay', 0)
+                ->where('bank_id', $request->bank_id)->get();
+        else
+            $res=Main::whereIn('bank_id',function ($q) use($request){
+                $q->select('id')->from('banks')->where('taj_id',$request->bank_id);
+            })
+                ->where('pay',0)
+                ->get() ;
+
+        if ($request->By==1)
+            $BankName=Bank::find($request->bank_id)->BankName;
+        else
+            $BankName=Taj::find($request->bank_id)->TajName;
+
+        $html = view('PrnView.pdf-not-mosdada',
+            ['RepTable' => $res, 'cus' => $cus, 'RepDate' => $RepDate,'BankName'=>$BankName,'By'=>$request->By])->toArabicHTML();
+        $pdf = PDF::loadHTML($html)->output();
+        $headers = array(
+            "Content-type" => "application/pdf",
+        );
+        return response()->streamDownload(fn () => print($pdf), "invoice.pdf", $headers );
+    }
     function PdfMotakraBank(Request $request)
     {
         $RepDate = date('Y-m-d');
