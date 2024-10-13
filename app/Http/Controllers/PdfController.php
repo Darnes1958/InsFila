@@ -139,12 +139,18 @@ class PdfController extends Controller
         $cus = OurCompany::where('Company', Auth::user()->company)->first();
         if ($request->By==1)
          $res = Main::where('Late', '>=', $request->Baky)
-            ->where('bank_id', $request->bank_id)->get();
+            ->where('bank_id', $request->bank_id)
+            ->when($request->notPay,function ($q){
+                $q->where('pay',0);
+            }) ->get();
         else
          $res = Main::where('Late', '>=', $request->Baky)
                 ->whereIn('bank_id',function ($q) use($request) {
                     $q->select('id')->from('banks')->where('taj_id', $request->bank_id);
                         })
+                 ->when($request->notPay,function ($q){
+                     $q->where('pay',0);
+                 })
                ->get();
 
         if ($request->By==1)

@@ -8,6 +8,7 @@ use App\Models\Main;
 use App\Models\Taj;
 
 use Filament\Forms\Components\Actions\Action;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Radio;
 
@@ -60,6 +61,7 @@ class AllReports extends Page implements HasTable, HasForms
     public $sul;
     public $pay;
     public $raseed;
+    public $notPay=false;
 
     public array $data_list= [
     'calc_columns' => [
@@ -142,6 +144,10 @@ class AllReports extends Page implements HasTable, HasForms
                     ->reactive()
                     ->numeric()
                     ->visible(fn (Get $get): bool => $get('rep_name')=='Mosdada' || $get('rep_name')=='Motakra'),
+                Checkbox::make('notPay')
+                 ->live()
+                 ->visible(fn(Get $get): bool => $get('rep_name')=='Motakra')
+                 ->label('لم تسدد بعد'),
 
                 DatePicker::make('Date1')
                     ->inlineLabel()
@@ -161,7 +167,7 @@ class AllReports extends Page implements HasTable, HasForms
                     if ($this->rep_name=='All') return route('pdfall',['bank_id'=>$this->bank_id,'By'=>$this->By]);
                     if ($this->rep_name=='Mosdada') return route('pdfmosdadabank',['Baky'=>$this->Baky,'bank_id'=>$this->bank_id,'By'=>$this->By]);
                      if ($this->rep_name=='NotMosdada') return route('pdfnotmosdadabank',['bank_id'=>$this->bank_id,'By'=>$this->By]);
-                    if ($this->rep_name=='Motakra') return route('pdfmotakrabank',['Baky'=>$this->Baky,'bank_id'=>$this->bank_id,'By'=>$this->By]);
+                    if ($this->rep_name=='Motakra') return route('pdfmotakrabank',['Baky'=>$this->Baky,'bank_id'=>$this->bank_id,'By'=>$this->By,'notPay'=>$this->notPay]);
                     if ($this->rep_name=='Mohasla') return route('pdfmohasla',['bank_id'=>$this->bank_id,'Date1'=>$this->Date1,'Date2'=>$this->Date2,'By'=>$this->By]);
                     if ($this->rep_name=='Not_Mohasla') return route('pdfnotmohasla',['bank_id'=>$this->bank_id,'Date1'=>$this->Date1,'Date2'=>$this->Date2,'By'=>$this->By]);
                  })
@@ -185,7 +191,9 @@ class AllReports extends Page implements HasTable, HasForms
                         ->when($this->rep_name=='NotMosdada' , function ($q) {
                             $q->where('pay',0); })
                         ->when($this->rep_name=='Motakra' , function ($q) {
-                            $q->where('late','>=',$this->Baky); }) ;
+                            $q->where('late','>=',$this->Baky); })
+                        ->when($this->rep_name=='Motakra' && $this->notPay, function ($q) {
+                            $q->where('pay',0); });
                 }
                 if ($this->By==2) {
                     $main=Main::whereIn('bank_id',function ($q){
@@ -196,7 +204,10 @@ class AllReports extends Page implements HasTable, HasForms
                         ->when($this->rep_name=='NotMosdada' , function ($q) {
                             $q->where('pay',0); })
                         ->when($this->rep_name=='Motakra' , function ($q) {
-                            $q->where('late','>=',$this->Baky); }) ;
+                            $q->where('late','>=',$this->Baky); })
+                        ->when($this->rep_name=='Motakra' && $this->notPay, function ($q) {
+                            $q->where('pay',0); });
+
                 }
                 $this->sul=number_format($main->sum('sul'),0, '', ',')  ;
                 $this->pay=number_format($main->sum('pay'),0, '', ',')  ;
