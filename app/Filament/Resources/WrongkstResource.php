@@ -122,7 +122,7 @@ class WrongkstResource extends Resource
                 TextColumn::make('kst')
                     ->label('المبلغ'),
                 TextColumn::make('status')
-                    ->label('المبلغ'),
+                    ->label('الحالة'),
 
             ])
             ->checkIfRecordIsSelectableUsing(
@@ -182,18 +182,19 @@ class WrongkstResource extends Resource
                 BulkAction::make('ترجيع')
                     ->color('success')
                     ->deselectRecordsAfterCompletion()
-
                     ->requiresConfirmation()
                     ->action(function (Collection $records) {
                         foreach ($records as  $item){
-                            $res=Tarkst::create([
+
+                            $item->tarkst()->create([
                                 'tar_date' => date('Y-m-d'),
                                 'kst' => $item->kst,
                                 'tar_type' => 'من الخطأ',
-                                'from_id' => $item->id,
                                 'haf_id' => $item->haf_id,
                                 'user_id' => Auth::id(),
                             ]);
+                            $item->status='مرجع';
+                            $item->save();
 
                         }
 

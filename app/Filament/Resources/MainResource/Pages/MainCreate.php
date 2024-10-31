@@ -23,20 +23,21 @@ use Filament\Resources\Pages\Page;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
-class MainCreate extends Page
-  implements HasForms
+class MainCreate extends Page  implements HasForms
 {
     use InteractsWithForms;
     protected static string $resource = MainResource::class;
     protected static string $view = 'filament.resources.main-resource.pages.main-create';
     protected ?string $heading="";
 
+
     public $contData;
-    public $sell_id;
+
+
     public $Sell;
     public function mount(): void
     {
-        $this->contForm->fill(['sul_begin'=>now()]);
+        $this->contForm->fill(['sul_begin'=>now(),'id'=>Main::max('id')+1]);
     }
 
     protected function getForms(): array
@@ -53,13 +54,12 @@ public function go($who){
 }
 public function store(){
   $this->validate();
-  Main:: create(collect($this->contData)->except(['total','pay','baky'])->toArray());
+  Main::create(collect($this->contData)->except(['total','pay','baky'])->toArray());
   Notification::make()
-    ->title('تم تحزين البانات بنجاح')
+    ->title('تم تحزين البيانات بنجاح')
     ->success()
     ->send();
   $this->mount();
-
 }
     protected function getContFormSchema(): array
     {

@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 
+use App\Filament\Pages\newCont;
 use Filament\Facades\Filament;
 use Filament\Navigation\NavigationGroup;
 use Filament\Support\Facades\FilamentAsset;
@@ -41,6 +42,7 @@ class AppServiceProvider extends ServiceProvider
             fn (): View => view('analytics'),
             scopes: [
                 \App\Filament\Resources\MainResource::class,
+                newCont::class,
             ]
         );
         FilamentAsset::register([

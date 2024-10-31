@@ -11,6 +11,10 @@ class Wrongkst extends Model
 {
   protected $connection = 'other';
 
+  public function tarkst()
+  {
+      return $this->morphOne(Tarkst::class, 'tarkstable');
+  }
   public function Taj(){
       return $this->belongsTo(Taj::class);
   }

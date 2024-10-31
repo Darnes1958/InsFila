@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\MainResource\Pages;
 
+use App\Filament\Pages\newCont;
 use App\Filament\Resources\MainResource;
 
 use App\Models\Main;
@@ -31,7 +32,7 @@ class ListMains extends ListRecords
            CreateAction::make()
                 ->label('عقد جديد')
                 ->visible( function (){
-                  info(Setting::find(Auth::user()->company)->is_together);
+
                   return Auth::user()->can('ادخال عقود')
                   && ! Setting::find(Auth::user()->company)->is_together;
                 }
@@ -42,13 +43,15 @@ class ListMains extends ListRecords
                 ->label('ادخال عقد')
                 ->icon('heroicon-m-users')
                 ->color('danger')
+
                 ->visible( function (){
                   return  Auth::user()->can('ادخال عقود')
                     &&  Setting::find(Auth::user()->company)->is_together;
                 }
 
                 )
-                ->url( 'mains/maincreate'),
+                ->url( newCont::getUrl()),
+                //->url( 'mains/maincreate'),
 
         ];
     }
