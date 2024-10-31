@@ -58,12 +58,13 @@ class TransWidget extends BaseWidget
                 Tables\Columns\TextColumn::make('kst_date')
                     ->size(TextColumnSize::ExtraSmall)
                     ->toggleable()
+                    ->toggledHiddenByDefault()
                     ->sortable()
                     ->label('ت.الاستحقاق'),
                 Tables\Columns\TextColumn::make('ksm_date')
                     ->size(TextColumnSize::ExtraSmall)
                     ->toggleable()
-                    ->toggledHiddenByDefault()
+
                     ->sortable()
                     ->label('ت.الخصم'),
                 Tables\Columns\TextColumn::make('ksm')
