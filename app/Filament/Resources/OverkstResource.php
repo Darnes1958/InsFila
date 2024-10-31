@@ -55,12 +55,10 @@ class OverkstResource extends Resource
                 TextColumn::make('Main.Customer.name')
                     ->searchable()
                     ->sortable()
-
                     ->label('الاسم'),
                 TextColumn::make('over_date')
                     ->searchable()
                     ->sortable()
-
                     ->label('التاريخ'),
                 TextColumn::make('kst')
                     ->label('المبلغ'),

@@ -13,7 +13,15 @@ class Main extends Model
     use HasFactory;
   protected $connection = 'other';
 
+  protected $appends =['name'];
 
+  public function getNameAttribute(){
+      return $this->Customer->name;
+  }
+    public function tarkst()
+    {
+        return $this->morphMany(Tarkst::class, 'tarkstable');
+    }
   public function Bank(){
     return $this->belongsTo(Bank::class);
   }
@@ -32,9 +40,7 @@ class Main extends Model
         return $this->hasMany(Tran::class);
     }
 
-    public function Tarkst(){
-     return $this->hasMany(Tarkst::class);
-    }
+
     public function Overkst(){
         return $this->hasMany(Overkst::class);
     }

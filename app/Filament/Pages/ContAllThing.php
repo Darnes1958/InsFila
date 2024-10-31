@@ -1,0 +1,170 @@
+<?php
+
+namespace App\Filament\Pages;
+
+use App\Models\aksat\MainArc;
+use App\Models\Main;
+use App\Models\stores\halls_names;
+use App\Models\stores\stores_names;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
+use Filament\Pages\Page;
+use Illuminate\Support\HtmlString;
+
+class ContAllThing extends Page implements HasForms
+{
+    use InteractsWithForms;
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+
+    protected static string $view = 'filament.pages.cont-all-thing';
+    protected ?string $heading='';
+    public $contData;
+    public $main_id;
+    public Main $Main;
+
+   public function mount(){
+       $this->contForm->fill([]);
+       $this->Main=Main::all()->first();
+   }
+
+
+    protected function getForms(): array
+    {
+        return array_merge(parent::getForms(),[
+            'contForm'=> $this->makeForm()
+
+                ->schema($this->getContFormSchema())
+                ->statePath('contData'),
+        ]);
+    }
+    protected function getContFormSchema(): array
+    {
+        return [
+            Section::make()
+                ->schema([
+                    Select::make('main_id')
+                    ->options(Main::all()->pluck('Customer.name', 'id'))
+                    ->afterStateUpdated(function ($state) {
+                        $this->main_id = $state;
+                        if ($state)
+                            $this->Main=Main::find($state);
+                        $this->dispatch('Take_Main_Id',main_id: $state);
+                    })
+                    ->searchable()
+                    ->preload()
+                    ->live()
+                    ->label('العقد'),
+
+                ]),
+        ];
+    }
+
+    public function mainArcInfolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+
+            ->record($this->Main)
+            ->schema([
+
+                TextEntry::make('Customer.name')
+                    ->color('primary')
+                    ->extraEntryWrapperAttributes(['style' => 'height: 16px;'])
+                    ->hiddenLabel()
+                    ->columnSpan(3),
+
+                TextEntry::make('acc')
+                    ->color('info')
+                    ->prefix(new HtmlString('<span class="ttext-gray-600 dark:text-white "> رقم الحساب&nbsp;&nbsp;</span>'))
+                    ->extraEntryWrapperAttributes(['style' => 'height: 12px;'])
+                    ->hiddenLabel()
+                    ->columnSpan(3),
+                TextEntry::make('Bank.BankName')
+                    ->color('primary')
+                    ->extraEntryWrapperAttributes(['style' => 'height: 12px;'])
+                    ->hiddenLabel()
+                    ->columnSpan(3),
+
+                TextEntry::make('Sell.Place.name')
+                    ->prefix(new HtmlString('<span class="text-gray-600 dark:text-white "> نقطة البيع&nbsp;&nbsp;</span>'))
+                    ->extraEntryWrapperAttributes(['style' => 'height: 12px;'])
+                    ->hiddenLabel()
+                    ->color('info')
+
+
+                    ->columnSpan(3),
+                TextEntry::make('sul_begin')
+                    ->color('info')
+                    ->prefix(new HtmlString('<span class="text-gray-600 dark:text-white "> ت.العقد&nbsp;&nbsp;</span>'))
+                    ->hiddenLabel()
+                    ->extraEntryWrapperAttributes(['style' => 'height: 12px;'])
+                    ->columnSpan(2),
+                TextEntry::make('Sell.tot')
+                    ->color('info')
+                    ->prefix(new HtmlString('<span class="text-gray-600 dark:text-white "> ج.الفاتورة&nbsp;&nbsp;</span>'))
+                    ->extraEntryWrapperAttributes(['style' => 'height: 12px;'])
+                    ->hiddenLabel()
+                    ->columnSpan(2),
+                TextEntry::make('Sell_pay')
+                    ->color('info')
+                    ->state(function (){
+                        return $this->Main->Sell->pay;
+                    })
+                    ->extraEntryWrapperAttributes(['style' => 'height: 12px;'])
+                    ->prefix(new HtmlString('<span class="text-gray-600 dark:text-white "> المدفوع&nbsp;&nbsp;</span>'))
+                    ->hiddenLabel()
+                    ->columnSpan(2),
+                TextEntry::make('sul')
+                    ->extraEntryWrapperAttributes(['style' => 'height: 12px;'])
+                    ->color('info')
+                    ->prefix(new HtmlString('<span class="text-gray-600 dark:text-white "> ج.التقسيط&nbsp;&nbsp;</span>'))
+                    ->hiddenLabel()
+                    ->columnSpan(2),
+                TextEntry::make('pay')
+                    ->color('info')
+                    ->extraEntryWrapperAttributes(['style' => 'height: 12px;'])
+                    ->prefix(new HtmlString('<span class="text-gray-600 dark:text-white "> المسدد&nbsp;&nbsp;</span>'))
+                    ->hiddenLabel()
+                    ->columnSpan(2),
+                TextEntry::make('raseed')
+                    ->color('danger')
+                    ->extraEntryWrapperAttributes(['style' => 'height: 12px;'])
+                    ->prefix(new HtmlString('<span class="text-gray-600 dark:text-white"> المطلوب&nbsp;&nbsp;</span>'))
+                    ->hiddenLabel()
+                    ->columnSpan(2),
+                TextEntry::make('kst_count')
+                    ->color('info')
+                    ->prefix(new HtmlString('<span class="text-gray-600 dark:text-white "> عدد الأقساط&nbsp;&nbsp;</span>'))
+                    ->hiddenLabel()
+                    ->extraEntryWrapperAttributes(['style' => 'height: 12px;'])
+                    ->columnSpan(2),
+                TextEntry::make('kst')
+                    ->color('info')
+                    ->prefix(new HtmlString('<span class="text-gray-600 dark:text-white "> القسط&nbsp;&nbsp;</span>'))
+                    ->hiddenLabel()
+                    ->extraEntryWrapperAttributes(['style' => 'height: 12px;'])
+                    ->columnSpan(2),
+                TextEntry::make('kst_baky')
+
+                    ->extraEntryWrapperAttributes(['style' => 'height: 12px;'])
+                    ->color('info')
+                    ->prefix(new HtmlString('<span class="text-gray-600 dark:text-white "> متبقية&nbsp;&nbsp;</span>'))
+                    ->hiddenLabel()
+                    ->columnSpan(2),
+                TextEntry::make('notes')
+                    ->color('success')
+                    ->prefix(new HtmlString('<span class="text-gray-600 dark:text-white "> ملاحظات&nbsp;&nbsp;</span>'))
+                    ->hiddenLabel()
+                    ->visible(function (Main $record){
+                        return $record->notes!=null;
+                    })
+                    ->extraEntryWrapperAttributes(['style' => 'height: 12px;'])
+
+                    ->columnSpan(6),
+
+            ])->columns(6);
+    }
+}

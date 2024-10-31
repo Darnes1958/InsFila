@@ -13,6 +13,9 @@ class Sell extends Model
     public function Main(){
         return $this->hasMany(Main::class);
     }
+    public function Place(){
+        return $this->belongsTo(Place::class);
+    }
     public function Customer(){
       return $this->belongsTo(Customer::class);
     }

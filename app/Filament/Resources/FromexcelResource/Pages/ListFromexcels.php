@@ -93,7 +93,7 @@ class ListFromexcels extends ListRecords
                     if ($main){
                         $type=$this->Fill_From_Excel($main->id,$item->ksm,$item->ksm_date,$haf->id,$item->id);
                         $item->main_id=$main->id;
-                        $item->main_name=$main->name;
+                        $item->main_name=$main->Customer->name;
                         $item->kst_type=$type;
                         $item->save();
                     } else {

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\Tar_type;
 use App\Filament\Resources\WrongkstResource\Pages;
 use App\Filament\Resources\WrongkstResource\RelationManagers;
 use App\Livewire\Traits\AksatTrait;
@@ -189,7 +190,7 @@ class WrongkstResource extends Resource
                             $item->tarkst()->create([
                                 'tar_date' => date('Y-m-d'),
                                 'kst' => $item->kst,
-                                'tar_type' => 'من الخطأ',
+                                'tar_type' => Tar_type::من_الخطأ,
                                 'haf_id' => $item->haf_id,
                                 'user_id' => Auth::id(),
                             ]);

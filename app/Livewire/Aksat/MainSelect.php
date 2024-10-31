@@ -15,9 +15,7 @@ class MainSelect extends Component implements HasForms
      use InteractsWithForms;
      public $the_main_id;
 
-     public function updatedThe_main_id(){
-         info('no');
-     }
+
 
      public function form(Form $form): Form
      {

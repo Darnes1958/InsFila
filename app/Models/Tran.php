@@ -10,9 +10,9 @@ class Tran extends Model
 {
     protected $connection = 'other';
 
-    public function KsmType(){
-        return $this->belongsTo(KsmType::class);
-    }
+    protected $casts=[
+        'ksm_type_id'=>\App\Enums\KsmType::class
+    ];
 
     public function Main(){
         return $this->belongsTo(Main::class);

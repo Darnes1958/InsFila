@@ -63,6 +63,21 @@ trait AksatTrait {
         $this->MainTarseed($main_id);
         return $res;
     }
+    public static function StoreTran2($main_id,$ksm_date,$ksm,$haf)
+    {
+        $res= Tran::create([
+            'main_id'=>$main_id,
+            'ksm'=>$ksm,
+            'ksm_type_id'=>2,
+            'ksm_date'=>$ksm_date,
+            'user_id'=>Auth::id(),
+            'ser'=>Tran::where('main_id',$main_id)->max('ser')+1,
+            'kst_date'=>self::getKst_date2($main_id),
+            'haf_id'=>$haf,
+        ]);
+        self::MainTarseed2($main_id);
+        return $res;
+    }
     public function StoreWrong($taj,$acc,$name,$date,$ksm,$haf){
         Wrongkst::create([
             'taj_id'=>$taj,
@@ -110,6 +125,14 @@ trait AksatTrait {
       $date=$date->format('Y-m-d');
       return $date;
   }
+    public static function setMonth2($begin){
+        $month = date('m', strtotime($begin));
+        $year = date('Y', strtotime($begin));
+        $date=$year.$month.'28';
+        $date = DateTime::createFromFormat('Ymd',$date);
+        $date=$date->format('Y-m-d');
+        return $date;
+    }
   public function getKst_date($main_id){
     $res=Tran::where('main_id',$main_id)->get();
     if (count($res)>0) {
@@ -124,6 +147,20 @@ trait AksatTrait {
 
     }
   }
+    public static function getKst_date2($main_id){
+        $res=Tran::where('main_id',$main_id)->get();
+        if (count($res)>0) {
+            $date=$res->max('kst_date');
+            $date= date('Y-m-d', strtotime($date . "+1 month"));
+            return $date;
+        } else
+        {
+            $begin=Main::find($main_id)->sul_begin;
+
+            return self::setMonth2($begin);
+
+        }
+    }
   public function SortKstDate($main_id){
     $sul_begin=Main::find($main_id)->sul_begin;
     $day = date('d', strtotime($sul_begin));

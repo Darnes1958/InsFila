@@ -35,6 +35,20 @@ trait MainTrait {
     return $months;
 
   }
+    public static function RetLate2($main_id,$kst_count,$nextKst){
+        $toDate = Carbon::parse($nextKst);
+        $fromDate = Carbon::now();
+
+        if ($fromDate>$toDate)
+            $months = $toDate->diffInMonths($fromDate);
+        else $months=0;
+
+        $count=Tran::where('main_id',$main_id)->count();
+        if ($months>($kst_count-$count)) $months=$kst_count-$count;
+
+        return $months;
+
+    }
   public function LateChk(){
     $Main=Main::where('LastUpd','<',now())->get();
     foreach ($Main as $main)
@@ -110,5 +124,32 @@ trait MainTrait {
     $this->raseed=$main->sul-$pay;
 
   }
+    public static function MainTarseed2($id){
+        $pay=Tran::where('main_id',$id)->sum('ksm');
+        $count=Tran::where('main_id',$id)->count();
+        $lastksm=Tran::where('main_id',$id)->max('ksm_date');
+        $nextkst=Tran::where('main_id',$id)->max('kst_date');
+        $main=Main::where('id',$id)->first();
+        $LastUpd=now();
+
+        if ($nextkst)
+            $NextKst= date('Y-m-d', strtotime($nextkst . "+1 month"));
+        else $NextKst=self::setMonth2($main->sul_begin);
+
+        Main::where('id',$id)->
+        update([
+            'pay'=>$pay,
+            'raseed'=>$main->sul-$pay,
+            'LastKsm'=>$lastksm,
+            'LastUpd'=>$LastUpd,
+            'NextKst'=>$NextKst,
+            'Late'=>self::RetLate2($id,$main->kst_count,$NextKst),
+            'Kst_baky'=>$main->kst_count-$count,
+        ]);
+
+
+
+
+    }
 
 }

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Pages\ContAllThing;
 use App\Filament\Resources\MainResource\Pages;
 
 use App\Models\Main;
@@ -305,6 +306,11 @@ class MainResource extends Resource
                 ->iconButton()->color('success')
                 ->icon('heroicon-m-printer')
                 ->url(fn (Main $record): string => route('pdfmaincont', $record)),
+                Tables\Actions\Action::make('tran')
+                    ->hiddenLabel()
+                    ->iconButton()->color('info')
+                    ->icon('heroicon-m-printer')
+                    ->url(ContAllThing::getUrl()),
             ]);
     }
 
