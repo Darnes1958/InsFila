@@ -75,6 +75,8 @@ class TarKstResource extends Resource
                      }
                      if ($record->tar_type==Tar_type::من_قسط_مخصوم){
                          self::StoreTran2($record->tarkstable->id,$record->tar_date,$record->kst,$record->haf_id);
+                         self::SortTrans2($record->tarkstable->id);
+
                      }
                  }),
             ])
@@ -93,6 +95,7 @@ class TarKstResource extends Resource
                                 }
                                 if ($item->tar_type==Tar_type::من_قسط_مخصوم){
                                     self::StoreTran2($item->tarkstable->id,$item->tar_date,$item->kst,$item->haf_id);
+                                    self::SortTrans2($item->tarkstable->id);
                                 }
                             }
 

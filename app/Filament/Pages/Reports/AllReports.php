@@ -174,7 +174,9 @@ class AllReports extends Page implements HasTable, HasForms
 
                ])
 
-            ])->columns(7);
+            ])
+            ->extraAttributes(['class'=>'p-y-2 gap-y-2'])
+            ->columns(7);
     }
 
 
@@ -227,8 +229,23 @@ class AllReports extends Page implements HasTable, HasForms
                         decimalSeparator: '.',
                         thousandsSeparator: ',',
                     ))
+                    ->numeric(
+                        decimalPlaces: 2,
+                        decimalSeparator: '.',
+                        thousandsSeparator: ',',
+                    )
                     ->label('اجمالي العقد'),
                 TextColumn::make('kst')
+                    ->summarize(Sum::make()->label('')->numeric(
+                        decimalPlaces: 2,
+                        decimalSeparator: '.',
+                        thousandsSeparator: ',',
+                    ))
+                    ->numeric(
+                        decimalPlaces: 2,
+                        decimalSeparator: '.',
+                        thousandsSeparator: ',',
+                    )
                     ->label('القسط'),
                 TextColumn::make('pay')
                     ->summarize(Sum::make()->label('')->numeric(
@@ -236,6 +253,11 @@ class AllReports extends Page implements HasTable, HasForms
                         decimalSeparator: '.',
                         thousandsSeparator: ',',
                     ))
+                    ->numeric(
+                        decimalPlaces: 2,
+                        decimalSeparator: '.',
+                        thousandsSeparator: ',',
+                    )
                     ->label('المسدد'),
                 TextColumn::make('raseed')
                     ->summarize(Sum::make()->label('')->numeric(
@@ -243,6 +265,11 @@ class AllReports extends Page implements HasTable, HasForms
                         decimalSeparator: '.',
                         thousandsSeparator: ',',
                     ))
+                    ->numeric(
+                        decimalPlaces: 2,
+                        decimalSeparator: '.',
+                        thousandsSeparator: ',',
+                    )
                     ->label('الرصيد'),
                 TextColumn::make('Late')
                     ->summarize(Sum::make()->label('')->numeric(
@@ -250,6 +277,7 @@ class AllReports extends Page implements HasTable, HasForms
                         decimalSeparator: '.',
                         thousandsSeparator: ',',
                     ))
+
                     ->label('متأخرة')
                     ->visible(fn (Get $get): bool =>$this->rep_name =='Motakra')
                     ->color('danger'),

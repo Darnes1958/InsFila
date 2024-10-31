@@ -3,6 +3,7 @@
 namespace App\Livewire\widgets;
 
 use App\Enums\Tar_type;
+use App\Livewire\Traits\AksatTrait;
 use App\Livewire\Traits\MainTrait;
 use App\Models\Main;
 use App\Models\Tran;
@@ -21,6 +22,7 @@ use Livewire\Attributes\On;
 class TransWidget extends BaseWidget
 {
     use MainTrait;
+    use AksatTrait;
     protected static ?string $heading='';
     public $main_id;
     #[On('Take_Main_Id')]
@@ -61,6 +63,7 @@ class TransWidget extends BaseWidget
                 Tables\Columns\TextColumn::make('ksm_date')
                     ->size(TextColumnSize::ExtraSmall)
                     ->toggleable()
+                    ->toggledHiddenByDefault()
                     ->sortable()
                     ->label('ت.الخصم'),
                 Tables\Columns\TextColumn::make('ksm')
@@ -72,6 +75,7 @@ class TransWidget extends BaseWidget
                     ->label('طريقة الدفع'),
                 Tables\Columns\TextColumn::make('ksm_notes')
                     ->toggleable()
+                    ->toggledHiddenByDefault()
                     ->size(TextColumnSize::ExtraSmall)
                     ->label('ملاحظات'),
             ])
@@ -79,6 +83,7 @@ class TransWidget extends BaseWidget
                 Tables\Actions\Action::make('tar')
                  ->label('ترجيع')
                  ->requiresConfirmation()
+
                 ->action(function (Model $record){
                   $main=Main::find($this->main_id);
                     $main->tarkst()->create([
@@ -91,6 +96,7 @@ class TransWidget extends BaseWidget
                         ]);
                     $record->delete();
                   $this->MainTarseed($this->main_id);
+                  self::SortTrans2($this->main_id);
 
                 })
             ]);

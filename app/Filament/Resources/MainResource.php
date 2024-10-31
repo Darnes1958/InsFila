@@ -30,6 +30,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Livewire;
 
 
 class MainResource extends Resource
@@ -279,7 +280,7 @@ class MainResource extends Resource
                  ->query(fn(Builder $query): Builder=>$query->where('raseed','=',0))
             ])
             ->actions([
-                ViewAction::make('View Information')->iconButton()->color('primary'),
+
                 DeleteAction::make()->iconButton()->hidden(! auth()->user()->can('الغاء عقود'))
               ->before(function (Main $record){
                 Tran::where('main_id',$record->id)->delete();
@@ -308,9 +309,9 @@ class MainResource extends Resource
                 ->url(fn (Main $record): string => route('pdfmaincont', $record)),
                 Tables\Actions\Action::make('tran')
                     ->hiddenLabel()
-                    ->iconButton()->color('info')
-                    ->icon('heroicon-m-printer')
-                    ->url(ContAllThing::getUrl()),
+                    ->iconButton()->color('primary')
+                    ->icon('heroicon-m-eye')
+                    ->url(fn (Main $record): string => route('filament.admin.pages.cont-all-thing', ['main_id'=>$record->id])),
             ]);
     }
 
@@ -327,7 +328,7 @@ class MainResource extends Resource
             'index' => Pages\ListMains::route('/'),
             'create' => Pages\CreateMain::route('/create'),
             'edit' => Pages\EditMain::route('/{record}/edit'),
-            'view' => Pages\ViewMain::route('/{record}'),
+
             'maincreate' => Pages\MainCreate::route('/maincreate'),
             'mainedit' => Pages\MainEdit::route('/{record}/mainedit'),
         ];

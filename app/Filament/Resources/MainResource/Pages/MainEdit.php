@@ -22,6 +22,7 @@ use Filament\Resources\Pages\EditRecord;
 use Filament\Resources\Pages\Page;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 
 class MainEdit extends Page
 {
@@ -42,15 +43,19 @@ class MainEdit extends Page
         $this->record = $this->resolveRecord($record);
         $this->main_id=$this->record->id;
         $this->main_id_edited=$this->main_id;
-        $this->main=Main::find($this->main_id);
-        $this->contForm->fill($this->record->toArray());
+        $this->main=Main::with('Sell')->find($this->main_id);
+        $arr=$this->main->toArray();
+
+       // Arr::add($arr,'total',$this->main->Sell->total);
+        info($arr);
+        $this->contForm->fill($arr);
     }
     protected function getForms(): array
     {
         return array_merge(parent::getForms(),[
             'contForm'=> $this->makeForm()
                 ->model(Main::class)
-                ->schema($this->getContFormSchema())
+                ->schema($this->getContFormSchema(),'')
                 ->statePath('contData'),
         ]);
     }
@@ -82,22 +87,27 @@ class MainEdit extends Page
                         ->columnSpan(2)
                         ->afterStateUpdated(function ($state,Set $set){
                             $this->Sell=Sell::find($state);
-                            $set('total',$this->Sell->total);
-                            $set('pay',$this->Sell->pay);
-                            $set('baky',$this->Sell->baky);
+                            $set('sell.total',$this->Sell->total);
+                            $set('sell.pay',$this->Sell->pay);
+                            $set('sell.baky',$this->Sell->baky);
                             $set('sul',$this->Sell->baky);
                             $set('id',Main::Max('id')+1);
                             $set('customer_id',$this->Sell->customer_id);
+                            $set('name',$this->Sell->Customer->name);
                             $this->go('main_id');
                         }),
+                    TextInput::make('name')
+                     ->label('الزبون')
+                     ->columnSpan(3)
+                     ->disabled(),
                     Hidden::make('customer_id'),
-                    TextInput::make('total')
+                    TextInput::make('sell.total')
                         ->label('الاجمالي')
                         ->disabled(),
-                    TextInput::make('pay')
+                    TextInput::make('sell.pay')
                         ->label('المدفوع')
                         ->disabled(),
-                    TextInput::make('baky')
+                    TextInput::make('sell.baky')
                         ->label('الباقي')
                         ->disabled(),
 

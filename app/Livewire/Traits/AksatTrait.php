@@ -189,5 +189,15 @@ trait AksatTrait {
       $ser++;
     }
   }
+    public static function SortTrans2($main_id){
+        $res=Tran::where('main_id',$main_id)->get();
+        $ser=1;
+        foreach ($res as $item) {
+            Tran::where('id', $item->id)->update([
+                'ser' => $ser,
+            ]);
+            $ser++;
+        }
+    }
 
 }

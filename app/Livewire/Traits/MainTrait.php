@@ -104,10 +104,13 @@ trait MainTrait {
     $main=Main::where('id',$id)->first();
     $LastUpd=now();
 
+
     if ($nextkst)
       $NextKst= date('Y-m-d', strtotime($nextkst . "+1 month"));
     else $NextKst=$this->setMonth($main->sul_begin);
 
+    $main=Main::find($id);
+    $tar=$main->tarkst->sum('kst');
     Main::where('id',$id)->
     update([
       'pay'=>$pay,
@@ -117,6 +120,7 @@ trait MainTrait {
       'NextKst'=>$NextKst,
       'Late'=>$this->RetLate($id,$main->kst_count,$NextKst),
       'Kst_baky'=>$main->kst_count-$count,
+      'tar_kst'=>$tar,
     ]);
 
 
@@ -135,6 +139,8 @@ trait MainTrait {
         if ($nextkst)
             $NextKst= date('Y-m-d', strtotime($nextkst . "+1 month"));
         else $NextKst=self::setMonth2($main->sul_begin);
+        $main=Main::find($id);
+         $tar=$main->tarkst->sum('kst');
 
         Main::where('id',$id)->
         update([
@@ -145,7 +151,9 @@ trait MainTrait {
             'NextKst'=>$NextKst,
             'Late'=>self::RetLate2($id,$main->kst_count,$NextKst),
             'Kst_baky'=>$main->kst_count-$count,
+            'tar_kst'=>$tar,
         ]);
+
 
 
 

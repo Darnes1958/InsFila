@@ -8,6 +8,7 @@ use Filament\Facades\Filament;
 use Filament\Navigation\NavigationGroup;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentView;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
@@ -37,6 +38,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Table::$defaultNumberLocale = 'nl';
         FilamentView::registerRenderHook(
             'panels::page.end',
             fn (): View => view('analytics'),

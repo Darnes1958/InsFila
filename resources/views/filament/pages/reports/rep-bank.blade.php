@@ -1,3 +1,7 @@
 <x-filament-panels::page>
-    <livewire:reports.rep-bank/>
+    {{ $this->form }}
+
+
+    {{ $this->table }}
+
 </x-filament-panels::page>

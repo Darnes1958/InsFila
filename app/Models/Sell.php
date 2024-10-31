@@ -11,7 +11,7 @@ class Sell extends Model
     protected $connection = 'other';
 
     public function Main(){
-        return $this->hasMany(Main::class);
+        return $this->hasOne(Main::class);
     }
     public function Place(){
         return $this->belongsTo(Place::class);
