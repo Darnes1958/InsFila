@@ -15,9 +15,7 @@ class Main extends Model
 
   protected $appends =['name'];
 
-  public function getNameAttribute(){
-      return $this->Customer->name;
-  }
+
     public function tarkst()
     {
         return $this->morphMany(Tarkst::class, 'tarkstable');
@@ -28,6 +26,9 @@ class Main extends Model
   public function Customer(){
     return $this->belongsTo(Customer::class);
   }
+    public function getNameAttribute(){
+        return $this->Customer->name;
+    }
 
   public function Sell(){
         return $this->belongsTo(Sell::class);

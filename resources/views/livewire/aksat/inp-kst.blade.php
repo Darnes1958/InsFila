@@ -319,7 +319,7 @@
                                     <x-table.cell  >{{$item->kst_date}}</x-table.cell>
                                     <x-table.cell  >{{$item->ksm_date}}</x-table.cell>
                                     <x-table.cell  >{{$item->ksm}}</x-table.cell>
-                                    <x-table.cell  >{{$item->KsmType->ksm_type_name}}</x-table.cell>
+                                    <x-table.cell  >{{$item->ksm_type_id->name}}</x-table.cell>
 
                                     <x-table.cell  >{{$item->ksm_notes}}</x-table.cell>
                                     <x-table.cell  >

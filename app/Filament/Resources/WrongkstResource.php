@@ -146,7 +146,7 @@ class WrongkstResource extends Resource
                          ->label('العقد')
                          ->options(function (Model $record) {
                              return Main::where('taj_id',$record->taj_id)->join('customers','customers.id','mains.customer_id')
-                                 ->pluck('name', 'mains.id');
+                                 ->pluck('customers.name', 'mains.id');
                          })
 
                         ->searchable()
