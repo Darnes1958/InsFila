@@ -1,0 +1,42 @@
+1- insert tajmeehy (wahda , afrikia)
+	- insert into Alateek.dbo.banks (BankName,taj_id,user_id) select distinct Client_Side,1,1 from The_Persons where Client_Side!='.' ;
+	- edit TajNo
+	
+2- Set Identity_Insert Alateek.dbo.Customers On
+   insert into Alateek.dbo.customers (id,name,libyana,address,user_id,created_at) select Person_No,Person_Name,Person_tel,Person_Add,1,Person_Date from The_Persons where Person_Kind=2;
+   Set Identity_Insert Alateek.dbo.Customers off
+   
+3- Set Identity_Insert Alateek.dbo.suppliers On
+insert into Alateek.dbo.suppliers (id,name,user_id,created_at) values (1,'مشتريات عامة',1,getdate());
+insert into Alateek.dbo.suppliers (id,name,libyana,address,user_id,created_at) select Person_No,Person_Name,Person_tel,Person_Add,1,Person_Date from The_Persons where Person_Kind=3;
+insert into Alateek.dbo.suppliers (id,name,libyana,address,user_id,created_at) select Person_No,Person_Name,Person_tel,Person_Add,1,Person_Date from The_Persons 
+ where Person_no  in (22,171,172);
+Set Identity_Insert Alateek.dbo.suppliers off
+
+
+4- Set Identity_Insert Alateek.dbo.item_types On
+   insert into Alateek.dbo.item_types (id,name,created_at) select Group_No,Group_Name,getdate() from The_Group ;
+   Set Identity_Insert Alateek.dbo.item_types off
+   
+   insert into Alateek.dbo.barcodes (id,item_id,created_at) select Barcode,Item_No,getdate() from The_Barcode;
+   
+5- insert unita
+Set Identity_Insert Alateek.dbo.items On
+
+   insert into Alateek.dbo.items (id,barcode,name,item_type_id,unita_id,price_buy,price1,user_id,created_at) 
+    select The_Items.item_no,The_Items.item_no,Scientific_Name,Group_No,1,Item_Cost,0,1,The_Items.NewItem_Add 
+    from The_Items,The_ItemDetails where The_Items.Item_No=The_ItemDetails.Item_No ;
+
+   Set Identity_Insert Alateek.dbo.items off
+   
+6- Set Identity_Insert Alateek.dbo.buys On
+
+   insert into Alateek.dbo.buys (id,order_date,supplier_id,price_type_id,place_id,tot,pay,user_id,created_at) 
+    select Movementrestrictions_No,Movementrestrictions_Date,Person_No,1,1,0,0,1,Movementrestrictions_Date
+    from The_Movementrestrictions where Account_No=7 ;
+
+   Set Identity_Insert Alateek.dbo.buys off   
+   
+7- insert into Alateek.dbo.buy_trans (buy_id,item_id,barcode_id,q1,qs1,price_input,sub_input,user_id,created_at) 
+    select Movementrestrictions_No,Item_No,Barcode,Item_Quntity,Item_Quntity,Item_Cost,Item_Cost*Item_Quntity,1,Item_Add
+    from The_Details where Movementrestrictions_No in (select id from Alateek.dbo.buys) ;

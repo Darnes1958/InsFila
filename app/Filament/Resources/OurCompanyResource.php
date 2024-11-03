@@ -19,7 +19,7 @@ class OurCompanyResource extends Resource
 {
   public static function shouldRegisterNavigation(): bool
   {
-    return  auth()->user()->hasRole('Super');
+    return  auth()->id()==1;
   }
     protected static ?string $model = OurCompany::class;
 
