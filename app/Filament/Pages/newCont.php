@@ -18,6 +18,7 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Support\Enums\VerticalAlignment;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -88,6 +89,13 @@ class newCont extends Page implements HasForms
                             $this->go('main_id');
                         }),
                     Hidden::make('customer_id'),
+                    \Filament\Forms\Components\Actions::make([
+                    Action::make('newnew')
+                     ->action(function (){
+                         $this->dispatch('open-modal', id: 'create-sell');
+                     })
+                     ->label('فاتورة جديدة'),
+                    ])->verticalAlignment(VerticalAlignment::End),
                     TextInput::make('total')
                         ->label('الاجمالي')
                         ->disabled(),
@@ -99,7 +107,7 @@ class newCont extends Page implements HasForms
                         ->disabled(),
 
                 ])
-                ->columns(5),
+                ->columns(6),
             Section::make()
                 ->schema([
                     TextInput::make('id')

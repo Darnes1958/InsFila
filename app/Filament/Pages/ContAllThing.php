@@ -73,13 +73,11 @@ class ContAllThing extends Page implements HasForms
 
             ->record($this->Main)
             ->schema([
-
                 TextEntry::make('Customer.name')
                     ->color('primary')
                     ->extraEntryWrapperAttributes(['style' => 'height: 16px;'])
                     ->hiddenLabel()
                     ->columnSpan(3),
-
                 TextEntry::make('acc')
                     ->color('info')
                     ->prefix(new HtmlString('<span class="ttext-gray-600 dark:text-white "> رقم الحساب&nbsp;&nbsp;</span>'))

@@ -10,6 +10,9 @@ class Sell extends Model
 {
     protected $connection = 'other';
 
+    public function Sell_tran(){
+        return $this->hasMany(Sell_tran::class);
+    }
     public function Main(){
         return $this->hasOne(Main::class);
     }

@@ -10,5 +10,6 @@ export default {
 
         './resources/views/components/**/*.blade.php',
         './vendor/filament/**/*.blade.php',
+        './vendor/awcodes/filament-table-repeater/resources/**/*.blade.php',
     ],
 }
