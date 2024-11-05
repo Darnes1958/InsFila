@@ -1,9 +1,14 @@
 1- insert tajmeehy (wahda , afrikia)
 	- insert into Alateek.dbo.banks (BankName,taj_id,user_id) select distinct Client_Side,1,1 from The_Persons where Client_Side!='.' ;
 	- edit TajNo
+
+- insert (المخزن , المعرض)	
 	
 2- Set Identity_Insert Alateek.dbo.Customers On
    insert into Alateek.dbo.customers (id,name,libyana,address,user_id,created_at) select Person_No,Person_Name,Person_tel,Person_Add,1,Person_Date from The_Persons where Person_Kind=2;
+   insert into Alateek.dbo.customers (id,name,libyana,address,user_id,created_at) 
+   select Person_No,Person_Name,Person_tel,Person_Add,1,Person_Date from The_Persons where 
+   Person_No in (1,19,282,328,430)
    Set Identity_Insert Alateek.dbo.Customers off
    
 3- Set Identity_Insert Alateek.dbo.suppliers On
@@ -32,7 +37,7 @@ Set Identity_Insert Alateek.dbo.items On
 6- Set Identity_Insert Alateek.dbo.buys On
 
    insert into Alateek.dbo.buys (id,order_date,supplier_id,price_type_id,place_id,tot,pay,user_id,created_at) 
-    select Movementrestrictions_No,Movementrestrictions_Date,Person_No,1,1,0,0,1,Movementrestrictions_Date
+    select Movementrestrictions_No,Movementrestrictions_Date,Person_No,1,2,0,0,1,Movementrestrictions_Date
     from The_Movementrestrictions where Account_No=7 ;
 
    Set Identity_Insert Alateek.dbo.buys off   
@@ -40,3 +45,44 @@ Set Identity_Insert Alateek.dbo.items On
 7- insert into Alateek.dbo.buy_trans (buy_id,item_id,barcode_id,q1,qs1,price_input,sub_input,user_id,created_at) 
     select Movementrestrictions_No,Item_No,Barcode,Item_Quntity,Item_Quntity,Item_Cost,Item_Cost*Item_Quntity,1,Item_Add
     from The_Details where Movementrestrictions_No in (select id from Alateek.dbo.buys) ;
+	
+	update buys set tot=(select sum(sub_input) from buy_trans where buys.id = buy_id);
+    update buys set  baky=tot;
+	
+8- Set Identity_Insert Alateek.dbo.sells On
+
+insert into Alateek.dbo.sells (id,order_date,customer_id,price_type_id,place_id,single,tot,cost,baky,user_id,created_at) 
+select Movementrestrictions_No,Movementrestrictions_Date,Person_No,  1   , 2,1,0,0,0,1,Movementrestrictions_Date 
+from The_Movementrestrictions
+where Account_No in (1,2) and not Person_No in (select Person_No from The_Premiums)
+
+insert into Alateek.dbo.sells (id,order_date,customer_id,price_type_id,place_id,single,tot,cost,baky,user_id,created_at) 
+select Movementrestrictions_No,Movementrestrictions_Date,Person_No,  3   , 2,1,0,0,0,1,Movementrestrictions_Date 
+from The_Movementrestrictions
+where Account_No in (1,2) and  Person_No in (select Person_No from The_Premiums)
+
+Set Identity_Insert Alateek.dbo.sells off
+
+
+insert into Alateek.dbo.sell_trans (sell_id,item_id,barcode_id,q1,price1,sub_tot,user_id,created_at) 
+select Movementrestrictions_No,Item_No,Barcode,Item_Quntity,Charge_Value,Item_Quntity * Charge_Value,1,Item_Add
+from The_Details where Movementrestrictions_No in (select id from Alateek.dbo.sells)
+
+update sells set tot=(select sum(sub_tot) from sell_trans where sells.id = sell_id);
+update sells set  total=tot,baky=tot;
+
+- 9 
+update items set stock1=0;
+update items set stock1=(select Item_Quantity from AlmohasebSQL.dbo.The_ItemDetails where id=Item_No)
+
+delete from place_stocks;
+insert into place_stocks (item_id,place_id,stock1,created_at) 
+	select id,2,stock1,getdate() from items
+	
+-10 
+insert into Alateek.dbo.mains (id,bank_id,taj_id,customer_id,acc,sul_begin,sul_end,sul,kst,kst_count,raseed,sell_id,user_id,created_at) 
+select Premiums_No,1,1,The_Premiums.Person_No,Account_Number,Start_Date,Start_Date,Fair_Value,round(Fair_Value,Value_Installment,0),Value_Installment,0,1,1,Premiums_Date
+from The_Premiums,The_Persons WHERE The_Premiums.Person_No=The_Persons.Person_No
+
+
+

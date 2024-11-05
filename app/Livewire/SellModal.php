@@ -27,7 +27,10 @@ class SellModal extends Component implements HasForms
     protected static ?string $model =Sell::class;
 
 
-    public
+public function mount()
+{
+    $this->form->fill(['order_date'=>now()]);
+}
 
     public function form(Form $form): Form
     {
@@ -131,7 +134,7 @@ class SellModal extends Component implements HasForms
                                  ->required(),
 
                          ])
-                         ->defaultItems(0)
+                         ->defaultItems(3)
                          ->addable(function (){
                              return true;
                          })

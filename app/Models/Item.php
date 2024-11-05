@@ -11,7 +11,9 @@ class Item extends Model
     protected $connection = 'other';
 
 
-
+    public function Price_sell(){
+        return $this->hasMany(Price_sell::class);
+    }
     public function Place_stock(){
       return $this->hasMany(Place_stock::class);
     }
