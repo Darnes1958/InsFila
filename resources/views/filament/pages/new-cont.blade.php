@@ -1,17 +1,11 @@
 <x-filament-panels::page>
-    <div class="flex gap-2">
-        <div class="w-2/5">
+    <div class="flex w-full gap-2">
+        <div class="w-2/6">
             {{$this->contForm}}
         </div>
-        <div class="w-3/5">
+        <div class="w-4/6">
             {{$this->sellForm}}
         </div>
     </div>
-
-
-
-    <x-filament::modal id="create-sell" width="7xl">
-        <livewire:sell-modal/>
-    </x-filament::modal>
 
 </x-filament-panels::page>

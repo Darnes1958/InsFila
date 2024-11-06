@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\Item;
 use App\Models\Main;
 use App\Models\Main_arc;
+use App\Models\Place;
 use App\Models\Place_stock;
 use App\Models\Price_sell;
 use App\Models\Sell;
@@ -20,6 +21,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -52,40 +54,50 @@ class newCont extends Page implements HasForms
     public $sellData;
     public $showSell=false;
 
-    public  $sell_id;
+
     public $Sell;
-    #[On('fillSell')]
-    public function fillSell($sell)
+
+    public function mount(): void
     {
+        if (request()->sell_id && !Main::where('sell_id', request()->sell_id)->exists()) {
+            $this->Sell=Sell::find(request()->sell_id);
 
-        $this->Sell=Sell::find($sell['id']);
-        $this->contForm->fill(['sul_begin'=>now(),'id'=>Main::max('id')+1,'sell_id'=>$this->Sell->id,
-                'acc'=>'222','baky'=>$this->Sell->baky]
+            $main=Main::where('customer_id',$this->Sell->customer_id)->first();
+            if ($main) {$bank_id=$main->bank_id;$taj_id=$main->taj_id;$acc=$main->acc;}
+            else {$bank_id=null;$acc=null;$taj_id=null;}
+            $this->contForm->fill([
+                    'sul_begin'=>now(),
+                    'id'=>Main::max('id')+1,
+                    'sell_id'=>$this->Sell->id,
+                    'acc'=>$acc,
+                    'bank_id'=>$bank_id,
+                    'taj_id'=>$taj_id,
+                    'baky'=>$this->Sell->baky,
+                    'sul'=>$this->Sell->baky,
+                    'customer_id'=>$this->Sell->customer_id,]
 
-        );
-    }
-    public function mount($sell=null): void
-    {
-
+            );
+            if ($main) $this->go('kst_count'); else $this->go('acc');
+        } else {
             $this->contForm->fill(['sul_begin'=>now(),'id'=>Main::max('id')+1]);
-            $this->sellForm->fill(['order_date'=>now()]);
+            $this->sellForm->fill(['order_date'=>now(),'place_id'=>Place::first()->id]);
+            $this->showSell=false;
+        }
 
-
-        $this->showSell=false;
     }
     protected function getForms(): array
-    {
-        return array_merge(parent::getForms(),[
-            'contForm'=> $this->makeForm()
-                ->model(Main::class)
-                ->schema($this->getContFormSchema())
-                ->statePath('contData'),
-            'sellForm'=> $this->makeForm()
-                ->model(Sell::class)
-                ->schema($this->getSellFormSchema())
-                ->statePath('sellData'),
-        ]);
-    }
+{
+    return array_merge(parent::getForms(),[
+        'contForm'=> $this->makeForm()
+            ->model(Main::class)
+            ->schema($this->getContFormSchema())
+            ->statePath('contData'),
+        'sellForm'=> $this->makeForm()
+            ->model(Sell::class)
+            ->schema($this->getSellFormSchema())
+            ->statePath('sellData'),
+    ]);
+}
     public function go($who){
         $this->dispatch('gotoitem', test: $who);
     }
@@ -96,6 +108,9 @@ class newCont extends Page implements HasForms
             ->title('تم تحزين البيانات بنجاح')
             ->success()
             ->send();
+        $this->Sell=null;
+        $this->contForm->fill([]);
+
         $this->mount();
     }
     protected function getSellFormSchema(): array
@@ -103,9 +118,6 @@ class newCont extends Page implements HasForms
         return [
         Section::make()
         ->schema([
-          Section::make()
-            ->schema([
-
                 DatePicker::make('order_date')
                     ->extraAttributes([
                         'wire:keydown.enter' => "\$dispatch('gotoitem', { test: 'customer_id' })",
@@ -136,6 +148,7 @@ class newCont extends Page implements HasForms
                     ->id('customer_id'),
                 Select::make('place_id')
                     ->prefix('نقطة البيع')
+
                     ->hiddenLabel()
                     ->relationship('Place','name')
                     ->live()
@@ -157,20 +170,13 @@ class newCont extends Page implements HasForms
                 Hidden::make('single'),
                 Hidden::make('baky'),
                 Hidden::make('user_id'),
-
-
-            ])
-            ->columns(4)
-            ->columnSpan('full'),
-        Section::make()
-            ->schema([
                 TableRepeater::make('Sell_tran')
                     ->hiddenLabel()
                     ->required()
                     ->addActionLabel('اضافة صنف')
                     ->relationship()
                     ->headers([
-                        Header::make('رقم الصنف')
+                        Header::make('الصنف')
                             ->width('46%'),
                         Header::make('الكمية')
                             ->width('12%'),
@@ -203,22 +209,35 @@ class newCont extends Page implements HasForms
                                     ->contains($value);
                             })
                             ->afterStateUpdated(function ($state,Set $set,Get $get){
-                                $set('price1',Price_sell::where('item_id',$state)
-                                    ->where('price_type_id',3)->first()->price1);
+                                $p=Price_sell::where('item_id',$state)
+                                    ->where('price_type_id',3)->first()->price1;
+                                $set('price1',$p);
                                 $set('stock1',Place_stock::where('place_id',$get('../../place_id'))
                                     ->where('item_id',$state)->first()->stock1);
-                                $set('q1',null);
-                                $set('sub_tot',null);
+                                $set('q1',1);
+                                $set('sub_tot',1*$p);
                                 $set('barcode_id',Item::find($state)->barcode);
+                                $total=0;
+                                foreach ($get('../../Sell_tran') as $item){
+                                    if ($item['q1'] && $item['price1'] && $item['q1']>0 && $item['price1']>0 ) {
+
+                                        $total +=round($item['q1'] * $item['price1'],3);
+                                    }
+                                }
+                                $set('../../tot',$total);
+                                $set('../../total',$total);
+                                $set('../../baky',$total);
 
                             })
                         ,
 
                         TextInput::make('q1')
                             ->numeric()
+                            ->minValue(1)
                             ->live(onBlur: true)
                             ->extraInputAttributes(['tabindex' => 1])
                             ->afterStateUpdated(function ($state,Set $set,Get $get,$old,$operation){
+                                if ($state<1) {$set('q1',null);$set('sub_tot',null); return;}
                                 if ($state > $get('stock1')) {
                                     $set('q1',null);
                                     Notification::make()
@@ -232,11 +251,15 @@ class newCont extends Page implements HasForms
                             ->required(),
                         TextInput::make('price1')
                             ->numeric()
-                            ->afterStateUpdated(function (Set $set,Get $get){
+                            ->minValue(1)
+                            ->afterStateUpdated(function (Set $set,Get $get,$state){
+                                if ($state<1) {$set('p1',null);$set('sub_tot',null); return;}
                                 if ($get('price1') && $get('q1')) $set('sub_tot',$get('price1')*$get('q1'));
                             })
                             ->required() ,
                         TextInput::make('stock1')
+
+                            ->readOnly()
                             ->dehydrated(false),
                         TextInput::make('sub_tot')
                             ->readOnly(),
@@ -259,7 +282,8 @@ class newCont extends Page implements HasForms
                     ->afterStateUpdated(function ($state,Set $set,Get $get){
                         $total=0;
                         foreach ($state as $item){
-                            if ($item['q1'] && $item['price1']) {
+                            if ($item['q1'] && $item['price1'] && $item['q1']>0 && $item['price1']>0 ) {
+
                                 $total +=round($item['q1'] * $item['price1'],3);
                             }
                         }
@@ -274,9 +298,8 @@ class newCont extends Page implements HasForms
                     Action::make('store')
                         ->label('تخزين')
                         ->color('success')
-                        ->action(function (Set $set){
+                        ->action(function (Set $set,$livewire){
                             $this->sellForm->validate();
-
                             $set('price_type_id',3);
                             $set('single',1);
                             $set('user_id',Auth::id());
@@ -293,12 +316,24 @@ class newCont extends Page implements HasForms
                             $set('tot',null);
                             $set('customer_id',null);
                             $this->Sell=Sell::find($sell->id);
-                            $this->contForm->fill(['sul_begin'=>now(),'id'=>Main::max('id')+1,'sell_id'=>$this->Sell->id,
-                                    'acc'=>'222','baky'=>$this->Sell->baky]
+                            $main=Main::where('customer_id',$this->Sell->customer_id)->first();
+                            if ($main) {$bank_id=$main->bank_id;$taj_id=$main->taj_id;$acc=$main->acc;}
+                            else {$bank_id=null;$acc=null;$taj_id=null;}
+                            $this->contForm->fill([
+                                'sul_begin'=>now(),
+                                    'id'=>Main::max('id')+1,
+                                    'sell_id'=>$this->Sell->id,
+                                    'acc'=>$acc,
+                                    'bank_id'=>$bank_id,
+                                    'taj_id'=>$taj_id,
+                                    'baky'=>$this->Sell->baky,
+                                    'sul'=>$this->Sell->baky,
+                                    'customer_id'=>$this->Sell->customer_id,]
 
                             );
-                            //$this->dispatch('fillSell',$sell);
-                            $this->showSell=false;
+
+                         //   $this->showSell=false;
+
                         }),
                     Action::make('cancel')
                         ->label('تجاهل')
@@ -313,11 +348,11 @@ class newCont extends Page implements HasForms
 
                 ])->columnSpan('full')
             ])
-            ->columnSpan('full'),
-    ])->columns(8)
-        ->hidden(fn(): bool => !$this->showSell)
-            ];
+        ->columns(4)
 
+
+         ->hidden(fn(): bool => !$this->showSell)
+      ];
     }
     protected function getContFormSchema(): array
     {
@@ -325,36 +360,51 @@ class newCont extends Page implements HasForms
             Section::make()
                 ->schema([
                     Select::make('sell_id')
-                        ->label('فاتورة المبيعات')
+                        ->hiddenLabel()
+                        ->prefix('الفاتورة')
                         ->relationship('Sell','name',modifyQueryUsing: fn (Builder $query) =>
                         $query->WhereDoesntHave('Main')->where('price_type_id','=',3),)
                         ->getOptionLabelFromRecordUsing(fn (Model $record) => "{$record->id} {$record->Customer->name} {$record->total}")
                         ->searchable()
                         ->preload()
                         ->live()
-
                         ->required()
-                        ->columnSpan(3)
+                        ->suffixAction(
+                            Action::make('copyCostToPrice')
+                                ->icon('heroicon-m-plus')
+
+                                ->url(fn (): string =>
+                                route('filament.admin.pages.new-sell')),
+                        )
+
+                        ->afterStateUpdated(function ($state,Set $set){
+                            $this->Sell=Sell::find($state);
+                            $set('total',$this->Sell->total);
+                            $set('pay',$this->Sell->pay);
+                            $set('baky',$this->Sell->baky);
+                            $set('sul',$this->Sell->baky);
+                            $set('id',Main::Max('id')+1);
+                            $set('customer_id',$this->Sell->customer_id);
+                            $main=Main::where('customer_id',$this->Sell->customer_id)->first();
+                            if ($main) {$set('bank_id',$main->bank_id);
+                                $set('taj_id',$main->taj_id);
+                                $set('acc',$main->acc);}
+
+                            $this->go('main_id');
+                        })
+                        ->columnSpan('full')
 
                         ,
                     Hidden::make('customer_id'),
-                    \Filament\Forms\Components\Actions::make([
-                    Action::make('newnew')
-                     ->action(function (){
-                       $this->showSell=true;
-                         //  $this->dispatch('open-modal', id: 'create-sell');
-                     })
-                     ->label('فاتورة جديدة'),
-                    ])->verticalAlignment(VerticalAlignment::End),
+
                     TextInput::make('baky')
-                        ->afterStateHydrated(function (TextInput $component){
-                          if ($this->Sell)  $component->state($this->Sell->baky);
-                        })
-                        ->label('الاجمالي')
+                        ->prefix('الاجمالي')
+                        ->hiddenLabel()
                         ->columnSpan(2)
                         ->disabled(),
                     TextInput::make('id')
-                        ->label('رقم العقد')
+                        ->prefix('رقم العقد')
+                        ->hiddenLabel()
                         ->columnSpan(2)
                         ->required()
                         ->unique(ignoreRecord: true)
@@ -374,7 +424,8 @@ class newCont extends Page implements HasForms
                 ->schema([
 
                     Select::make('bank_id')
-                        ->label('المصرف')
+                        ->prefix('المصرف')
+                        ->hiddenLabel()
                         ->columnSpan(4)
                         ->relationship('Bank','BankName')
                         ->searchable()
@@ -435,7 +486,6 @@ class newCont extends Page implements HasForms
                         ->afterStateUpdated(function ($state,Set $set){
                             $set('taj_id',Bank::find($state)->taj_id);
                             $this->go('acc');
-
                         })
                         ->id('bank_id')
                         ->required(),
@@ -444,15 +494,14 @@ class newCont extends Page implements HasForms
 
                     TextInput::make('acc')
                         ->columnSpan(4)
-                        ->label('رقم الحساب')
+                        ->prefix('رقم الحساب')
+                        ->hiddenLabel()
                         ->required()
-
-
-
                         ->id('acc')
                         ->extraAttributes(['wire:keydown.enter'=>'$dispatch("gotoitem", {test: "sul_begin"})',]),
                     DatePicker::make('sul_begin')
                         ->required()
+
                         ->label('تاريخ العقد')
                         ->columnSpan(2)
                         ->maxDate(now())
@@ -465,40 +514,57 @@ class newCont extends Page implements HasForms
                         ->live(onBlur: true)
                         ->readOnly()                     ,
                     TextInput::make('kst_count')
-                        ->label('عدد الأقساط')
+                        ->prefix('عدد الأقساط')
+                        ->hiddenLabel()
                         ->columnSpan(2)
                         ->live(onBlur: true)
                         ->afterStateUpdated(function (Get $get,Set $set) {
                             $val=$get('sul') / $get('kst_count');
+
                             $set('kst', $val);
+
                         })
                         ->required()
                         ->extraAttributes(['wire:keydown.enter'=>'$dispatch("gotoitem", {test: "kst"})',])
                         ->id('kst_count'),
                     TextInput::make('kst')
                         ->columnSpan(2)
-                        ->label('القسط')
+                        ->prefix('القسط')
+                        ->hiddenLabel()
                         ->id('kst')
                         ->extraAttributes(['wire:keydown.enter'=>'$dispatch("gotoitem", {test: "notes"})',])
                         ->required(),
                     TextInput::make('notes')
                         ->label('ملاحظات')
                         ->columnSpan('full')
-                        ->extraAttributes(['x-on:keyup.enter'=>"\$wire.store",])
+
                         ->id('notes')
                         ->columnSpanFull(),
                     \Filament\Forms\Components\Actions::make([
-                        Action::make('store')
+                        Action::make('storeCont')
                             ->label('تخزين')
-                            ->color('success')
+
                             ->action(function (){
-                                $this->store();
-                            }),
-                        Action::make('cancel')
+                                $this->contForm->validate();
+                                Main::create(collect($this->contData)->except(['total','pay','baky'])->toArray());
+                                Notification::make()
+                                    ->title('تم تحزين البيانات بنجاح')
+                                    ->success()
+                                    ->send();
+                                $this->Sell=null;
+                                $this->contForm->fill([]);
+                            })
+                            ->color('success')
+                            ,
+                        Action::make('cancelCont')
                             ->label('تجاهل')
                             ->color('info')
+
                             ->action(function (){
+
+
                                 $this->mount();
+
                             }),
 
                     ])->columnSpan('full')
