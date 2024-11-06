@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Livewire\Traits\Raseed;
 use App\Models\Bank;
 use App\Models\Customer;
 use App\Models\Item;
@@ -14,6 +15,7 @@ use App\Models\Sell_tran;
 use Awcodes\TableRepeater\Components\TableRepeater;
 use Awcodes\TableRepeater\Header;
 use Filament\Forms\Components\Actions\Action;
+use Filament\Forms\Components\Component;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Section;
@@ -21,6 +23,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Notifications\Notification;
@@ -29,10 +32,13 @@ use Filament\Support\Enums\VerticalAlignment;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\On;
+use Closure;
 
 class newCont extends Page implements HasForms
 {
     use InteractsWithForms;
+    use Raseed;
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     protected static string $view = 'filament.pages.new-cont';
@@ -46,12 +52,25 @@ class newCont extends Page implements HasForms
     public $sellData;
     public $showSell=false;
 
-
+    public  $sell_id;
     public $Sell;
-    public function mount(): void
+    #[On('fillSell')]
+    public function fillSell($sell)
     {
-        $this->contForm->fill(['sul_begin'=>now(),'id'=>Main::max('id')+1]);
-        $this->sellForm->fill(['order_date'=>now()]);
+
+        $this->Sell=Sell::find($sell['id']);
+        $this->contForm->fill(['sul_begin'=>now(),'id'=>Main::max('id')+1,'sell_id'=>$this->Sell->id,
+                'acc'=>'222','baky'=>$this->Sell->baky]
+
+        );
+    }
+    public function mount($sell=null): void
+    {
+
+            $this->contForm->fill(['sul_begin'=>now(),'id'=>Main::max('id')+1]);
+            $this->sellForm->fill(['order_date'=>now()]);
+
+
         $this->showSell=false;
     }
     protected function getForms(): array
@@ -133,13 +152,11 @@ class newCont extends Page implements HasForms
                     ->hiddenLabel()
                     ->columnSpan(2)
                     ->readOnly(),
-                Hidden::make('price_type_id')
-                    ->default(3),
-
+                Hidden::make('price_type_id'),
                 Hidden::make('total'),
-                Hidden::make('single')->default(1),
+                Hidden::make('single'),
                 Hidden::make('baky'),
-                Hidden::make('user_id')->default(Auth::id()),
+                Hidden::make('user_id'),
 
 
             ])
@@ -186,13 +203,13 @@ class newCont extends Page implements HasForms
                                     ->contains($value);
                             })
                             ->afterStateUpdated(function ($state,Set $set,Get $get){
-                                $set('p1',Price_sell::where('item_id',$state)
+                                $set('price1',Price_sell::where('item_id',$state)
                                     ->where('price_type_id',3)->first()->price1);
                                 $set('stock1',Place_stock::where('place_id',$get('../../place_id'))
                                     ->where('item_id',$state)->first()->stock1);
                                 $set('q1',null);
                                 $set('sub_tot',null);
-                                $set('barcode_id',Item::find($state)->barcode_id);
+                                $set('barcode_id',Item::find($state)->barcode);
 
                             })
                         ,
@@ -210,13 +227,13 @@ class newCont extends Page implements HasForms
                                         ->send();
                                     return;
                                 }
-                                if ($get('p1') && $get('q1')) $set('sub_tot',$get('p1')*$get('q1'));
+                                if ($get('price1') && $get('q1')) $set('sub_tot',$get('price1')*$get('q1'));
                             })
                             ->required(),
-                        TextInput::make('p1')
+                        TextInput::make('price1')
                             ->numeric()
                             ->afterStateUpdated(function (Set $set,Get $get){
-                                if ($get('p1') && $get('q1')) $set('sub_tot',$get('p1')*$get('q1'));
+                                if ($get('price1') && $get('q1')) $set('sub_tot',$get('price1')*$get('q1'));
                             })
                             ->required() ,
                         TextInput::make('stock1')
@@ -234,16 +251,16 @@ class newCont extends Page implements HasForms
                         if (!$get('place_id')) return false;
                         if ($state)
                             foreach ($state as $item) {
-                                if (!$item['item_id'] || !$item['q1'] || !$item['p1']
-                                || $item['q1']==0 || $item['p1']==0) {$flag=false; break;}
+                                if (!$item['item_id'] || !$item['q1'] || !$item['price1']
+                                || $item['q1']==0 || $item['price1']==0) {$flag=false; break;}
                             }
                         return $flag;
                     })
                     ->afterStateUpdated(function ($state,Set $set,Get $get){
                         $total=0;
                         foreach ($state as $item){
-                            if ($item['q1'] && $item['p1']) {
-                                $total +=round($item['q1'] * $item['p1'],3);
+                            if ($item['q1'] && $item['price1']) {
+                                $total +=round($item['q1'] * $item['price1'],3);
                             }
                         }
                         $set('tot',$total);
@@ -258,20 +275,29 @@ class newCont extends Page implements HasForms
                         ->label('تخزين')
                         ->color('success')
                         ->action(function (Set $set){
+                            $this->sellForm->validate();
 
-                          //  $id=Sell::create($this->sellData->except(['Sell_tran']));
+                            $set('price_type_id',3);
+                            $set('single',1);
+                            $set('user_id',Auth::id());
+                            $sell=Sell::create( collect($this->sellData)->except(['Sell_tran'])->toArray());
                             foreach ($this->sellData['Sell_tran'] as $item){
-                                info($item['sell_id']);
-                                $item['sell_id']=101;
-                                info($item['sell_id']);
-                            }
-                            info($this->sellData['Sell_tran']);
-                            return;
 
+                                $item['sell_id']=$sell->id;
+                                $tran_id=Sell_tran::create(collect($item)->except(['stock1'])->toArray());
+                                $this->decAll($tran_id->id,$sell->id,$item['item_id'],$sell->place_id,$item['q1'],0);
+                                $this->setPriceSell($item['item_id'],$sell->price_type_id,$sell->single,$item['price1'],0);
+                            }
                             $set('Sell_tran',null);
                             $set('place_id',null);
                             $set('tot',null);
                             $set('customer_id',null);
+                            $this->Sell=Sell::find($sell->id);
+                            $this->contForm->fill(['sul_begin'=>now(),'id'=>Main::max('id')+1,'sell_id'=>$this->Sell->id,
+                                    'acc'=>'222','baky'=>$this->Sell->baky]
+
+                            );
+                            //$this->dispatch('fillSell',$sell);
                             $this->showSell=false;
                         }),
                     Action::make('cancel')
@@ -306,18 +332,11 @@ class newCont extends Page implements HasForms
                         ->searchable()
                         ->preload()
                         ->live()
+
                         ->required()
                         ->columnSpan(3)
-                        ->afterStateUpdated(function ($state,Set $set){
-                            $this->Sell=Sell::find($state);
-                            $set('total',$this->Sell->total);
-                            $set('pay',$this->Sell->pay);
-                            $set('baky',$this->Sell->baky);
-                            $set('sul',$this->Sell->baky);
-                            $set('id',Main::Max('id')+1);
-                            $set('customer_id',$this->Sell->customer_id);
-                            $this->go('main_id');
-                        }),
+
+                        ,
                     Hidden::make('customer_id'),
                     \Filament\Forms\Components\Actions::make([
                     Action::make('newnew')
@@ -328,6 +347,9 @@ class newCont extends Page implements HasForms
                      ->label('فاتورة جديدة'),
                     ])->verticalAlignment(VerticalAlignment::End),
                     TextInput::make('baky')
+                        ->afterStateHydrated(function (TextInput $component){
+                          if ($this->Sell)  $component->state($this->Sell->baky);
+                        })
                         ->label('الاجمالي')
                         ->columnSpan(2)
                         ->disabled(),
@@ -424,6 +446,9 @@ class newCont extends Page implements HasForms
                         ->columnSpan(4)
                         ->label('رقم الحساب')
                         ->required()
+
+
+
                         ->id('acc')
                         ->extraAttributes(['wire:keydown.enter'=>'$dispatch("gotoitem", {test: "sul_begin"})',]),
                     DatePicker::make('sul_begin')
