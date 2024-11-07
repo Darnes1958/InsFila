@@ -127,7 +127,7 @@ class WrongkstResource extends Resource
 
             ])
             ->checkIfRecordIsSelectableUsing(
-                fn (Model $record): bool => $record->status->value === 'غير مرجع',
+                fn (Model $record): bool => $record->status->value === 1,
             )
             ->filters([
                 //
@@ -138,7 +138,7 @@ class WrongkstResource extends Resource
                 ->icon('heroicon-o-check')
                 ->iconButton()
                 ->visible(function (Model $record): bool {
-                    return $record->status->value=='غير مرجع';
+                    return $record->status->value==1;
                 })
                 ->color('success')
                 ->form([
@@ -166,7 +166,7 @@ class WrongkstResource extends Resource
                             'kst_date'=>self::getKst_date($data['main_id']),
                             'haf_id'=>$wr->haf_id,
                         ]);
-                        $wr->status='مصحح';
+                        $wr->status=3;
                         $wr->save();
 
                     }
@@ -194,7 +194,7 @@ class WrongkstResource extends Resource
                                 'haf_id' => $item->haf_id,
                                 'user_id' => Auth::id(),
                             ]);
-                            $item->status='مرجع';
+                            $item->status=2;
                             $item->save();
 
                         }

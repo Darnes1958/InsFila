@@ -9,4 +9,8 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateOverkst extends CreateRecord
 {
     protected static string $resource = OverkstResource::class;
+    protected function getRedirectUrl(): string
+    {
+        return static::getResource()::getUrl('index');
+    }
 }

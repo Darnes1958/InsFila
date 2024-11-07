@@ -2,14 +2,19 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\Status;
+use App\Enums\Tar_type;
 use App\Filament\Resources\OverkstResource\Pages;
 use App\Filament\Resources\OverkstResource\RelationManagers;
 use App\Livewire\Forms\TarForm;
 use App\Livewire\Traits\AksatTrait;
+use App\Livewire\Traits\PublicTrait;
 use App\Models\Main;
 use App\Models\Overkst;
 use App\Models\Tarkst;
 use Filament\Forms;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -30,7 +35,7 @@ class OverkstResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationLabel='خصم بالفائض';
 
-    use AksatTrait;
+    use AksatTrait,PublicTrait;
 
 
     protected static ?int $navigationSort = 5;
@@ -39,8 +44,15 @@ class OverkstResource extends Resource
     {
         return $form
             ->schema([
-                //
-            ]);
+                Section::make()
+                 ->schema([
+                     self::getMainSelectFromComponent(),
+                     self::getDateFromComponent(),
+                     self::getKstFromComponent(),
+                     Hidden::make('user_id')
+                         ->default(Auth::id())
+                 ])->columnSpan(1)
+            ])->columns(3);
     }
 
     public static function table(Table $table): Table
@@ -63,7 +75,6 @@ class OverkstResource extends Resource
                 TextColumn::make('kst')
                     ->label('المبلغ'),
                 TextColumn::make('status')
-                    ->color(fn(Model $record): string=>$record->status==='مرجع'?'success':'danger')
                     ->label('الحالة'),
                 TextColumn::make('haf_id')
                     ->label('رقم الحافظة'),
@@ -83,7 +94,7 @@ class OverkstResource extends Resource
                     }),
             ])
             ->checkIfRecordIsSelectableUsing(
-                fn (Model $record): bool => $record->status === 'غير مرجع',
+                fn (Model $record): bool => $record->status->value ==1,
             )
             ->bulkActions([
                 BulkAction::make('ترجيع')
@@ -97,13 +108,12 @@ class OverkstResource extends Resource
                                     'main_id' => $item->main_id,
                                     'tar_date' => date('Y-m-d'),
                                     'kst' => $item->kst,
-                                    'tar_type' => 'من الفائض',
+                                    'tar_type' => Tar_type::من_الفائض,
                                     'from_id' => $item->id,
                                     'haf_id' => $item->haf_id,
                                     'user_id' => Auth::id(),
                                 ]);
-                                $item->update(['tar_id'=>$res->id,'status'=>'مرجع']);
-                                $item->update(['tar_id'=>$res->id,'status'=>'مرجع']);
+                                $item->update(['tar_id'=>$res->id,'status'=>Status::مرجع]);
                                 $count=Tarkst::where('main_id',$item->main_id)->count();
                                 $sum=Tarkst::where('main_id',$item->main_id)->sum('kst');
                                 Main::where('id',$item->main_id)->update([

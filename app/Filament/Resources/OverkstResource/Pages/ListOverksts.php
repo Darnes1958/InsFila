@@ -11,5 +11,13 @@ class ListOverksts extends ListRecords
     protected static string $resource = OverkstResource::class;
     protected ?string $heading='أقساط مخصومة بالفائض';
 
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\CreateAction::make()->label('اضافة'),
+        ];
+
+    }
+
 
 }

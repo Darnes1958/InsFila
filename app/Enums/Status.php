@@ -5,11 +5,12 @@ use Filament\Support\Contracts\HasLabel;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasColor;
 
-enum Status: string implements HasLabel,HasColor
+enum Status: int implements HasLabel,HasColor
 {
-  case مرجع = 'مرجع';
-  case غير_مرجع = 'غير مرجع';
-    case مصحح = 'مصحح';
+  case غير_مرجع = 1;
+  case مرجع = 2;
+
+  case مصحح = 3;
 
 
   public function getLabel(): ?string

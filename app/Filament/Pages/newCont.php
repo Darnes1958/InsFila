@@ -18,6 +18,7 @@ use Awcodes\TableRepeater\Header;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Component;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -51,8 +52,7 @@ class newCont extends Page implements HasForms
     }
 
     public $contData;
-    public $sellData;
-    public $showSell=false;
+
 
 
     public $Sell;
@@ -80,8 +80,7 @@ class newCont extends Page implements HasForms
             if ($main) $this->go('kst_count'); else $this->go('acc');
         } else {
             $this->contForm->fill(['sul_begin'=>now(),'id'=>Main::max('id')+1]);
-            $this->sellForm->fill(['order_date'=>now(),'place_id'=>Place::first()->id]);
-            $this->showSell=false;
+
         }
 
     }
@@ -92,10 +91,7 @@ class newCont extends Page implements HasForms
             ->model(Main::class)
             ->schema($this->getContFormSchema())
             ->statePath('contData'),
-        'sellForm'=> $this->makeForm()
-            ->model(Sell::class)
-            ->schema($this->getSellFormSchema())
-            ->statePath('sellData'),
+
     ]);
 }
     public function go($who){
@@ -113,464 +109,224 @@ class newCont extends Page implements HasForms
 
         $this->mount();
     }
-    protected function getSellFormSchema(): array
-    {
-        return [
-        Section::make()
-        ->schema([
-                DatePicker::make('order_date')
-                    ->extraAttributes([
-                        'wire:keydown.enter' => "\$dispatch('gotoitem', { test: 'customer_id' })",
-                    ])
-                    ->default(function (){
-                        return now();
-                    })
-                    ->id('order_date')
-                    ->autofocus()
-                    ->live()
-                    ->hiddenLabel()
-                    ->prefix('التاريخ')
-                    ->columnSpan(2)
-                    ->required(),
-                Select::make('customer_id')
-                    ->prefix('الزبون')
-                    ->hiddenLabel()
-                    ->relationship('Customer', 'name')
-                    ->searchable()
-                    ->preload()
-                    ->live()
-                    ->required()
-                    ->columnSpan(2)
-                    ->extraAttributes([
-                        'wire:change' => "\$dispatch('gotoitem', { test: 'place_id' })",
-                        'wire:keydown.enter' => "\$dispatch('gotoitem', { test: 'place_id' })",
-                    ])
-                    ->id('customer_id'),
-                Select::make('place_id')
-                    ->prefix('نقطة البيع')
 
-                    ->hiddenLabel()
-                    ->relationship('Place','name')
-                    ->live()
-                    ->required()
-                    ->columnSpan(2)
-                    ->extraAttributes([
-                        'wire:change' => "\$dispatch('gotoitem', { test: 'price_type_id' })",
-                        'wire:keydown..enter' => "\$dispatch('goto', { test: 'price_type_id' })",
-                    ])
-                    ->id('place_id'),
-
-                TextInput::make('tot')
-                    ->prefix('إجمالي الفاتورة')
-                    ->hiddenLabel()
-                    ->columnSpan(2)
-                    ->readOnly(),
-                Hidden::make('price_type_id'),
-                Hidden::make('total'),
-                Hidden::make('single'),
-                Hidden::make('baky'),
-                Hidden::make('user_id'),
-                TableRepeater::make('Sell_tran')
-                    ->hiddenLabel()
-                    ->required()
-                    ->addActionLabel('اضافة صنف')
-                    ->relationship()
-                    ->headers([
-                        Header::make('الصنف')
-                            ->width('46%'),
-                        Header::make('الكمية')
-                            ->width('12%'),
-                        Header::make('السعر')
-                            ->width('15%'),
-                        Header::make('الرصيد')
-                            ->width('12%'),
-                        Header::make('الاجمالي')
-                            ->width('15%'),
-
-                    ])
-                    ->schema([
-                        Select::make('item_id')
-                            ->required()
-                            ->preload()
-                            ->searchable()
-
-                          ->relationship('Item','name',
-                              modifyQueryUsing: fn ($query,Get $get) =>
-                              $query->whereIn('id',
-                                  Place_stock::where('place_id', $get('../../place_id'))
-                                      ->where('stock1','>',0)
-                                      ->pluck('item_id'))
-                          )
-                            //->options(Item::all()->pluck('name','id'))
-                            ->disableOptionWhen(function ($value, $state, Get $get) {
-                                return collect($get('../*.item_id'))
-                                    ->reject(fn($id) => $id == $state)
-                                    ->filter()
-                                    ->contains($value);
-                            })
-                            ->afterStateUpdated(function ($state,Set $set,Get $get){
-                                $p=Price_sell::where('item_id',$state)
-                                    ->where('price_type_id',3)->first()->price1;
-                                $set('price1',$p);
-                                $set('stock1',Place_stock::where('place_id',$get('../../place_id'))
-                                    ->where('item_id',$state)->first()->stock1);
-                                $set('q1',1);
-                                $set('sub_tot',1*$p);
-                                $set('barcode_id',Item::find($state)->barcode);
-                                $total=0;
-                                foreach ($get('../../Sell_tran') as $item){
-                                    if ($item['q1'] && $item['price1'] && $item['q1']>0 && $item['price1']>0 ) {
-
-                                        $total +=round($item['q1'] * $item['price1'],3);
-                                    }
-                                }
-                                $set('../../tot',$total);
-                                $set('../../total',$total);
-                                $set('../../baky',$total);
-
-                            })
-                        ,
-
-                        TextInput::make('q1')
-                            ->numeric()
-                            ->minValue(1)
-                            ->live(onBlur: true)
-                            ->extraInputAttributes(['tabindex' => 1])
-                            ->afterStateUpdated(function ($state,Set $set,Get $get,$old,$operation){
-                                if ($state<1) {$set('q1',null);$set('sub_tot',null); return;}
-                                if ($state > $get('stock1')) {
-                                    $set('q1',null);
-                                    Notification::make()
-                                        ->title('الرصيد لا يسمح')
-                                        ->color('danger')
-                                        ->send();
-                                    return;
-                                }
-                                if ($get('price1') && $get('q1')) $set('sub_tot',$get('price1')*$get('q1'));
-                            })
-                            ->required(),
-                        TextInput::make('price1')
-                            ->numeric()
-                            ->minValue(1)
-                            ->afterStateUpdated(function (Set $set,Get $get,$state){
-                                if ($state<1) {$set('p1',null);$set('sub_tot',null); return;}
-                                if ($get('price1') && $get('q1')) $set('sub_tot',$get('price1')*$get('q1'));
-                            })
-                            ->required() ,
-                        TextInput::make('stock1')
-
-                            ->readOnly()
-                            ->dehydrated(false),
-                        TextInput::make('sub_tot')
-                            ->readOnly(),
-                        Hidden::make('sell_id'),
-                        Hidden::make('barcode_id'),
-                        Hidden::make('user_id')->default(Auth::id()),
-
-                    ])
-                    ->defaultItems(0)
-                    ->addable(function ($state,Get $get){
-                        $flag=true;
-                        if (!$get('place_id')) return false;
-                        if ($state)
-                            foreach ($state as $item) {
-                                if (!$item['item_id'] || !$item['q1'] || !$item['price1']
-                                || $item['q1']==0 || $item['price1']==0) {$flag=false; break;}
-                            }
-                        return $flag;
-                    })
-                    ->afterStateUpdated(function ($state,Set $set,Get $get){
-                        $total=0;
-                        foreach ($state as $item){
-                            if ($item['q1'] && $item['price1'] && $item['q1']>0 && $item['price1']>0 ) {
-
-                                $total +=round($item['q1'] * $item['price1'],3);
-                            }
-                        }
-                        $set('tot',$total);
-                        $set('total',$total);
-                        $set('baky',$total);
-
-                    })
-                    ->live()
-                    ->columnSpan('full'),
-                \Filament\Forms\Components\Actions::make([
-                    Action::make('store')
-                        ->label('تخزين')
-                        ->color('success')
-                        ->action(function (Set $set,$livewire){
-                            $this->sellForm->validate();
-                            $set('price_type_id',3);
-                            $set('single',1);
-                            $set('user_id',Auth::id());
-                            $sell=Sell::create( collect($this->sellData)->except(['Sell_tran'])->toArray());
-                            foreach ($this->sellData['Sell_tran'] as $item){
-
-                                $item['sell_id']=$sell->id;
-                                $tran_id=Sell_tran::create(collect($item)->except(['stock1'])->toArray());
-                                $this->decAll($tran_id->id,$sell->id,$item['item_id'],$sell->place_id,$item['q1'],0);
-                                $this->setPriceSell($item['item_id'],$sell->price_type_id,$sell->single,$item['price1'],0);
-                            }
-                            $set('Sell_tran',null);
-                            $set('place_id',null);
-                            $set('tot',null);
-                            $set('customer_id',null);
-                            $this->Sell=Sell::find($sell->id);
-                            $main=Main::where('customer_id',$this->Sell->customer_id)->first();
-                            if ($main) {$bank_id=$main->bank_id;$taj_id=$main->taj_id;$acc=$main->acc;}
-                            else {$bank_id=null;$acc=null;$taj_id=null;}
-                            $this->contForm->fill([
-                                'sul_begin'=>now(),
-                                    'id'=>Main::max('id')+1,
-                                    'sell_id'=>$this->Sell->id,
-                                    'acc'=>$acc,
-                                    'bank_id'=>$bank_id,
-                                    'taj_id'=>$taj_id,
-                                    'baky'=>$this->Sell->baky,
-                                    'sul'=>$this->Sell->baky,
-                                    'customer_id'=>$this->Sell->customer_id,]
-
-                            );
-
-                         //   $this->showSell=false;
-
-                        }),
-                    Action::make('cancel')
-                        ->label('تجاهل')
-                        ->color('info')
-                        ->action(function (Set $set){
-                            $set('Sell_tran',null);
-                            $set('place_id',null);
-                            $set('tot',null);
-                            $set('customer_id',null);
-                            $this->showSell=false;
-                        }),
-
-                ])->columnSpan('full')
-            ])
-        ->columns(4)
-
-
-         ->hidden(fn(): bool => !$this->showSell)
-      ];
-    }
     protected function getContFormSchema(): array
     {
         return [
-            Section::make()
-                ->schema([
-                    Select::make('sell_id')
-                        ->hiddenLabel()
-                        ->prefix('الفاتورة')
-                        ->relationship('Sell','name',modifyQueryUsing: fn (Builder $query) =>
-                        $query->WhereDoesntHave('Main')->where('price_type_id','=',3),)
-                        ->getOptionLabelFromRecordUsing(fn (Model $record) => "{$record->id} {$record->Customer->name} {$record->total}")
-                        ->searchable()
-                        ->preload()
-                        ->live()
-                        ->required()
-                        ->suffixAction(
-                            Action::make('copyCostToPrice')
-                                ->icon('heroicon-m-plus')
+            Grid::make()
+             ->schema([
+                 Section::make()
+                     ->schema([
+                         Select::make('sell_id')
+                             ->hiddenLabel()
+                             ->prefix('الفاتورة')
+                             ->relationship('Sell','name',modifyQueryUsing: fn (Builder $query) =>
+                             $query->WhereDoesntHave('Main')->where('price_type_id','=',3),)
+                             ->getOptionLabelFromRecordUsing(fn (Model $record) => "{$record->id} {$record->Customer->name} {$record->total}")
+                             ->searchable()
+                             ->preload()
+                             ->live()
+                             ->required()
+                             ->suffixAction(
+                                 Action::make('copyCostToPrice')
+                                     ->icon('heroicon-m-plus')
 
-                                ->url(fn (): string =>
-                                route('filament.admin.pages.new-sell')),
-                        )
+                                     ->url(fn (): string =>
+                                     route('filament.admin.pages.new-sell')),
+                             )
 
-                        ->afterStateUpdated(function ($state,Set $set){
-                            $this->Sell=Sell::find($state);
-                            $set('total',$this->Sell->total);
-                            $set('pay',$this->Sell->pay);
-                            $set('baky',$this->Sell->baky);
-                            $set('sul',$this->Sell->baky);
-                            $set('id',Main::Max('id')+1);
-                            $set('customer_id',$this->Sell->customer_id);
-                            $main=Main::where('customer_id',$this->Sell->customer_id)->first();
-                            if ($main) {$set('bank_id',$main->bank_id);
-                                $set('taj_id',$main->taj_id);
-                                $set('acc',$main->acc);}
+                             ->afterStateUpdated(function ($state,Set $set){
+                                 $this->Sell=Sell::find($state);
+                                 $set('total',$this->Sell->total);
+                                 $set('pay',$this->Sell->pay);
+                                 $set('baky',$this->Sell->baky);
+                                 $set('sul',$this->Sell->baky);
+                                 $set('id',Main::Max('id')+1);
+                                 $set('customer_id',$this->Sell->customer_id);
+                                 $main=Main::where('customer_id',$this->Sell->customer_id)->first();
+                                 if ($main) {$set('bank_id',$main->bank_id);
+                                     $set('taj_id',$main->taj_id);
+                                     $set('acc',$main->acc);}
 
-                            $this->go('main_id');
-                        })
-                        ->columnSpan('full')
+                                 $this->go('main_id');
+                             })
+                             ->columnSpan('full')
 
-                        ,
-                    Hidden::make('customer_id'),
+                         ,
+                         Hidden::make('customer_id'),
 
-                    TextInput::make('baky')
-                        ->prefix('الاجمالي')
-                        ->hiddenLabel()
-                        ->columnSpan(2)
-                        ->disabled(),
-                    TextInput::make('id')
-                        ->prefix('رقم العقد')
-                        ->hiddenLabel()
-                        ->columnSpan(2)
-                        ->required()
-                        ->unique(ignoreRecord: true)
-                        ->unique(table: Main_arc::class)
-                        ->default(Main::max('id')+1)
-                        ->numeric()
-                        ->extraAttributes([
-                            'wire:keydown.enter'=>'$dispatch("gotoitem", {test: "acc"})',
+                         TextInput::make('baky')
+                             ->prefix('الاجمالي')
+                             ->hiddenLabel()
+                             ->columnSpan(2)
+                             ->disabled(),
+                         TextInput::make('id')
+                             ->prefix('رقم العقد')
+                             ->hiddenLabel()
+                             ->columnSpan(2)
+                             ->required()
+                             ->unique(ignoreRecord: true)
+                             ->unique(table: Main_arc::class)
+                             ->default(Main::max('id')+1)
+                             ->numeric()
+                             ->extraAttributes([
+                                 'wire:keydown.enter'=>'$dispatch("gotoitem", {test: "acc"})',
 
-                        ])
-                        ->id('main_id'),
-
-
-                ])
-                ->columns(4),
-            Section::make()
-                ->schema([
-
-                    Select::make('bank_id')
-                        ->prefix('المصرف')
-                        ->hiddenLabel()
-                        ->columnSpan(4)
-                        ->relationship('Bank','BankName')
-                        ->searchable()
-                        ->preload()
-                        ->createOptionForm([
-                            Section::make('ادخال مصارف')
-                                ->description('ادخال بيانات مصرف .. ويمكن ادخال المصرف التجميعي اذا كان غير موجود بالقائمة')
-                                ->schema([
-                                    TextInput::make('BankName')
-                                        ->required()
-                                        ->label('اسم المصرف')
-                                        ->maxLength(255),
-                                    Select::make('taj_id')
-                                        ->relationship('Taj','TajName')
-                                        ->label('المصرف التجميعي')
-                                        ->searchable()
-                                        ->preload()
-                                        ->createOptionForm([
-                                            TextInput::make('TajName')
-                                                ->required()
-                                                ->label('المصرف التجميعي')
-                                                ->maxLength(255),
-                                            TextInput::make('TajAcc')
-                                                ->label('رقم الحساب')
-                                                ->required(),
-                                        ])
-                                        ->required(),
-                                ])
-                        ])
-                        ->editOptionForm([
-                            Section::make('ادخال مصارف')
-                                ->description('ادخال بيانات مصرف .. ويمكن ادخال المصرف التجميعي اذا كان غير موجود بالقائمة')
-                                ->schema([
-                                    TextInput::make('BankName')
-                                        ->required()
-                                        ->label('اسم المصرف')
-                                        ->maxLength(255),
-                                    Select::make('taj_id')
-                                        ->relationship('Taj','TajName')
-                                        ->label('المصرف التجميعي')
-                                        ->searchable()
-                                        ->preload()
-                                        ->createOptionForm([
-                                            TextInput::make('TajName')
-                                                ->required()
-
-                                                ->label('المصرف التجميعي')
-                                                ->maxLength(255),
-                                            TextInput::make('TajAcc')
-                                                ->label('رقم الحساب')
-                                                ->required(),
-                                        ])
-                                        ->required(),
-                                ])
-                        ])
-                        ->createOptionAction(fn ($action) => $action->color('success'))
-                        ->editOptionAction(fn ($action) => $action->color('info'))
-                        ->afterStateUpdated(function ($state,Set $set){
-                            $set('taj_id',Bank::find($state)->taj_id);
-                            $this->go('acc');
-                        })
-                        ->id('bank_id')
-                        ->required(),
-
-                    Hidden::make('taj_id'),
-
-                    TextInput::make('acc')
-                        ->columnSpan(4)
-                        ->prefix('رقم الحساب')
-                        ->hiddenLabel()
-                        ->required()
-                        ->id('acc')
-                        ->extraAttributes(['wire:keydown.enter'=>'$dispatch("gotoitem", {test: "sul_begin"})',]),
-                    DatePicker::make('sul_begin')
-                        ->required()
-
-                        ->label('تاريخ العقد')
-                        ->columnSpan(2)
-                        ->maxDate(now())
-                        ->extraAttributes(['wire:keydown.enter'=>'$dispatch("gotoitem", {test: "kst_count"})',])
-                        ->id('sul_begin'),
-                    TextInput::make('sul')
-                        ->label('قيمة العقد')
-                        ->columnSpan(2)
-                        ->readOnly()
-                        ->live(onBlur: true)
-                        ->readOnly()                     ,
-                    TextInput::make('kst_count')
-                        ->prefix('عدد الأقساط')
-                        ->hiddenLabel()
-                        ->columnSpan(2)
-                        ->live(onBlur: true)
-                        ->afterStateUpdated(function (Get $get,Set $set) {
-                            $val=$get('sul') / $get('kst_count');
-
-                            $set('kst', $val);
-
-                        })
-                        ->required()
-                        ->extraAttributes(['wire:keydown.enter'=>'$dispatch("gotoitem", {test: "kst"})',])
-                        ->id('kst_count'),
-                    TextInput::make('kst')
-                        ->columnSpan(2)
-                        ->prefix('القسط')
-                        ->hiddenLabel()
-                        ->id('kst')
-                        ->extraAttributes(['wire:keydown.enter'=>'$dispatch("gotoitem", {test: "notes"})',])
-                        ->required(),
-                    TextInput::make('notes')
-                        ->label('ملاحظات')
-                        ->columnSpan('full')
-
-                        ->id('notes')
-                        ->columnSpanFull(),
-                    \Filament\Forms\Components\Actions::make([
-                        Action::make('storeCont')
-                            ->label('تخزين')
-
-                            ->action(function (){
-                                $this->contForm->validate();
-                                Main::create(collect($this->contData)->except(['total','pay','baky'])->toArray());
-                                Notification::make()
-                                    ->title('تم تحزين البيانات بنجاح')
-                                    ->success()
-                                    ->send();
-                                $this->Sell=null;
-                                $this->contForm->fill([]);
-                            })
-                            ->color('success')
-                            ,
-                        Action::make('cancelCont')
-                            ->label('تجاهل')
-                            ->color('info')
-
-                            ->action(function (){
+                             ])
+                             ->id('main_id'),
 
 
-                                $this->mount();
+                     ])
+                     ->columnSpan(2)
+                     ->columns(4),
+                 Section::make()
+                     ->schema([
 
-                            }),
+                         Select::make('bank_id')
+                             ->prefix('المصرف')
+                             ->hiddenLabel()
+                             ->columnSpan(4)
+                             ->relationship('Bank','BankName')
+                             ->searchable()
+                             ->preload()
+                             ->createOptionForm([
+                                 Section::make('ادخال مصارف')
+                                     ->description('ادخال بيانات مصرف .. ويمكن ادخال المصرف التجميعي اذا كان غير موجود بالقائمة')
+                                     ->schema([
+                                         TextInput::make('BankName')
+                                             ->required()
+                                             ->label('اسم المصرف')
+                                             ->maxLength(255),
+                                         Select::make('taj_id')
+                                             ->relationship('Taj','TajName')
+                                             ->label('المصرف التجميعي')
+                                             ->searchable()
+                                             ->preload()
+                                             ->createOptionForm([
+                                                 TextInput::make('TajName')
+                                                     ->required()
+                                                     ->label('المصرف التجميعي')
+                                                     ->maxLength(255),
+                                                 TextInput::make('TajAcc')
+                                                     ->label('رقم الحساب')
+                                                     ->required(),
+                                             ])
+                                             ->required(),
+                                     ])
+                             ])
+                             ->editOptionForm([
+                                 Section::make('ادخال مصارف')
+                                     ->description('ادخال بيانات مصرف .. ويمكن ادخال المصرف التجميعي اذا كان غير موجود بالقائمة')
+                                     ->schema([
+                                         TextInput::make('BankName')
+                                             ->required()
+                                             ->label('اسم المصرف')
+                                             ->maxLength(255),
+                                         Select::make('taj_id')
+                                             ->relationship('Taj','TajName')
+                                             ->label('المصرف التجميعي')
+                                             ->searchable()
+                                             ->preload()
+                                             ->createOptionForm([
+                                                 TextInput::make('TajName')
+                                                     ->required()
 
-                    ])->columnSpan('full')
+                                                     ->label('المصرف التجميعي')
+                                                     ->maxLength(255),
+                                                 TextInput::make('TajAcc')
+                                                     ->label('رقم الحساب')
+                                                     ->required(),
+                                             ])
+                                             ->required(),
+                                     ])
+                             ])
+                             ->createOptionAction(fn ($action) => $action->color('success'))
+                             ->editOptionAction(fn ($action) => $action->color('info'))
+                             ->afterStateUpdated(function ($state,Set $set){
+                                 $set('taj_id',Bank::find($state)->taj_id);
+                                 $this->go('acc');
+                             })
+                             ->id('bank_id')
+                             ->required(),
 
-                ])
-                ->columns(4),
+                         Hidden::make('taj_id'),
+
+                         TextInput::make('acc')
+                             ->columnSpan(4)
+                             ->prefix('رقم الحساب')
+                             ->hiddenLabel()
+                             ->required()
+                             ->id('acc')
+                             ->extraAttributes(['wire:keydown.enter'=>'$dispatch("gotoitem", {test: "sul_begin"})',]),
+                         DatePicker::make('sul_begin')
+                             ->required()
+                             ->label('تاريخ العقد')
+                             ->columnSpan(2)
+                             ->maxDate(now())
+                             ->extraAttributes(['wire:keydown.enter'=>'$dispatch("gotoitem", {test: "kst_count"})',])
+                             ->id('sul_begin'),
+                         TextInput::make('sul')
+                             ->label('قيمة العقد')
+                             ->columnSpan(2)
+                             ->readOnly()
+                             ->live(onBlur: true)
+                             ->readOnly()                     ,
+                         TextInput::make('kst_count')
+                             ->prefix('عدد الأقساط')
+                             ->hiddenLabel()
+                             ->columnSpan(2)
+                             ->live(onBlur: true)
+                             ->afterStateUpdated(function (Get $get,Set $set) {
+                                 $val=$get('sul') / $get('kst_count');
+                                 $set('kst', $val);
+                             })
+                             ->required()
+                             ->extraAttributes(['wire:keydown.enter'=>'$dispatch("gotoitem", {test: "kst"})',])
+                             ->id('kst_count'),
+                         TextInput::make('kst')
+                             ->columnSpan(2)
+                             ->prefix('القسط')
+                             ->hiddenLabel()
+                             ->id('kst')
+                             ->extraAttributes(['wire:keydown.enter'=>'$dispatch("gotoitem", {test: "notes"})',])
+                             ->required(),
+                         TextInput::make('notes')
+                             ->label('ملاحظات')
+                             ->columnSpan('full')
+                             ->id('notes')
+                             ->columnSpanFull(),
+                         \Filament\Forms\Components\Actions::make([
+                             Action::make('storeCont')
+                                 ->label('تخزين')
+                                 ->action(function (){
+                                     $this->contForm->validate();
+                                     Main::create(collect($this->contData)->except(['total','pay','baky'])->toArray());
+                                     Notification::make()
+                                         ->title('تم تحزين البيانات بنجاح')
+                                         ->success()
+                                         ->send();
+                                     $this->Sell=null;
+                                     $this->contForm->fill(['sul_begin'=>now(),'id'=>Main::max('id')+1]);
+                                 })
+                                 ->color('success')
+                             ,
+                             Action::make('cancelCont')
+                                 ->label('تجاهل')
+                                 ->color('info')
+
+                                 ->action(function (){
+
+
+                                     $this->mount();
+
+                                 }),
+
+                         ])->columnSpan('full')
+
+                     ])
+                     ->columnSpan(2)
+                     ->columns(4),
+             ])->columns(3)
 
         ];
     }
