@@ -6,6 +6,9 @@ namespace App\Providers;
 use App\Filament\Pages\newCont;
 use Filament\Facades\Filament;
 use Filament\Navigation\NavigationGroup;
+use Filament\Notifications\Livewire\Notifications;
+use Filament\Support\Enums\Alignment;
+use Filament\Support\Enums\VerticalAlignment;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentView;
 use Filament\Tables\Table;
@@ -39,6 +42,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Notifications::alignment(Alignment::Center);
+        Notifications::verticalAlignment(VerticalAlignment::Center);
         Table::$defaultNumberLocale = 'nl';
         FilamentView::registerRenderHook(
             'panels::page.end',
@@ -61,6 +66,8 @@ class AppServiceProvider extends ServiceProvider
         'green' =>  Color::Green,
         'blue' =>  Color::Blue,
         'gray' =>  Color::Gray,
+        'yellow' =>  Color::Yellow,
+        'lime' =>  Color::Lime,
       ]);
         DB::listen(function ($query) {
           // info($query->sql);

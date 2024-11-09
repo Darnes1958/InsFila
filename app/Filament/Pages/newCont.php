@@ -34,6 +34,7 @@ use Filament\Pages\Page;
 use Filament\Support\Enums\VerticalAlignment;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Closure;
@@ -320,7 +321,6 @@ class newCont extends Page implements HasForms
                                      $this->mount();
 
                                  }),
-
                          ])->columnSpan('full')
 
                      ])
