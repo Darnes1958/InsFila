@@ -10,10 +10,12 @@ use App\Livewire\Forms\TarForm;
 use App\Livewire\Traits\AksatTrait;
 use App\Livewire\Traits\PublicTrait;
 use App\Models\Main;
+use App\Models\Main_arc;
 use App\Models\Overkst;
 use App\Models\Tarkst;
 use Filament\Forms;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\MorphToSelect;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -46,7 +48,19 @@ class OverkstResource extends Resource
             ->schema([
                 Section::make()
                  ->schema([
-                     self::getMainSelectFromComponent(),
+                   MorphToSelect::make('overkstable')
+                     ->types([
+                        MorphToSelect\Type::make(Main::class)
+                            ->getOptionLabelFromRecordUsing(fn (Main $record): string => "{$record->Customer->name} {$record->sul}")
+                            ->label('العقود القائمة'),
+                         MorphToSelect\Type::make(Main_arc::class)
+                             ->getOptionLabelFromRecordUsing(fn (Main_arc $record) => "{$record->Customer->name} {$record->sul}")
+                             ->label('الأرشيف'),
+                     ])
+                     ->searchable()
+                     ->preload()
+                     ->label('فائض من'),
+                     //  self::getMainSelectFromComponent(),
                      self::getDateFromComponent(),
                      self::getKstFromComponent(),
                      Hidden::make('user_id')
@@ -62,12 +76,10 @@ class OverkstResource extends Resource
             ->columns([
                 TextColumn::make('id')
                     ->label('الرقم الألي'),
-                TextColumn::make('main_id')
-                  ->label('رقم العقد'),
-                TextColumn::make('Main.Customer.name')
-                    ->searchable()
-                    ->sortable()
+
+                TextColumn::make('overkstable.Customer.name')
                     ->label('الاسم'),
+
                 TextColumn::make('over_date')
                     ->searchable()
                     ->sortable()
@@ -76,9 +88,8 @@ class OverkstResource extends Resource
                     ->label('المبلغ'),
                 TextColumn::make('status')
                     ->label('الحالة'),
-                TextColumn::make('haf_id')
-                    ->label('رقم الحافظة'),
-
+                TextColumn::make('overkstable_type')
+                    ->label('حالة العقد'),
             ])
             ->filters([
                 //
@@ -86,11 +97,11 @@ class OverkstResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make()
                  ->visible(function (Model $record) {
-                     return $record->haf_id==0;
+                     return $record->haf_id==0 && $record->status==Status::غير_مرجع;
                  }),
                 Tables\Actions\DeleteAction::make()
                     ->visible(function (Model $record) {
-                        return $record->haf_id==0;
+                        return $record->haf_id==0 && $record->status==Status::غير_مرجع;
                     }),
             ])
             ->checkIfRecordIsSelectableUsing(
@@ -104,16 +115,17 @@ class OverkstResource extends Resource
                     ->requiresConfirmation()
                     ->action(function (Collection $records) {
                             foreach ($records as  $item){
-                                $res=Tarkst::create([
-                                    'main_id' => $item->main_id,
+                                $item->tarkst()->create([
+                                    'main_id' => $item->overkstable_id,
                                     'tar_date' => date('Y-m-d'),
                                     'kst' => $item->kst,
                                     'tar_type' => Tar_type::من_الفائض,
-                                    'from_id' => $item->id,
                                     'haf_id' => $item->haf_id,
                                     'user_id' => Auth::id(),
                                 ]);
-                                $item->update(['tar_id'=>$res->id,'status'=>Status::مرجع]);
+
+                                $item->update(['status'=>Status::مرجع]);
+
                                 $count=Tarkst::where('main_id',$item->main_id)->count();
                                 $sum=Tarkst::where('main_id',$item->main_id)->sum('kst');
                                 Main::where('id',$item->main_id)->update([

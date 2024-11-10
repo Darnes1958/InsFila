@@ -20,8 +20,9 @@ enum Status: int implements HasLabel,HasColor
   public function getColor(): string | array | null
   {
     return match ($this) {
-      self::مرجع => 'success',
+
       self::غير_مرجع => 'info',
+      self::مرجع => 'success',
       self::مصحح => 'primary',
     };
   }

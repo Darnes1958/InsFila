@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 
+use App\Filament\Pages\KsmKst;
 use App\Filament\Pages\newCont;
 use Filament\Facades\Filament;
 use Filament\Navigation\NavigationGroup;
@@ -51,6 +52,7 @@ class AppServiceProvider extends ServiceProvider
             scopes: [
                 \App\Filament\Resources\MainResource::class,
                 newCont::class,
+                KsmKst::class,
             ]
         );
         FilamentView::registerRenderHook(

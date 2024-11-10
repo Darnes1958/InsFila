@@ -11,6 +11,21 @@
                 $("#kst").focus();
                 $("#kst").select();
             }
+            if (postid == 'ksm_date') {
+
+                $("#ksm_date").focus();
+                $("#ksm_date").select();
+            }
+            if (postid == 'ksm') {
+
+                $("#ksm").focus();
+                $("#ksm").select();
+            }
+            if (postid == 'kst') {
+
+                $("#kst").focus();
+                $("#kst").select();
+            }
             if (postid == 'kst_count') {
 
                 $("#kst_count").focus();

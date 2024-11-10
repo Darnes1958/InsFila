@@ -8,7 +8,11 @@ use Illuminate\Support\Facades\Auth;
 
 class Main_arc extends Model
 {
-  public function Bank(){
+    public function overkstable()
+    {
+        return $this->morphMany(Overkst::class, 'overkstable');
+    }
+    public function Bank(){
     return $this->belongsTo(Bank::class);
   }
   public function Customer(){

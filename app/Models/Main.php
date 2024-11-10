@@ -20,6 +20,10 @@ class Main extends Model
     {
         return $this->morphMany(Tarkst::class, 'tarkstable');
     }
+    public function overkstable()
+    {
+        return $this->morphMany(Overkst::class, 'overkstable');
+    }
   public function Bank(){
     return $this->belongsTo(Bank::class);
   }
@@ -42,9 +46,7 @@ class Main extends Model
     }
 
 
-    public function Overkst(){
-        return $this->hasMany(Overkst::class);
-    }
+
     public function Stop(){
         return $this->hasOne(Stop::class);
 }

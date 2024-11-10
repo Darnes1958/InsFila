@@ -69,7 +69,7 @@ class TarKstResource extends Resource
                 Tables\Actions\DeleteAction::make()
                  ->modalHeading('الغاء الترجيع')
                  ->after(function (Model $record){
-                     if ($record->tar_type==Tar_type::من_الخطأ){
+                     if ($record->tar_type==Tar_type::من_الخطأ || $record->tar_type==Tar_type::من_الفائض){
                          $record->tarkstable->status=Status::غير_مرجع;
                          $record->tarkstable->save();
                      }
@@ -88,7 +88,7 @@ class TarKstResource extends Resource
                         ->requiresConfirmation()
                         ->action(function (Collection $records) {
                             foreach ($records as  $item){
-                                if ($item->tar_type==Tar_type::من_الخطأ){
+                                if ($item->tar_type==Tar_type:: من_الخطأ || $item->tar_type==Tar_type::من_الفائض  ){
                                     $item->tarkstable->status=Status::غير_مرجع;
                                     $item->tarkstable->save();
                                     $item->delete();
