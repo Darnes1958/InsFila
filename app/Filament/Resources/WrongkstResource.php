@@ -168,15 +168,9 @@ class WrongkstResource extends Resource
                         ]);
                         $wr->status=3;
                         $wr->save();
-
                     }
-
                     Main::find($data['main_id'])->update(['acc'=>$record->acc]);
-
                     self::MainTarseed($data['main_id']);
-
-
-
                 })
             ])
             ->bulkActions([

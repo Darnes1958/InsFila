@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Enums\KsmType;
+use App\Livewire\Traits\AksatTrait;
 use App\Models\Main;
 use App\Models\Tran;
 use Filament\Forms\Components\DatePicker;
@@ -18,6 +19,7 @@ use Illuminate\Support\Str;
 
 class KsmKst extends Page
 {
+    use AksatTrait;
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     protected static string $view = 'filament.pages.ksm-kst';
@@ -47,14 +49,12 @@ class KsmKst extends Page
     public function fillcontForm(){
         $this->contForm->fill(['ksm_type_id'=>$this->ksm_type_id,'main_id'=>$this->main_id,'acc'=>$this->acc,
             'ksm_date'=>$this->ksm_date,'ksm'=>$this->ksm,]);
-
     }
     public function go($who){
         $this->dispatch('gotoitem', test: $who);
     }
-    public function chkacc(Set $set)
+    public function chkacc()
     {
-
             $this->main=Main::where('acc',$this->acc)->first();
             if ($this->main) {
                 $this->main_id=$this->main->id;
@@ -65,11 +65,18 @@ class KsmKst extends Page
                 $this->accTaken=false;
                 $this->main_id=null;
             }
-
-
-
         $this->fillcontForm();
     }
+    public function chkmainid()
+    {
+            $this->main=Main::where('id',$this->main_id)->first();
+            $this->acc=$this->main->acc;
+            $this->ksm=$this->main->kst;
+            $this->accTaken=true;
+            $this->fillcontForm();
+            $this->go('ksm_date');
+    }
+
     protected function getForms(): array
     {
         return array_merge(parent::getForms(),[
@@ -81,7 +88,7 @@ class KsmKst extends Page
     }
 
     public function store(){
-
+        self::StoreTran2($this->main_id,$this->ksm_date,$this->ksm,0);
         Notification::make()
             ->title('تم تحزين البانات بنجاح')
             ->success()
@@ -126,20 +133,21 @@ class KsmKst extends Page
                 })
                 ->extraAttributes([
                     'wire:keydown.enter'=>'chkacc',
-
                 ])
-
                  ->id('acc'),
 
                  Select::make('main_id')
                   ->columnSpan(3)
                   ->live()
-                     ->relationship('Main','name',modifyQueryUsing: fn ($query) =>
+                  ->relationship('Main','name',modifyQueryUsing: fn ($query) =>
                      $query->when($this->accTaken,function ($q){
                          $q->where('acc',$this->acc);
                      }),)
-                     ->getOptionLabelFromRecordUsing(fn (Model $record) => "{$record->id} {$record->Customer->name} {$record->sul}")
-
+                  ->getOptionLabelFromRecordUsing(fn (Model $record) => "{$record->id} {$record->Customer->name} {$record->sul}")
+                     ->afterStateUpdated(function ($state){
+                       $this->main_id=$state;
+                       $this->chkmainid();
+                     })
                   ->required()
                   ->searchable()
                   ->preload()
@@ -147,29 +155,23 @@ class KsmKst extends Page
                   ->label('رقم العقد'),
                  DatePicker::make('ksm_date')
                   ->label('التاريخ')
-                     ->live()
-                     ->afterStateUpdated(function ($state){
+                  ->live()
+                  ->afterStateUpdated(function ($state){
                          $this->ksm_date=$state;
                      })
-
-                     ->columnSpan(3)
+                  ->columnSpan(3)
                   ->required()
-                     ->extraAttributes([
-                         'wire:keydown.enter'=>'$dispatch("gotoitem", {test: "ksm"})'
-
-                     ])
+                  ->extraAttributes(['wire:keydown.enter'=>'$dispatch("gotoitem", {test: "ksm"})'])
                  ->id('ksm_date'),
                  TextInput::make('ksm')
                  ->label('المبلغ')
                  ->columnSpan(3)
                   ->numeric()
                   ->required()
+                  ->extraAttributes(['wire:keydown.enter'=>'store'])
                  ->id('ksm')
-
-
              ])
              ->columns(6)
-
         ];
     }
 }
