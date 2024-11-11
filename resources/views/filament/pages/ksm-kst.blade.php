@@ -1,5 +1,5 @@
 <x-filament-panels::page>
-  <div class="flex">
+  <div class="flex gap-2">
       <div class="w-1/2">
           {{$this->contForm}}
       </div>

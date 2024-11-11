@@ -60,7 +60,7 @@ class EventServiceProvider extends ServiceProvider
         $blog->NextKst=$this->setMonth($blog->sul_begin);
         $blog->LastUpd=now();
         $blog->kst_baky=$blog->kst_count;
-        $blog->raseed=$blog->sul;
+        $blog->raseed=$blog->sul-$blog->pay;
       });
 
       Main::updating(function($blog){

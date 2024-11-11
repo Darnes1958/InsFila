@@ -109,7 +109,6 @@ trait AksatTrait {
 
     }
     public static function OverTarseed2($main){
-
         $count=$main->overkstable->count();
         $sum=$main->overkstable->sum('kst');
         $main->update([
@@ -199,8 +198,8 @@ trait AksatTrait {
 
     }
   }
-  public function SortTrans($main_id){
-    $res=Tran::where('main_id',$main_id)->get();
+  public  function SortTrans($main_id){
+    $res=Tran::where('main_id',$main_id)->orderby('kst_date')->get();
     $ser=1;
     foreach ($res as $item) {
       Tran::where('id', $item->id)->update([
@@ -210,7 +209,7 @@ trait AksatTrait {
     }
   }
     public static function SortTrans2($main_id){
-        $res=Tran::where('main_id',$main_id)->get();
+        $res=Tran::where('main_id',$main_id)->orderby('kst_date')->get();
         $ser=1;
         foreach ($res as $item) {
             Tran::where('id', $item->id)->update([
@@ -218,6 +217,24 @@ trait AksatTrait {
             ]);
             $ser++;
         }
+    }
+
+    public static function StoreKst($main_id,$ksm_date,$ksm,$haf=0,$ksm_type_id=2){
+        $main=Main::find($main_id);
+        if ($main->raseed>0 && $main->raseed>=$ksm)
+            self::StoreTran2($main_id,$ksm_date,$ksm,0,$ksm_type_id);
+        if ($main->raseed>0 && $main->raseed<$ksm)
+        {
+            $tran= self::StoreTran2($main_id,$ksm_date,$main->raseed,0,$ksm_type_id);
+            $over= self::StoreOver2($main,$ksm_date,$ksm-$main->raseed,0);
+            $tran->baky=$over->kst;
+            $tran->over_id=$over->id;
+            $tran->save();
+            $over->tran_id=$tran->id;
+            $over->save();
+        }
+        if ($main->raseed<=0)
+            self::StoreOver2($main,$ksm_date,$ksm,0);
     }
 
 }

@@ -9,6 +9,7 @@ use App\Models\Main;
 use App\Models\Main_arc;
 use App\Models\Operations;
 use App\Models\Tran;
+use App\Models\Trans_arc;
 use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Placeholder;
@@ -57,6 +58,7 @@ class KsmKst extends Page implements HasTable
     public $message;
     public $color='myRed';
     public $is_arc=false;
+    public $has_baki=false;
 
 
     public function mount(): void
@@ -162,27 +164,16 @@ class KsmKst extends Page implements HasTable
         if (!$this->is_arc) $this->validate(); else {if (!$this->ksm || $this->ksm<=0 || !$this->ksm_date) return; }
         if ($this->is_arc) self::StoreOver2($this->main,$this->ksm_date,$this->ksm,0);
         else {
-            if ($this->main->raseed>0 && $this->main->raseed>=$this->ksm)
-                self::StoreTran2($this->main_id,$this->ksm_date,$this->ksm,0,$this->ksm_type_id);
-            if ($this->main->raseed>0 && $this->main->raseed<$this->ksm)
-            {
-               $tran= self::StoreTran2($this->main_id,$this->ksm_date,$this->main->raseed,0,$this->ksm_type_id);
-               $over= self::StoreOver2($this->main,$this->ksm_date,$this->ksm-$this->main->raseed,0);
-               $tran->baky=$over->kst;
-               $tran->over_id=$over->id;
-               $tran->save();
-            }
-            if ($this->main->raseed<=0)
-                self::StoreOver2($this->main,$this->ksm_date,$this->ksm,0);
+             self::StoreKst($this->main_id,$this->ksm_date,$this->ksm,0,$this->ksm_type_id);
         }
 
         Notification::make()
             ->title('تم تحزين البانات بنجاح')
             ->success()
-
             ->send();
 
-        $this->mount();
+        $this->fillcontForm();
+        $this->go('acc');
 
     }
     protected function getContFormSchema(): array
@@ -319,11 +310,14 @@ class KsmKst extends Page implements HasTable
                 ->defaultPaginationPageOption(12)
                 ->paginationPageOptions([5,12,15,50,'all'])
                 ->defaultSort('ser')
-                ->query(function (Tran $main){
-                    $main=Tran::where('id',$this->main_id);
-                    return $main;
+                ->query(function (){
+                    if (!$this->is_arc)
+                     $tran=Tran::where('main_id',$this->main_id);
+                    else
+                     $tran=Trans_arc::where('main_id',$this->main_id);
+                    $this->has_baki=$tran->sum('baky')>0;
+                    return $tran;
                 })
-
                 ->columns([
                     TextColumn::make('ser')
                         ->size(TextColumnSize::ExtraSmall)
@@ -333,6 +327,7 @@ class KsmKst extends Page implements HasTable
                     TextColumn::make('kst_date')
                         ->size(TextColumnSize::ExtraSmall)
                         ->toggleable()
+                        ->toggledHiddenByDefault()
                         ->sortable()
                         ->label('ت.الاستحقاق'),
                     TextColumn::make('ksm_date')
@@ -343,9 +338,14 @@ class KsmKst extends Page implements HasTable
                     TextColumn::make('ksm')
                         ->size(TextColumnSize::ExtraSmall)
                         ->label('الخصم'),
-                    TextColumn::make('ksm_type')
+                    TextColumn::make('baky')
+                        ->size(TextColumnSize::ExtraSmall)
+                        ->visible(fn()=>$this->has_baki)
+                        ->label('الباقي'),
+                    TextColumn::make('ksm_type_id')
                         ->size(TextColumnSize::ExtraSmall)
                         ->toggleable()
+                        ->toggledHiddenByDefault()
                         ->label('طريقة الدفع'),
                     TextColumn::make('ksm_notes')
                         ->toggleable()
@@ -355,14 +355,16 @@ class KsmKst extends Page implements HasTable
                 ->actions([
                     Action::make('del')
                         ->iconButton()
+                        ->visible(fn($record)=> $record->baky==0 && !$this->is_arc)
                         ->icon('heroicon-o-trash')
                         ->iconSize(IconSize::Small)
                         ->color('danger')
                         ->requiresConfirmation()
-
                         ->action(function (Model $record){
                            $record->delete();
                            self::MainTarseed2($this->main_id);
+                           self::SortTrans2($this->main_id);
+                           $this->fillcontForm();
                         })
 
 

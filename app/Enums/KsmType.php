@@ -10,7 +10,7 @@ enum KsmType: int implements HasLabel,HasColor
   case نقدا = 1;
   case المصرف = 2;
   case صك = 3;
-  case الكنروني = 4;
+  case الكتروني = 4;
 
 
   public function getLabel(): ?string

@@ -315,19 +315,24 @@ class MainResource extends Resource
                     ->icon('heroicon-m-eye')
                     ->url(fn (Main $record): string => route('filament.admin.pages.cont-all-thing', ['main_id'=>$record->id])),
                 Tables\Actions\Action::make('toArc')
-                    ->iconButton()
-                    ->hidden()
+                    ->label('نقل للأرشيف')
                     ->color('primary')
-                    ->icon('heroicon-m-eye')
+                    ->requiresConfirmation()
+                    ->visible(fn($record)=>$record->raseed<=0)
                     ->action(function (Main $record) {
                         $oldRecord= $record;
                         $newRecord = $oldRecord->replicate();
+
                         $newRecord->setTable('main_arcs');
                         $newRecord->id=$record->id;
+
                         $newRecord->save();
+                        Overkst::where('overkstable_type','App\Models\Main')
+                            ->where('overkstable_id',$record->id)
+                            ->update(['overkstable_type'=>'App\Models\Main_arc']);
 
                         Tran::query()
-                            ->where('id', $record->id)
+                            ->where('main_id', $record->id)
                             ->each(function ($oldTran) {
                                 $newTran = $oldTran->replicate();
                                 $newTran->setTable('trans_arcs');
