@@ -43,8 +43,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        Notifications::alignment(Alignment::Center);
-        Notifications::verticalAlignment(VerticalAlignment::Center);
+   //     Notifications::alignment(Alignment::Center);
+     //   Notifications::verticalAlignment(VerticalAlignment::Center);
         Table::$defaultNumberLocale = 'nl';
         FilamentView::registerRenderHook(
             'panels::page.end',

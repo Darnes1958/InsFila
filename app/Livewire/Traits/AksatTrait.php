@@ -48,12 +48,12 @@ trait AksatTrait {
 
       return $wtype;
     }
-    public function StoreTran($main_id,$ksm_date,$ksm,$haf)
+    public function StoreTran($main_id,$ksm_date,$ksm,$haf,$ksm_type_id=2)
     {
         $res= Tran::create([
             'main_id'=>$main_id,
             'ksm'=>$ksm,
-            'ksm_type_id'=>2,
+            'ksm_type_id'=>$ksm_type_id,
             'ksm_date'=>$ksm_date,
             'user_id'=>Auth::id(),
             'ser'=>Tran::where('main_id',$main_id)->max('ser')+1,
@@ -63,12 +63,13 @@ trait AksatTrait {
         $this->MainTarseed($main_id);
         return $res;
     }
-    public static function StoreTran2($main_id,$ksm_date,$ksm,$haf)
+    public static function StoreTran2($main_id,$ksm_date,$ksm,$haf,$ksm_type_id=2)
     {
+
         $res= Tran::create([
             'main_id'=>$main_id,
             'ksm'=>$ksm,
-            'ksm_type_id'=>2,
+            'ksm_type_id'=>$ksm_type_id,
             'ksm_date'=>$ksm_date,
             'user_id'=>Auth::id(),
             'ser'=>Tran::where('main_id',$main_id)->max('ser')+1,
@@ -107,6 +108,16 @@ trait AksatTrait {
         ]);
 
     }
+    public static function OverTarseed2($main){
+
+        $count=$main->overkstable->count();
+        $sum=$main->overkstable->sum('kst');
+        $main->update([
+            'over_count'=>$count,
+            'over_kst'=>$sum,
+        ]);
+
+    }
     public function StoreOver($main_id,$ksm_date,$ksm,$haf=0){
         $over=Overkst::create([
             'main_id'=>$main_id,
@@ -116,6 +127,15 @@ trait AksatTrait {
             ]);
         $this->OverTarseed($main_id);
         return $over->id;
+    }
+    public static function StoreOver2($main,$ksm_date,$ksm,$haf=0){
+       $res= $main->overkstable()->create([
+            'over_date'=>$ksm_date,
+            'kst'=>$ksm,
+            'haf_id'=>$haf,
+        ]);
+        self::OverTarseed2($main);
+        return $res;
     }
   public function setMonth($begin){
       $month = date('m', strtotime($begin));

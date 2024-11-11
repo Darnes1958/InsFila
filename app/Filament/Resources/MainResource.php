@@ -5,10 +5,12 @@ namespace App\Filament\Resources;
 use App\Filament\Pages\ContAllThing;
 use App\Filament\Resources\MainResource\Pages;
 
+use App\Models\aksat\kst_trans;
 use App\Models\Main;
 
 use App\Models\Main_arc;
 use App\Models\Overkst;
+use App\Models\OverTar\over_kst;
 use App\Models\Sell;
 use App\Models\Setting;
 use App\Models\Tarkst;
@@ -312,6 +314,29 @@ class MainResource extends Resource
                     ->iconButton()->color('primary')
                     ->icon('heroicon-m-eye')
                     ->url(fn (Main $record): string => route('filament.admin.pages.cont-all-thing', ['main_id'=>$record->id])),
+                Tables\Actions\Action::make('toArc')
+                    ->iconButton()
+                    ->hidden()
+                    ->color('primary')
+                    ->icon('heroicon-m-eye')
+                    ->action(function (Main $record) {
+                        $oldRecord= $record;
+                        $newRecord = $oldRecord->replicate();
+                        $newRecord->setTable('main_arcs');
+                        $newRecord->id=$record->id;
+                        $newRecord->save();
+
+                        Tran::query()
+                            ->where('id', $record->id)
+                            ->each(function ($oldTran) {
+                                $newTran = $oldTran->replicate();
+                                $newTran->setTable('trans_arcs');
+                                $newTran->save();
+                                $oldTran->delete();
+                            });
+                        $record->delete();
+                    })
+
             ]);
     }
 

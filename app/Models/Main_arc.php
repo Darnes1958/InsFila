@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Auth;
 
 class Main_arc extends Model
 {
+    public function tarkst()
+    {
+        return $this->morphMany(Tarkst::class, 'tarkstable');
+    }
     public function overkstable()
     {
         return $this->morphMany(Overkst::class, 'overkstable');
@@ -15,6 +19,9 @@ class Main_arc extends Model
     public function Bank(){
     return $this->belongsTo(Bank::class);
   }
+    public function Taj(){
+        return $this->belongsTo(Taj::class);
+    }
   public function Customer(){
     return $this->belongsTo(Customer::class);
   }

@@ -27,6 +27,9 @@ class Main extends Model
   public function Bank(){
     return $this->belongsTo(Bank::class);
   }
+    public function Taj(){
+        return $this->belongsTo(Taj::class);
+    }
   public function Customer(){
     return $this->belongsTo(Customer::class);
   }

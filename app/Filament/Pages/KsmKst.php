@@ -4,21 +4,38 @@ namespace App\Filament\Pages;
 
 use App\Enums\KsmType;
 use App\Livewire\Traits\AksatTrait;
+use App\Models\aksat\kst_trans;
 use App\Models\Main;
+use App\Models\Main_arc;
+use App\Models\Operations;
 use App\Models\Tran;
+use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ViewField;
 use Filament\Forms\Set;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Support\Enums\IconSize;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\TextColumn\TextColumnSize;
+use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
-class KsmKst extends Page
+class KsmKst extends Page implements HasTable
 {
+    use InteractsWithTable;
     use AksatTrait;
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
@@ -37,44 +54,98 @@ class KsmKst extends Page
     public $ksm_type_id;
     public $main;
     public $accTaken=false;
+    public $message;
+    public $color='myRed';
+    public $is_arc=false;
 
 
     public function mount(): void
     {
+        $this->is_arc=false;
+        $this->message=null;
+        $this->main_id=null;
+        $this->accTaken=null;
         $this->ksm_type_id=KsmType::المصرف;
         $this->ksm_date=now();
         $this->fillcontForm();
+        $this->go('acc');
     }
 
     public function fillcontForm(){
-        $this->contForm->fill(['ksm_type_id'=>$this->ksm_type_id,'main_id'=>$this->main_id,'acc'=>$this->acc,
-            'ksm_date'=>$this->ksm_date,'ksm'=>$this->ksm,]);
+        if ($this->main_id){
+            if (! $this->is_arc) $this->main=Main::find($this->main_id);
+            else $this->main=Main_arc::find($this->main_id);
+            $this->message=null;
+            if ($this->main->raseed<=0) {$this->message='خصم قسط بالفائض';$this->color='myYellow';}
+            if ($this->is_arc) {$this->message='خصم قسط بالفائض من الأرشـــــــيف';$this->color='myGreen';}
+
+            $this->contForm->fill(['ksm_type_id'=>$this->ksm_type_id,'main_id'=>$this->main_id,'acc'=>$this->acc,
+                'ksm_date'=>$this->ksm_date,'ksm'=>$this->ksm,'name'=>$this->main->Customer->name,'sul'=>$this->main->sul,
+                'pay'=>$this->main->pay,'raseed'=>$this->main->raseed,'bank'=>$this->main->Taj->TajName  ]);
+        }
+
+        else
+          $this->contForm->fill(['ksm_type_id'=>$this->ksm_type_id,'main_id'=>$this->main_id,'acc'=>$this->acc,
+                'ksm_date'=>$this->ksm_date,'ksm'=>$this->ksm,]);
+
     }
+
     public function go($who){
         $this->dispatch('gotoitem', test: $who);
     }
     public function chkacc()
     {
-            $this->main=Main::where('acc',$this->acc)->first();
-            if ($this->main) {
-                $this->main_id=$this->main->id;
-                $this->ksm=$this->main->kst;
+        $this->message=null;
+        $this->is_arc=false;
+            $m=Main::where('acc',$this->acc)->get();
+            if ($m->count()>0) {
+                if ($m->count()==1) {
+                    $this->main_id=$m[0]['id'];
+                    $this->main=$m->first();
+                    $this->ksm=$this->main->kst;
+                } else {
+                    $this->message='يوجد أكثر من عقد لهذا الحساب .. يجب اختيار رقم العقد من القائمة';
+                    $this->ksm=null;
+                    $this->main_id=null;
+                }
                 $this->accTaken=true;
                 $this->go('ksm_date');
             } else {
-                $this->accTaken=false;
-                $this->main_id=null;
+                $m=Main_arc::where('acc',$this->acc)->first();
+                if ($m){
+                    $this->is_arc=true;
+                    $this->main_id=$m->id;
+                    $this->main=$m;
+                    $this->ksm=$this->main->kst;
+                    $this->go('ksm_date');
+                } else
+                {$this->accTaken=false;
+                $this->main_id=null;}
             }
         $this->fillcontForm();
     }
     public function chkmainid()
     {
+            $this->message=null;
+            $this->is_arc=false;
+
             $this->main=Main::where('id',$this->main_id)->first();
             $this->acc=$this->main->acc;
             $this->ksm=$this->main->kst;
             $this->accTaken=true;
             $this->fillcontForm();
             $this->go('ksm_date');
+    }
+    public function chkmainArc()
+    {
+        $this->message=null;
+        $this->is_arc=true;
+
+        $this->main=Main_arc::where('id',$this->main_id)->first();
+        $this->ksm=$this->main->kst;
+        $this->accTaken=true;
+        $this->fillcontForm();
+        $this->go('ksm_date');
     }
 
     protected function getForms(): array
@@ -88,11 +159,29 @@ class KsmKst extends Page
     }
 
     public function store(){
-        self::StoreTran2($this->main_id,$this->ksm_date,$this->ksm,0);
+        if (!$this->is_arc) $this->validate(); else {if (!$this->ksm || $this->ksm<=0 || !$this->ksm_date) return; }
+        if ($this->is_arc) self::StoreOver2($this->main,$this->ksm_date,$this->ksm,0);
+        else {
+            if ($this->main->raseed>0 && $this->main->raseed>=$this->ksm)
+                self::StoreTran2($this->main_id,$this->ksm_date,$this->ksm,0,$this->ksm_type_id);
+            if ($this->main->raseed>0 && $this->main->raseed<$this->ksm)
+            {
+               $tran= self::StoreTran2($this->main_id,$this->ksm_date,$this->main->raseed,0,$this->ksm_type_id);
+               $over= self::StoreOver2($this->main,$this->ksm_date,$this->ksm-$this->main->raseed,0);
+               $tran->baky=$over->kst;
+               $tran->over_id=$over->id;
+               $tran->save();
+            }
+            if ($this->main->raseed<=0)
+                self::StoreOver2($this->main,$this->ksm_date,$this->ksm,0);
+        }
+
         Notification::make()
             ->title('تم تحزين البانات بنجاح')
             ->success()
+
             ->send();
+
         $this->mount();
 
     }
@@ -101,7 +190,7 @@ class KsmKst extends Page
         return [
             Section::make()
              ->schema([
-                 Radio::make('ksm_type_id')
+               Radio::make('ksm_type_id')
                  ->options(KsmType::class)
                  ->live()
                  ->afterStateUpdated(function ($state){
@@ -112,11 +201,11 @@ class KsmKst extends Page
                  ->hiddenLabel()
                  ->columnSpanFull()
                  ->required(),
-            TextInput::make('acc')->label('رقم الحساب')
-                     ->live(debounce:400)
-                     ->columnSpan(3)
-                     ->autocomplete('off')
-                     ->datalist(function (?string $state , TextInput $component,?Model $record ,
+               TextInput::make('acc')->label('رقم الحساب')
+                ->live(debounce:400)
+                ->columnSpan(3)
+                ->autocomplete('off')
+                ->datalist(function (?string $state , TextInput $component,?Model $record ,
                                           $modelsearch='\App\Models\Main' , $fieldsearch='acc') {
                          $options =[];
                          if($state!=null  and Str::length($state)>=3){
@@ -130,29 +219,69 @@ class KsmKst extends Page
                      })
                 ->afterStateUpdated(function ($state){
                     $this->acc=$state;
+                    $this->main_id=null;
                 })
                 ->extraAttributes([
                     'wire:keydown.enter'=>'chkacc',
                 ])
-                 ->id('acc'),
-
-                 Select::make('main_id')
+                ->id('acc'),
+               Select::make('main_id')
                   ->columnSpan(3)
                   ->live()
                   ->relationship('Main','name',modifyQueryUsing: fn ($query) =>
                      $query->when($this->accTaken,function ($q){
                          $q->where('acc',$this->acc);
                      }),)
-                  ->getOptionLabelFromRecordUsing(fn (Model $record) => "{$record->id} {$record->Customer->name} {$record->sul}")
+
+                  ->getOptionLabelFromRecordUsing(fn (Model $record) => "{$record->id} {$record->Customer->name} {$record->sul} {$record->kst}")
                      ->afterStateUpdated(function ($state){
                        $this->main_id=$state;
+
                        $this->chkmainid();
                      })
-                  ->required()
+
                   ->searchable()
                   ->preload()
                   ->id('main_id')
                   ->label('رقم العقد'),
+
+                 Placeholder::make('notes')
+                  ->content(function (){
+                      return new HtmlString('<span class="'.$this->color.' ">'.$this->message.'</span>');
+                  })
+                  ->hidden(fn(): bool=>$this->message==null)
+                  ->live()
+                  ->columnSpan('full')
+                  ->hiddenLabel(),
+
+                 Section::make()
+                  ->schema([
+                      TextInput::make('name')
+                       ->readOnly()
+                       ->columnSpan(3)
+                       ->label(''),
+                      TextInput::make('bank')
+                          ->readOnly()
+                          ->columnSpan(3)
+                          ->label(''),
+                      TextInput::make('sul')
+                          ->readOnly()
+                          ->columnSpan(2)
+                          ->label(''),
+                      TextInput::make('pay')
+                          ->readOnly()
+                          ->columnSpan(2)
+                          ->label(''),
+                      TextInput::make('raseed')
+                          ->readOnly()
+                          ->columnSpan(2)
+                          ->label(''),
+
+
+
+                  ])->columns(6)
+
+                 ,
                  DatePicker::make('ksm_date')
                   ->label('التاريخ')
                   ->live()
@@ -161,17 +290,85 @@ class KsmKst extends Page
                      })
                   ->columnSpan(3)
                   ->required()
+                  ->validationMessages([
+                         'required' => 'يجب ادخال التاريخ بشكل صحيح',
+                     ])
                   ->extraAttributes(['wire:keydown.enter'=>'$dispatch("gotoitem", {test: "ksm"})'])
-                 ->id('ksm_date'),
+                  ->id('ksm_date'),
                  TextInput::make('ksm')
-                 ->label('المبلغ')
-                 ->columnSpan(3)
+                  ->label('المبلغ')
+                  ->columnSpan(3)
+                  ->validationMessages([
+                         'required' => 'يجب ادخال قيمة القسط',
+                     ])
+                  ->afterStateUpdated(function ($state){$this->ksm=$state;})
                   ->numeric()
                   ->required()
                   ->extraAttributes(['wire:keydown.enter'=>'store'])
-                 ->id('ksm')
+                  ->id('ksm')
              ])
              ->columns(6)
         ];
     }
+
+    public  function table(Table $table): Table
+    {
+        return $table
+            ->emptyStateHeading('لا توجد أقساط مخصومة')
+                ->emptyStateDescription('لم يتم خصم أقساط بعد')
+                ->defaultPaginationPageOption(12)
+                ->paginationPageOptions([5,12,15,50,'all'])
+                ->defaultSort('ser')
+                ->query(function (Tran $main){
+                    $main=Tran::where('id',$this->main_id);
+                    return $main;
+                })
+
+                ->columns([
+                    TextColumn::make('ser')
+                        ->size(TextColumnSize::ExtraSmall)
+                        ->color('primary')
+                        ->sortable()
+                        ->label('ت'),
+                    TextColumn::make('kst_date')
+                        ->size(TextColumnSize::ExtraSmall)
+                        ->toggleable()
+                        ->sortable()
+                        ->label('ت.الاستحقاق'),
+                    TextColumn::make('ksm_date')
+                        ->size(TextColumnSize::ExtraSmall)
+                        ->toggleable()
+                        ->sortable()
+                        ->label('ت.الخصم'),
+                    TextColumn::make('ksm')
+                        ->size(TextColumnSize::ExtraSmall)
+                        ->label('الخصم'),
+                    TextColumn::make('ksm_type')
+                        ->size(TextColumnSize::ExtraSmall)
+                        ->toggleable()
+                        ->label('طريقة الدفع'),
+                    TextColumn::make('ksm_notes')
+                        ->toggleable()
+                        ->size(TextColumnSize::ExtraSmall)
+                        ->label('ملاحظات'),
+                ])
+                ->actions([
+                    Action::make('del')
+                        ->iconButton()
+                        ->icon('heroicon-o-trash')
+                        ->iconSize(IconSize::Small)
+                        ->color('danger')
+                        ->requiresConfirmation()
+
+                        ->action(function (Model $record){
+                           $record->delete();
+                           self::MainTarseed2($this->main_id);
+                        })
+
+
+
+
+                ]);
+    }
+
 }
