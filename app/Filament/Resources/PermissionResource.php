@@ -22,6 +22,7 @@ class PermissionResource extends Resource
   {
     return  auth()->user()->id==1;
   }
+    protected static ?string $navigationGroup='Setting';
     protected static ?string $model = \Spatie\Permission\Models\Permission::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
@@ -31,21 +32,40 @@ class PermissionResource extends Resource
         return $form
             ->schema([
                 TextInput::make('name')->unique(ignoreRecord: true),
+                Select::make('for_who')
+                    ->default('ins')
+                    ->options([
+                        'sell'=>'sell',
+                        'ins'=>'ins'
+                    ]),
+                Select::make('permissions')
+                    ->multiple()
+                    ->relationship('permissions','name', fn (Builder $query) =>
+                    $query->where('for_who','=','ins')
+                    )
+                    ->preload(),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
-            ->columns([
+            ->modifyQueryUsing(function (Builder $query) {
+                return $query
+                    ->when('for_who'!=null,function ($q){$q->where('for_who','ins');})
+                    ;
 
-                TextColumn::make('name')
+            })
+            ->columns([
+                TextColumn::make('name'),
+                TextColumn::make('Permissions.name')
             ])
             ->filters([
                 //
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

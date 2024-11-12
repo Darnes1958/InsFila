@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Auth;
 
 class Main_arc extends Model
 {
+    protected $appends =['name'];
+    public function getNameAttribute(){
+        return $this->Customer->name;
+    }
     public function tarkst()
     {
         return $this->morphMany(Tarkst::class, 'tarkstable');

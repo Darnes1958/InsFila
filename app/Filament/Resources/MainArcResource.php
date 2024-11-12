@@ -15,6 +15,8 @@ use App\Models\Trans_arc;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\ActionSize;
+use Filament\Support\Enums\IconSize;
 use Filament\Tables;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
@@ -32,6 +34,7 @@ class MainArcResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationLabel='الأرشيف';
+    protected static ?int $navigationSort=8;
 
     public static function form(Form $form): Form
     {
@@ -44,6 +47,9 @@ class MainArcResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->recordUrl(
+                null
+            )
             ->columns([
                 TextColumn::make('id')->label('رقم العقد')->sortable()->searchable(),
                 TextColumn::make('Customer.name')->label('الاسم')->searchable()->sortable(),
@@ -60,26 +66,23 @@ class MainArcResource extends Resource
 
             ])
             ->actions([
-
-
-
                 Tables\Actions\Action::make('tran')
                     ->hiddenLabel()
                     ->iconButton()->color('primary')
+                    ->iconSize(IconSize::Small)
                     ->icon('heroicon-m-eye')
                     ->url(fn (Main_arc $record): string => route('filament.admin.pages.cont-all-thing-arc', ['main_id'=>$record->id])),
                 Tables\Actions\Action::make('toMain')
                     ->label('استرجاع')
                     ->color('primary')
+                    ->size(ActionSize::ExtraSmall)
                     ->requiresConfirmation()
-
                     ->action(function (Main_arc $record) {
                         $oldRecord= $record;
                         $newRecord = $oldRecord->replicate();
                         $newRecord->setTable('mains');
                         $newRecord->id=$record->id;
                         $newRecord->save();
-
                         Trans_arc::query()
                             ->where('main_id', $record->id)
                             ->each(function ($oldTran) {

@@ -48,7 +48,7 @@ trait AksatTrait {
 
       return $wtype;
     }
-    public function StoreTran($main_id,$ksm_date,$ksm,$haf,$ksm_type_id=2)
+    public function StoreTran($main_id,$ksm_date,$ksm,$haf,$ksm_type_id=2,$notes=null)
     {
         $res= Tran::create([
             'main_id'=>$main_id,
@@ -59,11 +59,12 @@ trait AksatTrait {
             'ser'=>Tran::where('main_id',$main_id)->max('ser')+1,
             'kst_date'=>$this->getKst_date($main_id),
             'haf_id'=>$haf,
+            'ksm_notes'=>$notes,
         ]);
         $this->MainTarseed($main_id);
         return $res;
     }
-    public static function StoreTran2($main_id,$ksm_date,$ksm,$haf,$ksm_type_id=2)
+    public static function StoreTran2($main_id,$ksm_date,$ksm,$haf,$ksm_type_id=2,$notes=null)
     {
 
         $res= Tran::create([
@@ -75,6 +76,7 @@ trait AksatTrait {
             'ser'=>Tran::where('main_id',$main_id)->max('ser')+1,
             'kst_date'=>self::getKst_date2($main_id),
             'haf_id'=>$haf,
+            'ksm_notes'=>$notes,
         ]);
         self::MainTarseed2($main_id);
         return $res;
@@ -219,13 +221,13 @@ trait AksatTrait {
         }
     }
 
-    public static function StoreKst($main_id,$ksm_date,$ksm,$haf=0,$ksm_type_id=2){
+    public static function StoreKst($main_id,$ksm_date,$ksm,$haf=0,$ksm_type_id=2,$notes=null){
         $main=Main::find($main_id);
         if ($main->raseed>0 && $main->raseed>=$ksm)
-            self::StoreTran2($main_id,$ksm_date,$ksm,0,$ksm_type_id);
+            self::StoreTran2($main_id,$ksm_date,$ksm,0,$ksm_type_id,$notes);
         if ($main->raseed>0 && $main->raseed<$ksm)
         {
-            $tran= self::StoreTran2($main_id,$ksm_date,$main->raseed,0,$ksm_type_id);
+            $tran= self::StoreTran2($main_id,$ksm_date,$main->raseed,0,$ksm_type_id,$notes);
             $over= self::StoreOver2($main,$ksm_date,$ksm-$main->raseed,0);
             $tran->baky=$over->kst;
             $tran->over_id=$over->id;

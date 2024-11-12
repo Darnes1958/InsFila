@@ -23,6 +23,7 @@ class RoleResource extends Resource
   {
     return  auth()->user()->id==1;
   }
+    protected static ?string $navigationGroup='Setting';
   protected static ?string $model = \Spatie\Permission\Models\Role::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';

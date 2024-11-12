@@ -15,6 +15,10 @@ class Overkst extends Model
     protected $casts = [
         'status' => Status::class,'overkstable_type'=>OverMorph::class,
     ];
+    protected $appends =['name'];
+    public function getNameAttribute(){
+        return $this->overkstable->name;
+    }
   public function overkstable(): MorphTo {
     return $this->morphTo();
   }

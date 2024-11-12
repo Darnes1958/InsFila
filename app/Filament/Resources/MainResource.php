@@ -16,6 +16,8 @@ use App\Models\Setting;
 use App\Models\Tarkst;
 use App\Models\Tran;
 use App\Services\MainForm;
+use Filament\Support\Enums\ActionSize;
+use Filament\Support\Enums\IconSize;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
@@ -284,6 +286,7 @@ class MainResource extends Resource
             ->actions([
 
                 DeleteAction::make()->iconButton()->hidden(! auth()->user()->can('الغاء عقود'))
+                    ->iconSize(IconSize::Small)
               ->before(function (Main $record){
                 Tran::where('main_id',$record->id)->delete();
                 Overkst::where('main_id',$record->id)->delete();
@@ -293,12 +296,13 @@ class MainResource extends Resource
                     ->visible(
                         Auth::user()->can('تعديل عقود')
                         && ! Setting::find(Auth::user()->company)->is_together
-                    )
+                    )->iconSize(IconSize::Small)
                    ,
                 Tables\Actions\Action::make('mainedit')
                     ->iconButton()
                     ->icon('heroicon-m-pencil')
                     ->color('info')
+                    ->iconSize(IconSize::Small)
                     ->visible(
                         Auth::user()->can('تعديل عقود')
                         &&  Setting::find(Auth::user()->company)->is_together
@@ -308,16 +312,20 @@ class MainResource extends Resource
                 ->hiddenLabel()
                 ->iconButton()->color('success')
                 ->icon('heroicon-m-printer')
+                    ->iconSize(IconSize::Small)
                 ->url(fn (Main $record): string => route('pdfmaincont', $record)),
                 Tables\Actions\Action::make('tran')
                     ->hiddenLabel()
                     ->iconButton()->color('primary')
+                    ->iconSize(IconSize::Small)
                     ->icon('heroicon-m-eye')
                     ->url(fn (Main $record): string => route('filament.admin.pages.cont-all-thing', ['main_id'=>$record->id])),
                 Tables\Actions\Action::make('toArc')
                     ->label('نقل للأرشيف')
                     ->color('primary')
+                    ->size(ActionSize::ExtraSmall)
                     ->requiresConfirmation()
+
                     ->visible(fn($record)=>$record->raseed<=0)
                     ->action(function (Main $record) {
                         $oldRecord= $record;

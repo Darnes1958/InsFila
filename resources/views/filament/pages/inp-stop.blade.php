@@ -1,3 +1,4 @@
 <x-filament-panels::page>
- <livewire:aksat.inp-stop/>
+{{$this->form}}
+    {{$this->table}}
 </x-filament-panels::page>

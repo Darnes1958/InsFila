@@ -10,9 +10,7 @@ class KsmType extends Model
 {
     protected $connection = 'other';
 
-    public function Tran(){
-        return $this->hasMany(Tran::class);
-    }
+
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);

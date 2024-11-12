@@ -2,11 +2,13 @@
 
 namespace App\Filament\Pages\Reports;
 
+use App\Filament\Resources\MainArcResource\Pages\ListMainArcs;
 use App\Models\aksat\MainArc;
 use App\Models\Main;
 use App\Models\Main_arc;
 use App\Models\stores\halls_names;
 use App\Models\stores\stores_names;
+use Filament\Actions\Action;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -63,6 +65,12 @@ class ContAllThingArc extends Page implements HasForms
         return [
             Section::make()
                 ->schema([
+                    \Filament\Forms\Components\Actions::make([
+                        \Filament\Forms\Components\Actions\Action::make('ret')
+                            ->Label('عودة')
+                            ->url(ListMainArcs::getUrl()),
+                    ]),
+
                 ]),
         ];
     }

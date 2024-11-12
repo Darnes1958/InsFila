@@ -67,6 +67,40 @@ class NewSell extends Page
                              ->prefix('الزبون')
                              ->hiddenLabel()
                              ->relationship('Customer', 'name')
+                             ->createOptionForm([
+                                 Section::make('ادخال زبون جديد')
+                                     ->schema([
+                                         TextInput::make('name')
+                                             ->required()
+                                             ->unique()
+                                             ->label('الاسم'),
+                                         TextInput::make('address')
+                                             ->label('العنوان'),
+                                         TextInput::make('mdar')
+                                             ->label('مدار'),
+                                         TextInput::make('libyana')
+                                             ->label('لبيانا'),
+                                         Hidden::make('user_id')
+                                             ->default(Auth::id()),
+                                     ])
+                             ])
+                             ->editOptionForm([
+                                 Section::make('تعديل بيانات زبون')
+                                     ->schema([
+                                         TextInput::make('name')
+                                             ->required()
+                                             ->label('الاسم'),
+                                         TextInput::make('address')
+                                             ->label('العنوان'),
+                                         TextInput::make('mdar')
+                                             ->label('مدار'),
+                                         TextInput::make('libyana')
+                                             ->label('لبيانا'),
+                                         Hidden::make('user_id')
+                                             ->default(Auth::id()),
+
+                                     ])->columns(2)
+                             ])
                              ->searchable()
                              ->preload()
                              ->live()
@@ -154,12 +188,15 @@ class NewSell extends Page
                                      })
                                      ->afterStateUpdated(function ($state,Set $set,Get $get){
                                          $p=Price_sell::where('item_id',$state)
-                                             ->where('price_type_id',3)->first()->price1;
-                                         $set('price1',$p);
+                                             ->where('price_type_id',3)->first();
+                                         if ($p) $price=$p->price1; else
+                                             $price=Price_sell::where('item_id',$state)
+                                                 ->where('price_type_id',1)->first()->price1;
+                                          $set('price1',$price);
                                          $set('stock1',Place_stock::where('place_id',$get('../../place_id'))
                                              ->where('item_id',$state)->first()->stock1);
                                          $set('q1',1);
-                                         $set('sub_tot',1*$p);
+                                         $set('sub_tot',1*$price);
                                          $set('barcode_id',Item::find($state)->barcode);
                                          $total=0;
                                          foreach ($get('../../Sell_tran') as $item){

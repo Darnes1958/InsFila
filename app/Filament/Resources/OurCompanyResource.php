@@ -22,6 +22,7 @@ class OurCompanyResource extends Resource
     return  auth()->id()==1;
   }
     protected static ?string $model = OurCompany::class;
+    protected static ?string $navigationGroup='Setting';
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -29,10 +30,10 @@ class OurCompanyResource extends Resource
     {
         return $form
             ->schema([
-              TextInput::make('Company')->unique(),
-              TextInput::make('CompanyName')->unique(),
-              TextInput::make('CompanyNameSuffix')->unique(),
-              TextInput::make('CompCode')->unique(),
+              TextInput::make('Company')->unique()->required(),
+              TextInput::make('CompanyName')->unique()->required(),
+              TextInput::make('CompanyNameSuffix')->required(),
+              TextInput::make('CompCode')->unique()->required(),
             ]);
     }
 

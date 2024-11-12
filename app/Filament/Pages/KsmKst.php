@@ -42,10 +42,8 @@ class KsmKst extends Page implements HasTable
 
     protected static string $view = 'filament.pages.ksm-kst';
     protected ?string $heading='';
-  public static function shouldRegisterNavigation(): bool
-  {
-    return  auth()->id()==1;
-  }
+    protected static ?string $navigationLabel='أقساط';
+    protected static ?int $navigationSort=3;
 
     public $contData;
     public $main_id;
@@ -59,6 +57,7 @@ class KsmKst extends Page implements HasTable
     public $color='myRed';
     public $is_arc=false;
     public $has_baki=false;
+    public $notes;
 
 
     public function mount(): void
@@ -69,6 +68,7 @@ class KsmKst extends Page implements HasTable
         $this->accTaken=null;
         $this->ksm_type_id=KsmType::المصرف;
         $this->ksm_date=now();
+        $this->notes=null;
         $this->fillcontForm();
         $this->go('acc');
     }
@@ -83,7 +83,7 @@ class KsmKst extends Page implements HasTable
 
             $this->contForm->fill(['ksm_type_id'=>$this->ksm_type_id,'main_id'=>$this->main_id,'acc'=>$this->acc,
                 'ksm_date'=>$this->ksm_date,'ksm'=>$this->ksm,'name'=>$this->main->Customer->name,'sul'=>$this->main->sul,
-                'pay'=>$this->main->pay,'raseed'=>$this->main->raseed,'bank'=>$this->main->Taj->TajName  ]);
+                'pay'=>$this->main->pay,'raseed'=>$this->main->raseed,'bank'=>$this->main->Taj->TajName,'ksm_notes'=>$this->notes  ]);
         }
 
         else
@@ -135,20 +135,12 @@ class KsmKst extends Page implements HasTable
             $this->acc=$this->main->acc;
             $this->ksm=$this->main->kst;
             $this->accTaken=true;
+
+        $this->has_baki=Tran::where('main_id',$this->main_id)->sum('baky')>0;
             $this->fillcontForm();
             $this->go('ksm_date');
     }
-    public function chkmainArc()
-    {
-        $this->message=null;
-        $this->is_arc=true;
 
-        $this->main=Main_arc::where('id',$this->main_id)->first();
-        $this->ksm=$this->main->kst;
-        $this->accTaken=true;
-        $this->fillcontForm();
-        $this->go('ksm_date');
-    }
 
     protected function getForms(): array
     {
@@ -164,7 +156,7 @@ class KsmKst extends Page implements HasTable
         if (!$this->is_arc) $this->validate(); else {if (!$this->ksm || $this->ksm<=0 || !$this->ksm_date) return; }
         if ($this->is_arc) self::StoreOver2($this->main,$this->ksm_date,$this->ksm,0);
         else {
-             self::StoreKst($this->main_id,$this->ksm_date,$this->ksm,0,$this->ksm_type_id);
+             self::StoreKst($this->main_id,$this->ksm_date,$this->ksm,0,$this->ksm_type_id,$this->notes);
         }
 
         Notification::make()
@@ -226,6 +218,7 @@ class KsmKst extends Page implements HasTable
 
                   ->getOptionLabelFromRecordUsing(fn (Model $record) => "{$record->id} {$record->Customer->name} {$record->sul} {$record->kst}")
                      ->afterStateUpdated(function ($state){
+                         $this->main_id=null;
                        $this->main_id=$state;
 
                        $this->chkmainid();
@@ -258,21 +251,24 @@ class KsmKst extends Page implements HasTable
                       TextInput::make('sul')
                           ->readOnly()
                           ->columnSpan(2)
-                          ->label(''),
+                          ->label('قيمة العقد'),
                       TextInput::make('pay')
                           ->readOnly()
                           ->columnSpan(2)
-                          ->label(''),
+                          ->label('المسدد'),
                       TextInput::make('raseed')
                           ->readOnly()
                           ->columnSpan(2)
-                          ->label(''),
+                          ->label('المتبقي'),
 
 
 
-                  ])->columns(6)
-
-                 ,
+                  ])->columns(6),
+                 TextInput::make('ksm_notes')
+                     ->extraAttributes(['wire:keydown.enter'=>'$dispatch("gotoitem", {test: "ksm_date"})'])
+                     ->afterStateUpdated(function ($state){$this->notes=$state;})
+                  ->columnSpanFull()
+                  ->label('ملاحظات'),
                  DatePicker::make('ksm_date')
                   ->label('التاريخ')
                   ->live()
@@ -287,7 +283,7 @@ class KsmKst extends Page implements HasTable
                   ->extraAttributes(['wire:keydown.enter'=>'$dispatch("gotoitem", {test: "ksm"})'])
                   ->id('ksm_date'),
                  TextInput::make('ksm')
-                  ->label('المبلغ')
+                  ->label('القسط')
                   ->columnSpan(3)
                   ->validationMessages([
                          'required' => 'يجب ادخال قيمة القسط',
@@ -341,6 +337,7 @@ class KsmKst extends Page implements HasTable
                     TextColumn::make('baky')
                         ->size(TextColumnSize::ExtraSmall)
                         ->visible(fn()=>$this->has_baki)
+                        ->color('success')
                         ->label('الباقي'),
                     TextColumn::make('ksm_type_id')
                         ->size(TextColumnSize::ExtraSmall)
@@ -355,7 +352,7 @@ class KsmKst extends Page implements HasTable
                 ->actions([
                     Action::make('del')
                         ->iconButton()
-                        ->visible(fn($record)=> $record->baky==0 && !$this->is_arc)
+                        ->visible(fn($record)=> !$this->has_baki && !$this->is_arc)
                         ->icon('heroicon-o-trash')
                         ->iconSize(IconSize::Small)
                         ->color('danger')
@@ -365,7 +362,60 @@ class KsmKst extends Page implements HasTable
                            self::MainTarseed2($this->main_id);
                            self::SortTrans2($this->main_id);
                            $this->fillcontForm();
+                        }),
+                    Action::make('edit')
+                        ->form([
+                            Section::make([
+                                Radio::make('ksm_type_id')
+                                    ->options(KsmType::class)
+                                    ->inline()
+                                    ->inlineLabel()
+                                    ->hiddenLabel()
+                                    ->columnSpanFull()
+                                    ->required(),
+                                DatePicker::make('ksm_date')
+                                    ->required()
+                                    ->label('التاريح'),
+                                TextInput::make('ksm')
+                                    ->required()
+                                    ->gt(0)
+                                    ->label('القسط'),
+                                TextInput::make('ksm_notes')
+                                    ->columnSpan(2)
+                                    ->label('ملاحظات'),
+                            ]) ->columns(2)
+
+                        ])
+                        ->fillForm(fn (Tran $record): array => [
+                            'ksm_date' => $record->ksm_date,'ksm'=>$record->ksm,
+                            'ksm_notes'=>$record->ksm_notes,'ksm_type_id'=>$record->ksm_type_id,
+                        ])
+                        ->modalCancelActionLabel('عودة')
+                        ->modalSubmitActionLabel('تحزين')
+                        ->modalHeading('تعديل قسط')
+                        ->action(function (array $data,Tran $record,){
+                            $raseed=$this->main->raseed+$record->ksm;
+                            if ($data['ksm']<=$raseed) {
+                                $record->update(['ksm_date'=>$data['ksm_date'],'ksm'=>$data['ksm'],
+                                    'ksm_notes'=>$data['ksm_notes'],'ksm_type_id'=>$data['ksm_type_id']]);
+                            } else
+                            {
+                                $record->update(['ksm_date'=>$data['ksm_date'],'ksm'=>$raseed,
+                                    'ksm_notes'=>$data['ksm_notes'],'ksm_type_id'=>$data['ksm_type_id']]);
+                                self::StoreOver2($this->main,$data['ksm_date'],$data['ksm']-$raseed);
+                            }
+                            self::MainTarseed2($this->main_id);
+                            $this->fillcontForm();
+
                         })
+                        ->iconButton()
+                        ->iconSize(IconSize::Small)
+                        ->icon('heroicon-o-pencil')
+                        ->visible(function (Model $record){
+                            return !$this->has_baki ;
+                        })
+                        ->color('blue')
+
 
 
 

@@ -71,6 +71,11 @@ class AppServiceProvider extends ServiceProvider
         'yellow' =>  Color::Yellow,
         'lime' =>  Color::Lime,
       ]);
+        Filament::registerNavigationGroups([
+            'تقارير',
+            'اعدادات',
+            'Setting',
+        ]);
         DB::listen(function ($query) {
           // info($query->sql);
             // $query->sql

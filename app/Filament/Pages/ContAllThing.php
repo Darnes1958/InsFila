@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Resources\MainResource\Pages\ListMains;
 use App\Models\aksat\MainArc;
 use App\Models\Main;
 use App\Models\stores\halls_names;
@@ -35,7 +36,7 @@ class ContAllThing extends Page implements HasForms
     #[On('AllThing_id')]
     public function allThing($main_id)
     {
-        info('here');
+
        $this->main_id=$main_id;
         $this->dispatch('Take_Main_Id',main_id: $main_id);
     }
@@ -63,6 +64,11 @@ class ContAllThing extends Page implements HasForms
         return [
             Section::make()
                 ->schema([
+                    \Filament\Forms\Components\Actions::make([
+                        \Filament\Forms\Components\Actions\Action::make('ret')
+                            ->Label('عودة')
+                            ->url(ListMains::getUrl()),
+                    ]),
                 ]),
         ];
     }
