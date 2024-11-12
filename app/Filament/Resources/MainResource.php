@@ -267,6 +267,9 @@ class MainResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->recordUrl(
+                null
+            )
             ->columns([
                 TextColumn::make('id')->label('رقم العقد')->sortable()->searchable(),
                 TextColumn::make('Customer.name')->label('الاسم')->searchable()->sortable(),
