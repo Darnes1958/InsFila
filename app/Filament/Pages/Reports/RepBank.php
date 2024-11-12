@@ -174,7 +174,7 @@ class RepBank extends Page implements HasTable, HasForms
                TextColumn::make('wrong_kst')
                     ->state(function (Model $record){
                         if ($this->By==1) $id=$record->taj_id; else $id=$record->id;
-                       return Wrongkst::where('taj_id',$id)->where('status','غير مرجع')->sum('kst');
+                       return Wrongkst::where('taj_id',$id)->where('status',1)->sum('kst');
                     })
 
                     ->label('بالخطأ'),
