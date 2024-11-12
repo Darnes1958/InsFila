@@ -292,8 +292,9 @@ class MainResource extends Resource
                     ->iconSize(IconSize::Small)
               ->before(function (Main $record){
                 Tran::where('main_id',$record->id)->delete();
-                Overkst::where('main_id',$record->id)->delete();
-                Tarkst::where('main_id',$record->id)->delete();
+                foreach ($record->overkstable as $item) $item->delete();
+                foreach ($record->tarkst as $item) $item->delete();
+
               }),
                 EditAction::make()->iconButton()->color('blue')
                     ->visible(
