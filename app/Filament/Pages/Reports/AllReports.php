@@ -5,6 +5,7 @@ namespace App\Filament\Pages\Reports;
 use App\Livewire\Traits\MainTrait;
 use App\Models\Bank;
 use App\Models\Main;
+use App\Models\OurCompany;
 use App\Models\Taj;
 
 use Filament\Forms\Components\Actions\Action;
@@ -24,6 +25,11 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Response;
+use Spatie\Browsershot\Browsershot;
+use Spatie\LaravelPdf\Enums\Unit;
+use Filament\Actions;
 
 class AllReports extends Page implements HasTable, HasForms
 {
@@ -71,6 +77,34 @@ class AllReports extends Page implements HasTable, HasForms
         'raseed',
     ],
         ];
+protected function getHeaderActions(): array
+{
+    return [
+        Actions\Action::make('prinitem')
+            ->label('طباعة')
+            ->icon('heroicon-s-printer')
+            ->color('success')
+            ->action(function (){
+                $RepDate=date('Y-m-d');
+                $cus=OurCompany::where('Company',Auth::user()->company)->first();
+
+                \Spatie\LaravelPdf\Facades\Pdf::view('PrnView.pdf-all',
+                    ['res'=>$this->getTableQueryForExport()->get(),
+                        'cus'=>$cus,'RepDate'=>$RepDate,
+                    ])
+                    ->headerHtml('<div>My header</div>')
+                    ->footerView('PrnView.footer')
+                    ->margins(10, 10, 40, 10, Unit::Pixel)
+                    ->save(Auth::user()->company.'/invoice-2023-04-10.pdf');
+                $file= public_path().'/'.Auth::user()->company.'/invoice-2023-04-10.pdf';
+
+                $headers = [
+                    'Content-Type' => 'application/pdf',
+                ];
+                return Response::download($file, 'filename.pdf', $headers);
+            }),
+    ];
+}
 
     public function form(Form $form): Form
     {
@@ -160,6 +194,34 @@ class AllReports extends Page implements HasTable, HasForms
                     ->reactive()
                     ->visible(fn (Get $get): bool => $get('rep_name')=='Mohasla' || $get('rep_name')=='Not_Mohasla'),
                 \Filament\Forms\Components\Actions::make([
+                    Action::make('prinitem')
+                        ->label('طباعة 2')
+                        ->visible(Auth::id()==1)
+                        ->icon('heroicon-s-printer')
+                        ->color('success')
+                        ->action(function (){
+                            $RepDate=date('Y-m-d');
+                            $cus=OurCompany::where('Company',Auth::user()->company)->first();
+
+                            \Spatie\LaravelPdf\Facades\Pdf::view('PrnView.pdf-all',
+                                ['RepTable'=>$this->getTableQueryForExport()->get(),
+                                    'cus'=>$cus,'RepDate'=>$RepDate,'BankName'=>'any','By'=>1
+                                ])
+                               ->withBrowsershot(function (Browsershot $shot) {
+                                    $shot->setNodeBinary('C:\Program Files\nodejs\node.exe')
+                                        ->setNpmBinary('C:\Program Files\nodejs\npm');
+                                })
+                                ->headerHtml('<div>My header</div>')
+                                ->footerView('PrnView.footer')
+                                ->margins(10, 10, 40, 10, Unit::Pixel)
+                                ->save(Auth::user()->company.'/invoice-2023-04-10.pdf');
+                            $file= public_path().'/'.Auth::user()->company.'/invoice-2023-04-10.pdf';
+
+                            $headers = [
+                                'Content-Type' => 'application/pdf',
+                            ];
+                            return Response::download($file, 'filename.pdf', $headers);
+                        }),
                 Action::make('names')
                  ->label('طباعة')
                  ->icon('heroicon-o-printer')
