@@ -209,7 +209,8 @@ protected function getHeaderActions(): array
                                 ])
                                ->withBrowsershot(function (Browsershot $shot) {
                                     $shot->setNodeBinary('C:\Program Files\nodejs\node.exe')
-                                        ->setNpmBinary('C:\Program Files\nodejs\npm');
+                                        ->setNpmBinary('C:\Program Files\nodejs\npm')
+                                        ->setChromePath('C:\Program Files\Google\Chrome\Application\chrome.exe');
                                 })
                                 ->headerHtml('<div>My header</div>')
                                 ->footerView('PrnView.footer')
