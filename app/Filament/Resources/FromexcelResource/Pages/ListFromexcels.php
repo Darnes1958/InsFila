@@ -11,6 +11,7 @@ use App\Models\Dateofexcel;
 use App\Models\Fromexcel;
 use App\Models\Hafitha;
 use App\Models\Main;
+use App\Models\Main_arc;
 use App\Models\Taj;
 use App\Models\User;
 use Filament\Actions;
@@ -96,10 +97,23 @@ class ListFromexcels extends ListRecords
                         $item->main_name=$main->Customer->name;
                         $item->kst_type=$type;
                         $item->save();
-                    } else {
-                        $this->StoreWrong($item->taj_id,$item->acc,$item->name,$item->ksm_date,$item->ksm,$haf->id);
-                        $item->kst_type='wrong';
-                        $item->save();
+                    } else
+                    {
+                        $mainArc=Main_arc::where('taj_id',$item->taj_id)->where('acc',$item->acc)->first();
+                        if ($mainArc)
+                        {
+                                self::StoreOver2($mainArc,$item->ksm_date,$item->ksm,$haf->id);
+                                $item->kst_type='over_arc';
+                                $item->save();
+
+
+                        } else
+                        {
+                            $this->StoreWrong($item->taj_id,$item->acc,$item->name,$item->ksm_date,$item->ksm,$haf->id);
+                            $item->kst_type='wrong';
+                            $item->save();
+                        }
+
                     }
                 }
 
@@ -110,6 +124,7 @@ class ListFromexcels extends ListRecords
                 $haf->over_kst=Fromexcel::where('haf_id',$haf->id)->where('kst_type','over')->sum('ksm');
                 $haf->over_kst_arc=Fromexcel::where('haf_id',$haf->id)->where('kst_type','over_arc')->sum('ksm');
                 $haf->wrong_kst=Fromexcel::where('haf_id',$haf->id)->where('kst_type','wrong')->sum('ksm');
+                $haf->half=Fromexcel::where('haf_id',$haf->id)->where('kst_type','half')->sum('ksm');
                 $haf->save();
             })
         ];

@@ -23,7 +23,7 @@ trait AksatTrait {
         $main=Main::find($main_id);
 
         if ($main->raseed<=0) {
-            $this->StoreOver($main_id,$ksm_date,$ksm,$haf);
+            self::StoreOver2($main,$ksm_date,$ksm,$haf);
             Fromexcel::find($from_id)->update(['kst'=>$ksm]);
             $wtype='over';
         }
@@ -32,7 +32,7 @@ trait AksatTrait {
             $over_id=0;
             if ($main->raseed<$ksm)
             {
-                $over_id=$this->StoreOver($main_id,$ksm_date,$ksm-$main->raseed,$haf);
+                $over_id= self::StoreOver2($main,$ksm_date,$ksm-$main->raseed,$haf);
                 $baky=$ksm-$main->raseed;
                 $ksm=$main->raseed;
                 Fromexcel::find($from_id)->update(['baky'=>$baky]);
@@ -119,16 +119,7 @@ trait AksatTrait {
         ]);
 
     }
-    public function StoreOver($main_id,$ksm_date,$ksm,$haf=0){
-        $over=Overkst::create([
-            'main_id'=>$main_id,
-            'over_date'=>$ksm_date,
-            'kst'=>$ksm,
-            'haf_id'=>$haf,
-            ]);
-        $this->OverTarseed($main_id);
-        return $over->id;
-    }
+
     public static function StoreOver2($main,$ksm_date,$ksm,$haf=0){
        $res= $main->overkstable()->create([
             'over_date'=>$ksm_date,
@@ -227,8 +218,8 @@ trait AksatTrait {
             self::StoreTran2($main_id,$ksm_date,$ksm,0,$ksm_type_id,$notes);
         if ($main->raseed>0 && $main->raseed<$ksm)
         {
-            $tran= self::StoreTran2($main_id,$ksm_date,$main->raseed,0,$ksm_type_id,$notes);
-            $over= self::StoreOver2($main,$ksm_date,$ksm-$main->raseed,0);
+            $tran= self::StoreTran2($main_id,$ksm_date,$main->raseed,$haf,$ksm_type_id,$notes);
+            $over= self::StoreOver2($main,$ksm_date,$ksm-$main->raseed,$haf);
             $tran->baky=$over->kst;
             $tran->over_id=$over->id;
             $tran->save();
@@ -236,7 +227,7 @@ trait AksatTrait {
             $over->save();
         }
         if ($main->raseed<=0)
-            self::StoreOver2($main,$ksm_date,$ksm,0);
+            self::StoreOver2($main,$ksm_date,$ksm,$haf);
     }
 
 }

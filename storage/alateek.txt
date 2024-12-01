@@ -84,5 +84,10 @@ insert into Alateek.dbo.mains (id,bank_id,taj_id,customer_id,acc,sul_begin,sul_e
 select Premiums_No,1,1,The_Premiums.Person_No,Account_Number,Start_Date,Start_Date,Fair_Value,round(Fair_Value,Value_Installment,0),Value_Installment,0,1,1,Premiums_Date
 from The_Premiums,The_Persons WHERE The_Premiums.Person_No=The_Persons.Person_No
 
+11- 
+ALTER TABLE The_Persons
+    ALTER COLUMN Client_Side nvarchar(40) COLLATE Arabic_100_CI_AS;
+
+update The_Persons set bank_id=(select id from Alateek.dbo.banks where BankName=Client_Side)
 
 
