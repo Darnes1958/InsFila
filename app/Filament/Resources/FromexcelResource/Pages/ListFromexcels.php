@@ -83,6 +83,7 @@ class ListFromexcels extends ListRecords
                 $fromexcel=Fromexcel::query()->where('haf_id',null)->get();
                 if ($fromexcel->count()>0){
                   $haf=Hafitha::create([
+                      'taj_id'=>Auth::user()->taj,
                       'from_date'=>$fromexcel->min('ksm_date'),
                       'to_date'=>$fromexcel->max('ksm_date'),
                       ]);
