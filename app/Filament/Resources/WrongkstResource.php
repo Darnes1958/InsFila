@@ -2,10 +2,12 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\Status;
 use App\Enums\Tar_type;
 use App\Filament\Resources\WrongkstResource\Pages;
 use App\Filament\Resources\WrongkstResource\RelationManagers;
 use App\Livewire\Traits\AksatTrait;
+use App\Livewire\Traits\MainTrait;
 use App\Models\Main;
 use App\Models\Tarkst;
 use App\Models\Tran;
@@ -18,6 +20,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -30,71 +33,12 @@ use DateTime;
 
 class WrongkstResource extends Resource
 {
+    use MainTrait;
     protected static ?string $model = Wrongkst::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-  protected static ?string $navigationLabel='أقساط واردة بالخطأ';
+    protected static ?string $navigationLabel='أقساط واردة بالخطأ';
     protected static ?int $navigationSort = 4;
-    public static function setMonth($begin){
-        $month = date('m', strtotime($begin));
-        $year = date('Y', strtotime($begin));
-        $date=$year.$month.'28';
-
-        $date = DateTime::createFromFormat('Ymd',$date);
-        $date=$date->format('Y-m-d');
-        return $date;
-    }
-    public static function getKst_date($main_id){
-        $res=Tran::where('main_id',$main_id)->get();
-        if (count($res)>0) {
-            $date=$res->max('kst_date');
-            $date= date('Y-m-d', strtotime($date . "+1 month"));
-            return $date;
-        } else
-        {
-            $begin=Main::find($main_id)->sul_begin;
-
-            return self::setMonth($begin);
-
-        }
-    }
-    public static function MainTarseed($id){
-        $pay=Tran::where('main_id',$id)->sum('ksm');
-        $count=Tran::where('main_id',$id)->count();
-        $lastksm=Tran::where('main_id',$id)->max('ksm_date');
-        $nextkst=Tran::where('main_id',$id)->max('kst_date');
-        $main=Main::where('id',$id)->first();
-        $LastUpd=now();
-
-        if ($nextkst)
-            $NextKst= date('Y-m-d', strtotime($nextkst . "+1 month"));
-        else $NextKst=self::setMonth($main->sul_begin);
-
-        Main::where('id',$id)->
-        update([
-            'pay'=>$pay,
-            'raseed'=>$main->sul-$pay,
-            'LastKsm'=>$lastksm,
-            'LastUpd'=>$LastUpd,
-            'NextKst'=>$NextKst,
-            'Late'=>self::RetLate($id,$main->kst_count,$NextKst),
-            'Kst_baky'=>$main->kst_count-$count,
-        ]);
-    }
-    public static function RetLate($main_id,$kst_count,$nextKst){
-        $toDate = Carbon::parse($nextKst);
-        $fromDate = Carbon::now();
-
-        if ($fromDate>$toDate)
-            $months = $toDate->diffInMonths($fromDate);
-        else $months=0;
-
-        $count=Tran::where('main_id',$main_id)->count();
-        if ($months>($kst_count-$count)) $months=$kst_count-$count;
-
-        return $months;
-
-    }
     public static function form(Form $form): Form
     {
         return $form
@@ -120,17 +64,29 @@ class WrongkstResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->label('رقم الحساب'),
+                TextColumn::make('wrong_date')
+                    ->sortable()
+                   ->label('التاريخ'),
                 TextColumn::make('kst')
                     ->label('المبلغ'),
                 TextColumn::make('status')
                     ->label('الحالة'),
 
             ])
+            ->recordUrl(
+                null
+            )
             ->checkIfRecordIsSelectableUsing(
                 fn (Model $record): bool => $record->status->value === 1,
             )
             ->filters([
-                //
+                SelectFilter::make('taj_id')
+                    ->relationship('Taj','TajName')
+                    ->label('مصارف'),
+                SelectFilter::make('status')
+                    ->options(Status::class)
+                    ->label('الحالة'),
+
             ])
             ->actions([
                 Tables\Actions\Action::make('toMain')
@@ -170,7 +126,7 @@ class WrongkstResource extends Resource
                         $wr->save();
                     }
                     Main::find($data['main_id'])->update(['acc'=>$record->acc]);
-                    self::MainTarseed($data['main_id']);
+                    self::MainTarseed2($data['main_id']);
                 })
             ])
             ->bulkActions([
@@ -180,7 +136,6 @@ class WrongkstResource extends Resource
                     ->requiresConfirmation()
                     ->action(function (Collection $records) {
                         foreach ($records as  $item){
-
                             $item->tarkst()->create([
                                 'tar_date' => date('Y-m-d'),
                                 'kst' => $item->kst,
@@ -190,9 +145,7 @@ class WrongkstResource extends Resource
                             ]);
                             $item->status=2;
                             $item->save();
-
                         }
-
                     }),
             ]);
     }
