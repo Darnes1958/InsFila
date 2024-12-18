@@ -34,6 +34,7 @@ use DateTime;
 class WrongkstResource extends Resource
 {
     use MainTrait;
+    use AksatTrait;
     protected static ?string $model = Wrongkst::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
@@ -119,7 +120,7 @@ class WrongkstResource extends Resource
                             'ksm_date'=>$wr->wrong_date,
                             'user_id'=>Auth::id(),
                             'ser'=>Tran::where('main_id',$data['main_id'])->max('ser')+1,
-                            'kst_date'=>self::getKst_date($data['main_id']),
+                            'kst_date'=>self::getKst_date2($data['main_id']),
                             'haf_id'=>$wr->haf_id,
                         ]);
                         $wr->status=3;
