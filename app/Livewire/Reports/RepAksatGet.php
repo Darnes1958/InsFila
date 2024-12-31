@@ -29,8 +29,8 @@ public $bank_id;
 public $Date1;
   #[Reactive]
 public $Date2;
-  #[Reactive]
-public $By;
+
+
 
   public $sul;
   public $pay;
@@ -45,17 +45,8 @@ public $By;
             ->pluralModelLabel('العقود')
             ->query(function (Tran $tran)  {
                $tran= Tran::whereBetween('ksm_date',[$this->Date1,$this->Date2])
-                   ->when($this->By==1,function ($query){
-                       $query->wherein('main_id',function ($q){
-                           $q->select('id')->from('mains')->where('bank_id',$this->bank_id);
-                       });
-                           })
-                   ->when($this->By==2,function ($query){
-                       $query->wherein('main_id',function ($q){
-                           $q->select('id')->from('mains')->whereIn('bank_id',function ($qq){
-                               $qq->select('id')->from('banks')->where('taj_id',$this->bank_id);
-                           });
-                       });
+                   ->wherein('main_id',function ($q){
+                           $q->select('id')->from('mains')->where('taj_id',$this->bank_id);
                    });
               $this->sul=0;
               $this->pay=0;
@@ -68,9 +59,7 @@ public $By;
                     ->label('رقم العقد'),
                 TextColumn::make('Main.Customer.name')
                     ->label('الاسم'),
-                TextColumn::make('Main.Bank.BankName')
-                    ->label('المصرف')
-                    ->visible(fn (Get $get): bool =>$this->By ==2),
+
                 TextColumn::make('Main.sul')
                     ->summarize(Sum::make()->label('')->numeric(
                         decimalPlaces: 2,

@@ -24,18 +24,19 @@ Route::get('/login', function () {
 })->name('login');
 
 Route::controller(PdfController::class)->group(function (){
-  route::get('/pdfbanksum/{By}', 'PdfBankSum')->name('pdfbanksum') ;
+  route::get('/pdfbanksum', 'PdfBankSum')->name('pdfbanksum') ;
 
-  route::get('/pdfall/{bank_id?}/{By?}', 'PdfAll')->name('pdfall') ;
 
-  route::get('/pdfmosdadabank/{Baky?}/{bank_id?}/{By?}', 'PdfMosdadaBank')->name('pdfmosdadabank') ;
-  route::get('/pdfnotmosdadabank/{bank_id?}/{By?}', 'PdfNotMosdadaBank')->name('pdfnotmosdadabank') ;
-  route::get('/pdfmotakrabank/{Baky?}/{bank_id?}/{By?}/{notPay?}', 'PdfMotakraBank')->name('pdfmotakrabank') ;
+    route::get('/pdfnames/{bank_id?}/', 'PdfNames')->name('pdfnames') ;
 
-  route::get('/pdfmohasla/{bank_id?}/{Date1?}/{Date2?}/{By?}', 'PdfMohasla')->name('pdfmohasla') ;
-  route::get('/pdfnotmohasla/{bank_id?}/{Date1?}/{Date2?}/{By?}', 'PdfNotMohasla')->name('pdfnotmohasla') ;
+  route::get('/pdfmosdadabank/{Baky?}/{bank_id?}', 'PdfMosdadaBank')->name('pdfmosdadabank') ;
+  route::get('/pdfnotmosdadabank/{bank_id?}', 'PdfNotMosdadaBank')->name('pdfnotmosdadabank') ;
+  route::get('/pdfmotakrabank/{Baky?}/{bank_id?}/{notPay?}', 'PdfMotakraBank')->name('pdfmotakrabank') ;
 
-  route::get('/pdfstopall/{bank_id?}/{Date1?}/{Date2?}/{By?}', 'PdfStopALL')->name('pdfstopall') ;
+  route::get('/pdfmohasla/{bank_id?}/{Date1?}/{Date2?}', 'PdfMohasla')->name('pdfmohasla') ;
+  route::get('/pdfnotmohasla/{bank_id?}/{Date1?}/{Date2?}', 'PdfNotMohasla')->name('pdfnotmohasla') ;
+
+  route::get('/pdfstopall/{bank_id?}/{Date1?}/{Date2?}', 'PdfStopALL')->name('pdfstopall') ;
   route::get('/pdfstopone/{record}/', 'PdfStopOne')->name('pdfstopone') ;
 
   route::get('/pdfmaincont/{id}/', 'PdfMainCont')->name('pdfmaincont') ;

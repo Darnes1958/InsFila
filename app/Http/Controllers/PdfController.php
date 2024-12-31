@@ -8,6 +8,7 @@ use App\Models\Main;
 use App\Models\OurCompany;
 use App\Models\Taj;
 use App\Models\Tran;
+use ArPHP\I18N\Arabic;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 use Carbon\Carbon;
@@ -22,16 +23,8 @@ class PdfController extends Controller
     $RepDate=date('Y-m-d');
     $cus=OurCompany::where('Company',Auth::user()->company)->first();
 
-        if ($request->By=='1') {
-            $res=Bank::with('main')
-                ->has('main')
-                ->withCount('main as count')
-                ->withSum('main as pay','pay')
-                ->withSum('main as sul','sul')
-                ->withSum('main as raseed','raseed')
-                ->get();
-        }
-        if ($request->By=='2'){
+
+
             $res=Taj::with('main')
                 ->has('main')
                 ->withCount('main as count')
@@ -40,12 +33,11 @@ class PdfController extends Controller
                 ->withSum('main as raseed','raseed')
                 ->get();
 
-        }
 
 
 
     $html = view('PrnView.pdf-bank-sum',
-      ['RepTable'=>$res,'cus'=>$cus,'RepDate'=>$RepDate,'By'=>$request->By])->toArabicHTML();
+      ['RepTable'=>$res,'cus'=>$cus,'RepDate'=>$RepDate])->toArabicHTML();
 
     $pdf = PDF::loadHTML($html)->output();
 
@@ -61,161 +53,162 @@ class PdfController extends Controller
       $headers
     );
   }
-    function PdfAll(Request $request)
+    function PdfAll($id)
     {
         $RepDate = date('Y-m-d');
         $cus = OurCompany::where('Company', Auth::user()->company)->first();
-        if ($request->By==1)
-            $res = Main::where('bank_id', $request->bank_id)->get();
-        else
-            $res=Main::whereIn('bank_id',function ($q) use($request){
-                $q->select('id')->from('banks')->where('taj_id',$request->bank_id);})->get() ;
-        if ($request->By==1)
-             $BankName=Bank::find($request->bank_id)->BankName;
-        else $BankName=Taj::find($request->bank_id)->TajName;
-        $html = view('PrnView.pdf-all',
-            ['RepTable' => $res, 'cus' => $cus, 'RepDate' => $RepDate,'BankName'=>$BankName,'By'=>$request->By])->toArabicHTML();
-        $pdf = PDF::loadHTML($html)->output();
+         $res = Main::where('taj_id', $id)->get();
+         $BankName=Taj::find($id)->TajName;
+
+        $reportHtml = view('PrnView.pdf-all',
+            ['RepTable' => $res, 'cus' => $cus, 'RepDate' => $RepDate,'BankName'=>$BankName])->render();
+        $arabic = new Arabic();
+        $p = $arabic->arIdentify($reportHtml);
+
+        for ($i = count($p)-1; $i >= 0; $i-=2) {
+            $utf8ar = $arabic->utf8Glyphs(substr($reportHtml, $p[$i-1], $p[$i] - $p[$i-1]));
+            $reportHtml = substr_replace($reportHtml, $utf8ar, $p[$i-1], $p[$i] - $p[$i-1]);
+        }
+
+        $pdf = PDF::loadHTML($reportHtml);
+
         $headers = array("Content-type" => "application/pdf",);
         return response()->streamDownload(fn () => print($pdf), "invoice.pdf", $headers );
+    }
+    function PdfNames(Request $request){
+        $RepDate = date('Y-m-d');
+        $cus = OurCompany::where('Company', Auth::user()->company)->first();
+        $res = Main::where('taj_id', $request->bank_id)->get();
+        $BankName=Taj::find($request->bank_id)->TajName;
+
+        $reportHtml = view('PrnView.pdf-all',
+            ['RepTable' => $res, 'cus' => $cus, 'RepDate' => $RepDate,'BankName'=>$BankName])->render();
+        $arabic = new Arabic();
+        $p = $arabic->arIdentify($reportHtml);
+
+        for ($i = count($p)-1; $i >= 0; $i-=2) {
+            $utf8ar = $arabic->utf8Glyphs(substr($reportHtml, $p[$i-1], $p[$i] - $p[$i-1]));
+            $reportHtml = substr_replace($reportHtml, $utf8ar, $p[$i-1], $p[$i] - $p[$i-1]);
+        }
+
+        $pdf = PDF::loadHTML($reportHtml);
+        return $pdf->download('report.pdf');
+
     }
     function PdfMosdadaBank(Request $request)
     {
         $RepDate = date('Y-m-d');
         $cus = OurCompany::where('Company', Auth::user()->company)->first();
-        if ($request->By==1)
-          $res = Main::where('raseed', '<=', $request->Baky)
-            ->where('bank_id', $request->bank_id)->get();
-        else
-           $res=Main::whereIn('bank_id',function ($q) use($request){
-                $q->select('id')->from('banks')->where('taj_id',$request->bank_id);
-            })
-            ->where('raseed','<=',$request->Baky)
-            ->get() ;
 
-        if ($request->By==1)
-         $BankName=Bank::find($request->bank_id)->BankName;
-        else
+          $res = Main::where('raseed', '<=', $request->Baky)
+            ->where('taj_id', $request->bank_id)->get();
+
+
          $BankName=Taj::find($request->bank_id)->TajName;
 
-        $html = view('PrnView.pdf-mosdada',
-            ['RepTable' => $res, 'cus' => $cus, 'RepDate' => $RepDate,'BankName'=>$BankName,'By'=>$request->By])->toArabicHTML();
-        $pdf = PDF::loadHTML($html)->output();
-        $headers = array(
-            "Content-type" => "application/pdf",
-        );
-        return response()->streamDownload(fn () => print($pdf), "invoice.pdf", $headers );
+        $reportHtml = view('PrnView.pdf-mosdada',
+            ['RepTable' => $res, 'cus' => $cus, 'RepDate' => $RepDate,'BankName'=>$BankName,])->render();
+        $arabic = new Arabic();
+        $p = $arabic->arIdentify($reportHtml);
+        for ($i = count($p)-1; $i >= 0; $i-=2) {
+            $utf8ar = $arabic->utf8Glyphs(substr($reportHtml, $p[$i-1], $p[$i] - $p[$i-1]));
+            $reportHtml = substr_replace($reportHtml, $utf8ar, $p[$i-1], $p[$i] - $p[$i-1]);
+        }
+        $pdf = PDF::loadHTML($reportHtml);
+        return $pdf->download('report.pdf');
+
     }
     function PdfNotMosdadaBank(Request $request)
     {
         $RepDate = date('Y-m-d');
         $cus = OurCompany::where('Company', Auth::user()->company)->first();
-        if ($request->By==1)
-            $res = Main::where('pay', 0)
-                ->where('bank_id', $request->bank_id)->get();
-        else
-            $res=Main::whereIn('bank_id',function ($q) use($request){
-                $q->select('id')->from('banks')->where('taj_id',$request->bank_id);
-            })
-                ->where('pay',0)
-                ->get() ;
 
-        if ($request->By==1)
-            $BankName=Bank::find($request->bank_id)->BankName;
-        else
+            $res = Main::where('pay', 0)
+                ->where('taj_id', $request->bank_id)->get();
+
             $BankName=Taj::find($request->bank_id)->TajName;
 
-        $html = view('PrnView.pdf-not-mosdada',
-            ['RepTable' => $res, 'cus' => $cus, 'RepDate' => $RepDate,'BankName'=>$BankName,'By'=>$request->By])->toArabicHTML();
-        $pdf = PDF::loadHTML($html)->output();
-        $headers = array(
-            "Content-type" => "application/pdf",
-        );
-        return response()->streamDownload(fn () => print($pdf), "invoice.pdf", $headers );
+        $reportHtml = view('PrnView.pdf-not-mosdada',
+            ['RepTable' => $res, 'cus' => $cus, 'RepDate' => $RepDate,'BankName'=>$BankName,])->render();
+        $arabic = new Arabic();
+        $p = $arabic->arIdentify($reportHtml);
+        for ($i = count($p)-1; $i >= 0; $i-=2) {
+            $utf8ar = $arabic->utf8Glyphs(substr($reportHtml, $p[$i-1], $p[$i] - $p[$i-1]));
+            $reportHtml = substr_replace($reportHtml, $utf8ar, $p[$i-1], $p[$i] - $p[$i-1]);
+        }
+        $pdf = PDF::loadHTML($reportHtml);
+        return $pdf->download('report.pdf');
     }
     function PdfMotakraBank(Request $request)
     {
         $RepDate = date('Y-m-d');
         $cus = OurCompany::where('Company', Auth::user()->company)->first();
-        if ($request->By==1)
+
          $res = Main::where('Late', '>=', $request->Baky)
-            ->where('bank_id', $request->bank_id)
+            ->where('taj_id', $request->bank_id)
             ->when($request->notPay,function ($q){
                 $q->where('pay',0);
             }) ->get();
-        else
-         $res = Main::where('Late', '>=', $request->Baky)
-                ->whereIn('bank_id',function ($q) use($request) {
-                    $q->select('id')->from('banks')->where('taj_id', $request->bank_id);
-                        })
-                 ->when($request->notPay,function ($q){
-                     $q->where('pay',0);
-                 })
-               ->get();
 
-        if ($request->By==1)
-            $BankName=Bank::find($request->bank_id)->BankName;
-        else
             $BankName=Taj::find($request->bank_id)->TajName;
-        $html = view('PrnView.pdf-motakra',
-            ['RepTable' => $res, 'cus' => $cus, 'RepDate' => $RepDate,'BankName'=>$BankName,'By'=>$request->By])->toArabicHTML();
-        $pdf = PDF::loadHTML($html)->output();
-        $headers = array( "Content-type" => "application/pdf", );
-        return response()->streamDownload(fn () => print($pdf), "invoice.pdf", $headers );
+        $reportHtml = view('PrnView.pdf-motakra',
+            ['RepTable' => $res, 'cus' => $cus, 'RepDate' => $RepDate,'BankName'=>$BankName,])->render();
+        $arabic = new Arabic();
+        $p = $arabic->arIdentify($reportHtml);
+        for ($i = count($p)-1; $i >= 0; $i-=2) {
+            $utf8ar = $arabic->utf8Glyphs(substr($reportHtml, $p[$i-1], $p[$i] - $p[$i-1]));
+            $reportHtml = substr_replace($reportHtml, $utf8ar, $p[$i-1], $p[$i] - $p[$i-1]);
+        }
+        $pdf = PDF::loadHTML($reportHtml);
+        return $pdf->download('report.pdf');
+
     }
     function PdfMohasla(Request $request)
     {
         $RepDate = date('Y-m-d');
         $cus = OurCompany::where('Company', Auth::user()->company)->first();
         $res = Tran::whereBetween('ksm_date',[$request->Date1,$request->Date2])
-            ->when($request->By==1,function ($query) use ($request){
-                $query->wherein('main_id',function ($q) use($request){
-                    $q->select('id')->from('mains')->where('bank_id',$request->bank_id);
-                });
-            })
-            ->when($request->By==2,function ($query) use ($request){
-                $query->wherein('main_id',function ($q) use ($request){
-                    $q->select('id')->from('mains')->whereIn('bank_id',function ($qq) use($request){
-                        $qq->select('id')->from('banks')->where('taj_id',$request->bank_id);
-                    });
-                });
-            })->get();
-        if ($request->By==1) $BankName=Bank::find($request->bank_id)->BankName;
-        else $BankName=Taj::find($request->bank_id)->TajName;
-        $html = view('PrnView.pdf-mohasla',
-            ['RepTable' => $res, 'cus' => $cus, 'Date1' => $request->Date1, 'Date2' => $request->Date2,'BankName'=>$BankName,'By'=>$request->By])->toArabicHTML();
-        $pdf = PDF::loadHTML($html)->output();
-        $headers = array( "Content-type" => "application/pdf", );
-        return response()->streamDownload(fn () => print($pdf), "invoice.pdf", $headers );
+
+                ->wherein('main_id',function ($q) use($request){
+                    $q->select('id')->from('mains')->where('taj_id',$request->bank_id);
+                })->get();
+         $BankName=Taj::find($request->bank_id)->TajName;
+        $reportHtml = view('PrnView.pdf-mohasla',
+            ['RepTable' => $res, 'cus' => $cus, 'Date1' => $request->Date1, 'Date2' => $request->Date2,'BankName'=>$BankName,])->render();
+        $arabic = new Arabic();
+        $p = $arabic->arIdentify($reportHtml);
+        for ($i = count($p)-1; $i >= 0; $i-=2) {
+            $utf8ar = $arabic->utf8Glyphs(substr($reportHtml, $p[$i-1], $p[$i] - $p[$i-1]));
+            $reportHtml = substr_replace($reportHtml, $utf8ar, $p[$i-1], $p[$i] - $p[$i-1]);
+        }
+        $pdf = PDF::loadHTML($reportHtml);
+        return $pdf->download('report.pdf');
+
     }
     function PdfNotMohasla(Request $request)
     {
         $RepDate = date('Y-m-d');
         $cus = OurCompany::where('Company', Auth::user()->company)->first();
 
-        if ($request->By==1)
-            $res= Main::where('bank_id',$request->bank_id)
+
+            $res= Main::where('taj_id',$request->bank_id)
                 ->whereNotin('id',function ($q) use ($request) {
                     $q->select('main_id')->from('trans')->whereBetween('ksm_date',[$request->Date1,$request->Date2]);
                     })
                 ->get();
-        if ($request->By==2)
-            $res= Main::whereIn('bank_id',function ($q) use($request){
-                        $q->select('id')->from('banks')->where('taj_id',$request->bank_id);
-                        })
-                ->whereNotin('id',function ($q) use($request){
-                    $q->select('main_id')->from('trans')->whereBetween('ksm_date',[$request->Date1,$request->Date2]);
-                    })
-                ->get();
 
+         $BankName=Taj::find($request->bank_id)->TajName;
+        $reportHtml = view('PrnView.pdf-not-mohasla',
+            ['RepTable' => $res, 'cus' => $cus, 'Date1' => $request->Date1, 'Date2' => $request->Date2,'BankName'=>$BankName,])->render();
+        $arabic = new Arabic();
+        $p = $arabic->arIdentify($reportHtml);
+        for ($i = count($p)-1; $i >= 0; $i-=2) {
+            $utf8ar = $arabic->utf8Glyphs(substr($reportHtml, $p[$i-1], $p[$i] - $p[$i-1]));
+            $reportHtml = substr_replace($reportHtml, $utf8ar, $p[$i-1], $p[$i] - $p[$i-1]);
+        }
+        $pdf = PDF::loadHTML($reportHtml);
+        return $pdf->download('report.pdf');
 
-        if ($request->By==1) $BankName=Bank::find($request->bank_id)->BankName;
-        else $BankName=Taj::find($request->bank_id)->TajName;
-        $html = view('PrnView.pdf-not-mohasla',
-            ['RepTable' => $res, 'cus' => $cus, 'Date1' => $request->Date1, 'Date2' => $request->Date2,'BankName'=>$BankName,'By'=>$request->By])->toArabicHTML();
-        $pdf = PDF::loadHTML($html)->output();
-        $headers = array( "Content-type" => "application/pdf", );
-        return response()->streamDownload(fn () => print($pdf), "invoice.pdf", $headers );
     }
 
     function PdfStopALl(Request $request)
@@ -224,36 +217,28 @@ class PdfController extends Controller
     $cus = OurCompany::where('Company', Auth::user()->company)->first();
 
     if ($request->By==1)
-      $res=Main::with('Stop')->where('bank_id',$request->bank_id)
+      $res=Main::with('Stop')->where('taj_id',$request->bank_id)
         ->has('Stop')
         ->whereHas('stop',function ($q) use($request){
          $q->whereBetween('stop_date',[$request->Date1,$request->Date2]);
         })
-
-        ->get();
-    if ($request->By==2)
-      $res=Main::with('Stop')->whereIn('bank_id',function ($q) use($request){
-        $q->select('id')->from('banks')->where('taj_id',$request->bank_id); })
-        ->has('Stop')
-        ->whereHas('stop',function ($q) use($request){
-          $q->whereBetween('stop_date',[$request->Date1,$request->Date2]);
-        })
         ->get();
 
-
-
-    if ($request->By==1) {
-
-      $BankName=Bank::find($request->bank_id)->BankName;
-      $taj=Bank::find($request->bank_id)->taj_id;
-    }
-    else {$BankName=Taj::find($request->bank_id)->TajName;$taj=$request->bank_id;}
+     {$BankName=Taj::find($request->bank_id)->TajName;$taj=$request->bank_id;}
     $TajAcc=Taj::find($taj)->TajAcc;
-    $html = view('PrnView.pdf-stop',
-      ['RepTable' => $res, 'cus' => $cus, 'TajAcc' => $TajAcc,'BankName'=>$BankName,'By'=>$request->By])->toArabicHTML();
-    $pdf = PDF::loadHTML($html)->output();
-    $headers = array( "Content-type" => "application/pdf", );
-    return response()->streamDownload(fn () => print($pdf), "invoice.pdf", $headers );
+      $reportHtml = view('PrnView.pdf-stop',
+          ['RepTable' => $res, 'cus' => $cus, 'TajAcc' => $TajAcc,'BankName'=>$BankName,])->render();
+      $arabic = new Arabic();
+      $p = $arabic->arIdentify($reportHtml);
+      for ($i = count($p)-1; $i >= 0; $i-=2) {
+          $utf8ar = $arabic->utf8Glyphs(substr($reportHtml, $p[$i-1], $p[$i] - $p[$i-1]));
+          $reportHtml = substr_replace($reportHtml, $utf8ar, $p[$i-1], $p[$i] - $p[$i-1]);
+      }
+      $pdf = PDF::loadHTML($reportHtml);
+      return $pdf->download('report.pdf');
+
+
+
   }
   function PdfStopOne($id)
   {
@@ -269,11 +254,17 @@ class PdfController extends Controller
 
    $BankName=$taj->TajName;
    $TajAcc=$taj->TajAcc;
-    $html = view('PrnView.pdf-stop-one',
-      ['record' => $record, 'cus' => $cus, 'TajAcc' => $TajAcc,'BankName'=>$BankName,])->toArabicHTML();
-    $pdf = PDF::loadHTML($html)->output();
-    $headers = array( "Content-type" => "application/pdf", );
-    return response()->streamDownload(fn () => print($pdf), "invoice.pdf", $headers );
+      $reportHtml = view('PrnView.pdf-stop-one',
+          ['record' => $record, 'cus' => $cus, 'TajAcc' => $TajAcc,'BankName'=>$BankName,])->render();
+      $arabic = new Arabic();
+      $p = $arabic->arIdentify($reportHtml);
+      for ($i = count($p)-1; $i >= 0; $i-=2) {
+          $utf8ar = $arabic->utf8Glyphs(substr($reportHtml, $p[$i-1], $p[$i] - $p[$i-1]));
+          $reportHtml = substr_replace($reportHtml, $utf8ar, $p[$i-1], $p[$i] - $p[$i-1]);
+      }
+      $pdf = PDF::loadHTML($reportHtml);
+      return $pdf->download('report.pdf');
+
   }
 
   function PdfMainCont($id){
@@ -297,11 +288,18 @@ class PdfController extends Controller
 
     $BankName=$taj->TajName;
     $TajAcc=$taj->TajAcc;
-    $html = view('PrnView.pdf-main-cont',
-      ['res' => $res, 'cus' => $cus, 'TajAcc' => $TajAcc,'BankName'=>$BankName,'mindate'=>$mmdate,'maxdate'=>$xxdate,])->toArabicHTML();
-    $pdf = PDF::loadHTML($html)->output();
-    $headers = array( "Content-type" => "application/pdf", );
-    return response()->streamDownload(fn () => print($pdf), "invoice.pdf", $headers );
+
+      $reportHtml = view('PrnView.pdf-main-cont',
+          ['res' => $res, 'cus' => $cus, 'TajAcc' => $TajAcc,'BankName'=>$BankName,'mindate'=>$mmdate,'maxdate'=>$xxdate,])->render();
+      $arabic = new Arabic();
+      $p = $arabic->arIdentify($reportHtml);
+      for ($i = count($p)-1; $i >= 0; $i-=2) {
+          $utf8ar = $arabic->utf8Glyphs(substr($reportHtml, $p[$i-1], $p[$i] - $p[$i-1]));
+          $reportHtml = substr_replace($reportHtml, $utf8ar, $p[$i-1], $p[$i] - $p[$i-1]);
+      }
+      $pdf = PDF::loadHTML($reportHtml);
+      return $pdf->download('report.pdf');
+
 
   }
   function PdfMain($id){
@@ -312,11 +310,17 @@ class PdfController extends Controller
     $res=Main::find($id);
     $res2=Tran::where('main_id',$id)->get();
 
-    $html = view('PrnView.pdf-main',
-      ['res' => $res, 'cus' => $cus, 'res2' => $res2,])->toArabicHTML();
-    $pdf = PDF::loadHTML($html)->output();
-    $headers = array( "Content-type" => "application/pdf", );
-    return response()->streamDownload(fn () => print($pdf), "invoice.pdf", $headers );
+      $reportHtml = view('PrnView.pdf-main',
+          ['res' => $res, 'cus' => $cus, 'res2' => $res2,])->render();
+      $arabic = new Arabic();
+      $p = $arabic->arIdentify($reportHtml);
+      for ($i = count($p)-1; $i >= 0; $i-=2) {
+          $utf8ar = $arabic->utf8Glyphs(substr($reportHtml, $p[$i-1], $p[$i] - $p[$i-1]));
+          $reportHtml = substr_replace($reportHtml, $utf8ar, $p[$i-1], $p[$i] - $p[$i-1]);
+      }
+      $pdf = PDF::loadHTML($reportHtml);
+      return $pdf->download('report.pdf');
+
 
   }
 

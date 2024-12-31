@@ -12,11 +12,9 @@
         <div >
             <label style="font-size: 10pt;">{{$BankName}}</label>
 
-           @if($By==1)
-             <label style="font-size: 14pt;margin-right: 12px;" >لفرع المصرف : </label>
-           @else
+
              <label style="font-size: 14pt;margin-right: 12px;" >للمصرف التجميعي : </label>
-           @endif
+
         </div>
         <table style=" margin-left: 2%;margin-right: 5%; margin-bottom: 4%; margin-top: 2%;">
             <thead style="  margin-top: 8px;">

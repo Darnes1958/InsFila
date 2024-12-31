@@ -17,7 +17,7 @@
                 يرجي الإنتظار ...
             </div>
             <div class="w-full mt-2">
-                @livewire('reports.rep-aksat-get' ,['Date1'=>$Date1 ,'Date2'=>$Date2 ,'bank_id'=>$bank_id ,'By'=>$By])
+                @livewire('reports.rep-aksat-get' ,['Date1'=>$Date1 ,'Date2'=>$Date2 ,'bank_id'=>$bank_id ])
             </div>
 
 
@@ -30,7 +30,7 @@
                 يرجي الإنتظار ...
             </div>
             <div class="w-full mt-2">
-                @livewire('reports.rep-aksat-not-get' ,['Date1'=>$Date1 ,'Date2'=>$Date2 ,'bank_id'=>$bank_id ,'By'=>$By])
+                @livewire('reports.rep-aksat-not-get' ,['Date1'=>$Date1 ,'Date2'=>$Date2 ,'bank_id'=>$bank_id ])
             </div>
 
 

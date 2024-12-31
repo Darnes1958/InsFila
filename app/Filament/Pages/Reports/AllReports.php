@@ -52,11 +52,9 @@ class AllReports extends Page implements HasTable, HasForms
     protected static string $view = 'filament.pages.reports.all-reports';
 
     public $bank_id;
-    public $bank;
-    public $taj;
-    public $By=1;
+
     public $is_show=false;
-    public $field='id';
+
     public $query;
     public $rep_name='All';
     public $Date1;
@@ -110,44 +108,15 @@ protected function getHeaderActions(): array
     {
         return $form
             ->schema([
-                    Radio::make('By')
-                    ->options([
-                        1 =>'بفروع المصارف',
-                        2 =>'بالتجميعي',
-                    ])
-                    ->inline()
-                    ->columnSpanFull()
-                    ->hiddenLabel()
-                    ->afterStateUpdated(function ($state){
-                        $this->By=$state;
-                    }),
-                Select::make('bank')
+                Select::make('bank_id')
                     ->columnSpan(2)
-                    ->options(Bank::all()->pluck('BankName', 'id')->toArray())
-                    ->searchable()
-                    ->reactive()
-                    ->prefix('فرع المصرف')
-                    ->hiddenLabel()
-                    ->visible($this->By==1)
-                    ->afterStateUpdated(function (callable $get) {
-                        $this->bank_id=$get('bank');
-                        $this->field='id';
-                        $this->table($this->table);
-
-                    }),
-                Select::make('taj')
-                    ->columnSpan(2)
-
                     ->options(Taj::all()->pluck('TajName', 'id')->toArray())
                     ->searchable()
                     ->hiddenLabel()
                     ->prefix('المصرف التجميعي')
-                    ->reactive()
-                    ->visible($this->By==2)
-                    ->afterStateUpdated(function (callable $get) {
-                        $this->bank_id=$get('taj');
-                        $this->field='taj_id';
-                        $this->table($this->table);
+                    ->live()
+                    ->afterStateUpdated(function ($state) {
+                        $this->bank_id=$state;
                     }),
                 Select::make('rep_name')
                     ->columnSpan(2)
@@ -227,12 +196,12 @@ protected function getHeaderActions(): array
                  ->label('طباعة')
                  ->icon('heroicon-o-printer')
                  ->url( function ():string {
-                    if ($this->rep_name=='All') return route('pdfall',['bank_id'=>$this->bank_id,'By'=>$this->By]);
-                    if ($this->rep_name=='Mosdada') return route('pdfmosdadabank',['Baky'=>$this->Baky,'bank_id'=>$this->bank_id,'By'=>$this->By]);
-                     if ($this->rep_name=='NotMosdada') return route('pdfnotmosdadabank',['bank_id'=>$this->bank_id,'By'=>$this->By]);
-                    if ($this->rep_name=='Motakra') return route('pdfmotakrabank',['Baky'=>$this->Baky,'bank_id'=>$this->bank_id,'By'=>$this->By,'notPay'=>$this->notPay]);
-                    if ($this->rep_name=='Mohasla') return route('pdfmohasla',['bank_id'=>$this->bank_id,'Date1'=>$this->Date1,'Date2'=>$this->Date2,'By'=>$this->By]);
-                    if ($this->rep_name=='Not_Mohasla') return route('pdfnotmohasla',['bank_id'=>$this->bank_id,'Date1'=>$this->Date1,'Date2'=>$this->Date2,'By'=>$this->By]);
+                    if ($this->rep_name=='All') return route('pdfnames',['bank_id'=>$this->bank_id]);
+                    if ($this->rep_name=='Mosdada') return route('pdfmosdadabank',['Baky'=>$this->Baky,'bank_id'=>$this->bank_id]);
+                     if ($this->rep_name=='NotMosdada') return route('pdfnotmosdadabank',['bank_id'=>$this->bank_id]);
+                    if ($this->rep_name=='Motakra') return route('pdfmotakrabank',['Baky'=>$this->Baky,'bank_id'=>$this->bank_id,'notPay'=>$this->notPay]);
+                    if ($this->rep_name=='Mohasla') return route('pdfmohasla',['bank_id'=>$this->bank_id,'Date1'=>$this->Date1,'Date2'=>$this->Date2]);
+                    if ($this->rep_name=='Not_Mohasla') return route('pdfnotmohasla',['bank_id'=>$this->bank_id,'Date1'=>$this->Date1,'Date2'=>$this->Date2]);
                  })
 
                ])
@@ -249,21 +218,7 @@ protected function getHeaderActions(): array
         return $table
             ->pluralModelLabel('العقود')
             ->query(function (Main $main)  {
-                if ($this->By==1) {
-                    $main=Main::where('bank_id',$this->bank_id)
-                        ->when($this->rep_name=='Mosdada' , function ($q) {
-                            $q->where('raseed','<=',$this->Baky); })
-                        ->when($this->rep_name=='NotMosdada' , function ($q) {
-                            $q->where('pay',0); })
-                        ->when($this->rep_name=='Motakra' , function ($q) {
-                            $q->where('late','>=',$this->Baky); })
-                        ->when($this->rep_name=='Motakra' && $this->notPay, function ($q) {
-                            $q->where('pay',0); });
-                }
-                if ($this->By==2) {
-                    $main=Main::whereIn('bank_id',function ($q){
-                        $q->select('id')->from('banks')->where('taj_id',$this->bank_id);
-                    })
+                    $main=Main::where('taj_id',$this->bank_id)
                         ->when($this->rep_name=='Mosdada' , function ($q) {
                             $q->where('raseed','<=',$this->Baky); })
                         ->when($this->rep_name=='NotMosdada' , function ($q) {
@@ -273,7 +228,6 @@ protected function getHeaderActions(): array
                         ->when($this->rep_name=='Motakra' && $this->notPay, function ($q) {
                             $q->where('pay',0); });
 
-                }
                 $this->sul=number_format($main->sum('sul'),0, '', ',')  ;
                 $this->pay=number_format($main->sum('pay'),0, '', ',')  ;
                 $this->raseed=number_format($main->sum('raseed'),0, '', ',')  ;
@@ -357,9 +311,12 @@ protected function getHeaderActions(): array
     }
 
     public function mount(){
+
         $this->Date1=date('Y-m-d');
         $this->Date2=date('Y-m-d');
         $this->LateChk();
+        $this->bank_id=Taj::min('id');
+        //$this->form->fill(['By'=>1,]);
     }
 
 }

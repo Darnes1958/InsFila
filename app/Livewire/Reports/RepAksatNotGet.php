@@ -28,8 +28,6 @@ class RepAksatNotGet extends Component implements HasTable, HasForms
     public $Date1;
     #[Reactive]
     public $Date2;
-    #[Reactive]
-    public $By;
 
     public $sul;
     public $pay;
@@ -41,18 +39,11 @@ class RepAksatNotGet extends Component implements HasTable, HasForms
         return $table
             ->pluralModelLabel('العقود')
             ->query(function (Main $main)  {
-                if ($this->By==1)
-                 $main= Main::where('bank_id',$this->bank_id)
+
+                 $main= Main::where('taj_id',$this->bank_id)
                   ->whereNotin('id',function ($q){
                     $q->select('main_id')->from('trans')->whereBetween('ksm_date',[$this->Date1,$this->Date2]);
                  });
-                if ($this->By==2)
-                    $main= Main::whereIn('bank_id',function ($q){
-                                  $q->select('id')->from('banks')->where('taj_id',$this->bank_id);
-                                 })
-                        ->whereNotin('id',function ($q){
-                            $q->select('main_id')->from('trans')->whereBetween('ksm_date',[$this->Date1,$this->Date2]);
-                        });
                 $this->sul=$main->sum('sul');
                 $this->pay=$main->sum('pay');
                 $this->raseed=$main->sum('raseed');
@@ -63,9 +54,6 @@ class RepAksatNotGet extends Component implements HasTable, HasForms
                     ->label('رقم العقد'),
                 TextColumn::make('Customer.name')
                     ->label('الاسم'),
-                TextColumn::make('Bank.BankName')
-                    ->label('المصرف')
-                    ->visible(fn (Get $get): bool =>$this->By ==2),
                 TextColumn::make('sul')
                     ->label('اجمالي العقد')
                   ->summarize(

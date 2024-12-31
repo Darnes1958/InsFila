@@ -5,11 +5,8 @@
 
         <div style="text-align: center">
             <label style="font-size: 10pt;">{{$RepDate}}</label>
-            @if($By==1)
-                <label style="font-size: 14pt;margin-right: 12px;" >تقرير بإجمالي العقود حسب فروع المصارف بتاريخ : </label>
-            @else
+
                 <label style="font-size: 14pt;margin-right: 12px;" >تقرير بإجمالي العقود حسب المصارف التجميعية بتاريخ : </label>
-            @endif
 
         </div>
 
