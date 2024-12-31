@@ -79,7 +79,7 @@
         <tbody style="margin-bottom: 40px; ">
         @foreach($res2 as $key => $item)
             <tr>
-                <td> {{ $item->KsmType->ksm_type_name }} </td>
+                <td> {{ $item->ksm_type_id->name }} </td>
                 <td> {{ $item->ksm }} </td>
                 <td style="text-align: center"> {{ $item->ksm_date }} </td>
                 <td style="text-align: center"> {{ $item->kst_date }} </td>
