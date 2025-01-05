@@ -8,6 +8,7 @@ use App\Livewire\Forms\TransForm;
 use App\Livewire\Traits\MainTrait;
 use App\Models\Main;
 use App\Models\Main_arc;
+use App\Models\Overkst;
 use App\Models\Sell;
 use App\Models\Tran;
 use Filament\Forms\Components\Actions\Action;
@@ -41,11 +42,9 @@ class newDmg extends Page implements HasInfolists,HasForms
 
     protected static string $view = 'filament.pages.new-dmg';
 
+    protected static ?string $navigationLabel='ضم عقد';
+    protected static ?int $navigationSort=4;
 
-    public static function shouldRegisterNavigation(): bool
-    {
-        return  false;
-    }
 
 
     public Main $mainRec;
@@ -68,6 +67,7 @@ class newDmg extends Page implements HasInfolists,HasForms
         $this->tranForm->ksm=$this->mainRec->raseed;
         $this->tranForm->ksm_notes='قيمة تم ضمها للعقد رقم : '.$this->data->id ;
         $this->overForm->FillAny();
+
         try {
             $this->validate();
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -75,24 +75,38 @@ class newDmg extends Page implements HasInfolists,HasForms
             info($validator->errors());
             throw $e;
         }
-        if ($this->data->sul<$this->mainRec->raseed) {
-            Notification::make()
-                ->title('لا يجوز أن يكون إجمالي العقد الجديد أصغر من السابق')
-                ->icon('heroicon-o-x-circle')
-                ->body('يرجي مراجعة قيمة العقد السابق والحالي.')
-                ->color('danger')
-                ->danger()
-                ->send();
-            return;
-        }
+
         DB::connection(Auth()->user()->company)->beginTransaction();
         try {
             $this->data->last_cont=$this->mainRec->id;
             Main::create($this->data->all());
             Tran::create($this->tranForm->all());
-            $this->MainTarseed($this->the_main_id);
+            self::MainTarseed2($this->the_main_id);
 
-            $this->toArc($this->the_main_id,$this->data,$this->tranForm,$this->overForm);
+
+            $oldRecord= Main::find($this->the_main_id);
+            $newRecord = $oldRecord->replicate();
+
+            $newRecord->setTable('main_arcs');
+            $newRecord->id=$oldRecord->id;
+
+            $newRecord->save();
+
+            Overkst::where('overkstable_type','App\Models\Main')
+                ->where('overkstable_id',$this->mainRec->id)
+                ->update(['overkstable_type'=>'App\Models\Main_arc']);
+
+            Tran::query()
+                ->where('main_id', $oldRecord->id)
+                ->each(function ($oldTran) {
+                    $newTran = $oldTran->replicate();
+                    $newTran->setTable('trans_arcs');
+                    $newTran->save();
+                    $oldTran->delete();
+                });
+            $oldRecord->delete();
+
+
 
             DB::connection(Auth()->user()->company)->commit();
             $this->show=false;
@@ -102,6 +116,14 @@ class newDmg extends Page implements HasInfolists,HasForms
                 ->icon('heroicon-o-check-circle')
                 ->success()
                 ->send();
+            $this->the_main_id=null;
+            $this->data->sell_id=null;
+            $this->data->kst='';
+            $this->data->id=0;
+            $this->data->customer_id=null;
+            $this->data->acc=null;
+            $this->data->bank_id=null;
+            $this->data->taj_id=null;
         } catch (\Exception $e) {
             Notification::make()
                 ->title('حدث خطأ !!')
@@ -139,6 +161,7 @@ class newDmg extends Page implements HasInfolists,HasForms
                                 $this->data->customer_id=$this->mainRec->customer_id;
                                 $this->data->acc=$this->mainRec->acc;
                                 $this->data->bank_id=$this->mainRec->bank_id;
+                                $this->data->taj_id=$this->mainRec->taj_id;
                                 $this->data->sul_begin=date('Y-m-d');
                                 $this->data->sul=$sell->baky;
 
@@ -153,6 +176,10 @@ class newDmg extends Page implements HasInfolists,HasForms
                             ->label('المصرف')
                             ->relationship('Bank','BankName')
                             ->disabled(),
+                        Select::make('taj_id')
+                            ->label('التجميعي')
+                            ->relationship('Taj','TajName')
+                            ->disabled(),
                         TextInput::make('acc')
                             ->label('رقم الحساب')
                             ->disabled(),
@@ -162,6 +189,7 @@ class newDmg extends Page implements HasInfolists,HasForms
                             ->visible(function (){return $this->data->kst!=null;})
                             ->action(function (){
                                 $this->create();
+
                             }),
                             ])
                     ])->columns(8)
@@ -188,17 +216,15 @@ class newDmg extends Page implements HasInfolists,HasForms
                                 ->required(),
                             TextInput::make('kst_count')
                                 ->label('عدد الأقساط')
-                                ->live(onBlur: true)
+                                ->live(debounce: 500)
                                 ->afterStateUpdated(function (Get $get,Set $set) {
-                                    if ($get('sul') && $get('kst_count')
-                                        && (!$get('kst') ||  $get('kst')==' ')){
-                                        $val=$get('sul') / $get('kst_count');
-                                        $set('kst', $val);
-                                    }
+                                    if ($get('sul') && $get('kst_count'))
+                                        $set('kst', $get('sul') / $get('kst_count'));
                                 })
                                 ->required(),
                             TextInput::make('kst')
                                 ->label('القسط')
+                                ->numeric()
                                 ->required(),
 
                             TextInput::make('notes')

@@ -24,6 +24,8 @@ class MainForm extends Form
 
     #[Rule('required')]
     public $bank_id = '';
+    #[Rule('required')]
+    public $taj_id = '';
 
     #[Rule('required',message: 'يجب ادخال رقم الحساب')]
     public $acc = '';
@@ -75,6 +77,7 @@ class MainForm extends Form
 
       $this->customer_id=$rec->customer_id;
       $this->bank_id=$rec->bank_id;
+      $this->taj_id=$rec->taj_id;
       $this->acc=$rec->acc;
       $this->sul_begin=$rec->sul_begin;
       $this->sul_end=$rec->sul_end;
