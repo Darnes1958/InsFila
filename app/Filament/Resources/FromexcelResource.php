@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\FromexcelResource\Pages;
 use App\Filament\Resources\FromexcelResource\RelationManagers;
+use App\Livewire\Traits\AksatTrait;
 use App\Models\Fromexcel;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class FromexcelResource extends Resource
 {
+
     protected static ?string $model = Fromexcel::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';

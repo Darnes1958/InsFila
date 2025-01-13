@@ -29,7 +29,7 @@ trait AksatTrait {
         }
 
         if ($main->raseed>0){
-            $over_id=0;
+            $over_id=null;
             if ($main->raseed<$ksm)
             {
                 $over_id= self::StoreOver2($main,$ksm_date,$ksm-$main->raseed,$haf);
@@ -41,8 +41,8 @@ trait AksatTrait {
 
            $res= $this->StoreTran($main_id,$ksm_date,$ksm,$haf);
             Fromexcel::find($from_id)->update(['kst'=>$ksm]);
-            if ($over_id!=0)
-               Overkst::where('id',$over_id)->update(['tran_id'=>$res->id]);
+            if ($over_id)
+               Overkst::where('id',$over_id->id)->update(['tran_id'=>$res->id]);
 
         }
 

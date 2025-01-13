@@ -163,7 +163,7 @@ class newDmg extends Page implements HasInfolists,HasForms
                                 $this->data->bank_id=$this->mainRec->bank_id;
                                 $this->data->taj_id=$this->mainRec->taj_id;
                                 $this->data->sul_begin=date('Y-m-d');
-                                $this->data->sul=$sell->baky;
+                                $this->data->sul=$sell->baky+$this->mainRec->raseed;
 
                             })
                             ->required()

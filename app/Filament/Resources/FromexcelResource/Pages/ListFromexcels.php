@@ -12,15 +12,23 @@ use App\Models\Fromexcel;
 use App\Models\Hafitha;
 use App\Models\Main;
 use App\Models\Main_arc;
+use App\Models\Overkst;
 use App\Models\Taj;
+use App\Models\Tran;
+use App\Models\Trans_arc;
 use App\Models\User;
+use App\Models\Wrongkst;
 use Filament\Actions;
 use Filament\Forms\Components\Actions\Action;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Set;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ListFromexcels extends ListRecords
 {
@@ -80,54 +88,124 @@ class ListFromexcels extends ListRecords
             Actions\Action::make('link')
              ->label('ربط بالعقود')
             ->action(function (){
-                $fromexcel=Fromexcel::query()->where('haf_id',null)->get();
-                if ($fromexcel->count()>0){
-                  $haf=Hafitha::create([
-                      'taj_id'=>Auth::user()->taj,
-                      'from_date'=>$fromexcel->min('ksm_date'),
-                      'to_date'=>$fromexcel->max('ksm_date'),
-                      ]);
-                } else return;
+                DB::connection(Auth()->user()->company)->beginTransaction();
+                try {
+                    $fromexcel=Fromexcel::query()->where('haf_id',null)->get();
+                    if ($fromexcel->count()>0){
+                        $haf=Hafitha::create([
+                            'taj_id'=>Auth::user()->taj,
+                            'from_date'=>$fromexcel->min('ksm_date'),
+                            'to_date'=>$fromexcel->max('ksm_date'),
+                        ]);
+                    } else return;
 
-                foreach ($fromexcel as $item){
-                    $main=Main::where('taj_id',$item->taj_id)->where('acc',$item->acc)->first();
+                    foreach ($fromexcel as $item){
+                        $main=Main::where('taj_id',$item->taj_id)->where('acc',$item->acc)->first();
 
-                    if ($main){
-                        $type=$this->Fill_From_Excel($main->id,$item->ksm,$item->ksm_date,$haf->id,$item->id);
-                        $item->main_id=$main->id;
-                        $item->main_name=$main->Customer->name;
-                        $item->kst_type=$type;
-                        $item->save();
-                    } else
-                    {
-                        $mainArc=Main_arc::where('taj_id',$item->taj_id)->where('acc',$item->acc)->first();
-                        if ($mainArc)
+                        if ($main){
+                            $type=$this->Fill_From_Excel($main->id,$item->ksm,$item->ksm_date,$haf->id,$item->id);
+                            $item->main_id=$main->id;
+                            $item->main_name=$main->Customer->name;
+                            $item->kst_type=$type;
+                            $item->save();
+                        } else
                         {
+                            $mainArc=Main_arc::where('taj_id',$item->taj_id)->where('acc',$item->acc)->first();
+                            if ($mainArc)
+                            {
                                 self::StoreOver2($mainArc,$item->ksm_date,$item->ksm,$haf->id);
                                 $item->kst_type='over_arc';
                                 $item->save();
 
 
-                        } else
-                        {
-                            $this->StoreWrong($item->taj_id,$item->acc,$item->name,$item->ksm_date,$item->ksm,$haf->id);
-                            $item->kst_type='wrong';
-                            $item->save();
-                        }
+                            } else
+                            {
+                                $this->StoreWrong($item->taj_id,$item->acc,$item->name,$item->ksm_date,$item->ksm,$haf->id);
+                                $item->kst_type='wrong';
+                                $item->save();
+                            }
 
+                        }
                     }
+
+                    Fromexcel::where('haf_id',null)->update(['haf_id'=>$haf->id]);
+
+                    $haf->tot=Fromexcel::where('haf_id',$haf->id)->sum('ksm');
+                    $haf->morahel=Fromexcel::where('haf_id',$haf->id)->where('kst_type','normal')->sum('ksm');
+                    $haf->over_kst=Fromexcel::where('haf_id',$haf->id)->where('kst_type','over')->sum('ksm');
+                    $haf->over_kst_arc=Fromexcel::where('haf_id',$haf->id)->where('kst_type','over_arc')->sum('ksm');
+                    $haf->wrong_kst=Fromexcel::where('haf_id',$haf->id)->where('kst_type','wrong')->sum('ksm');
+                    $haf->half=Fromexcel::where('haf_id',$haf->id)->where('kst_type','half')->sum('ksm');
+                    $haf->save();
+
+                    DB::connection(Auth()->user()->company)->commit();
+                    Notification::make()
+                        ->title('تم الترحيل بنجاح')
+                        ->color('success')
+                        ->icon('heroicon-o-check-circle')
+                        ->success()
+                        ->send();
+                }
+                catch (\Exception $e) {
+                    Notification::make()
+                        ->title('حدث خطأ !!')
+                        ->color('danger')
+                        ->icon('heroicon-o-x-circle')
+                        ->danger()
+                        ->send();
+                    info($e);
+                    DB::connection(Auth()->user()->company)->rollback();
                 }
 
-                Fromexcel::where('haf_id',null)->update(['haf_id'=>$haf->id]);
+            }),
 
-                $haf->tot=Fromexcel::where('haf_id',$haf->id)->sum('ksm');
-                $haf->morahel=Fromexcel::where('haf_id',$haf->id)->where('kst_type','normal')->sum('ksm');
-                $haf->over_kst=Fromexcel::where('haf_id',$haf->id)->where('kst_type','over')->sum('ksm');
-                $haf->over_kst_arc=Fromexcel::where('haf_id',$haf->id)->where('kst_type','over_arc')->sum('ksm');
-                $haf->wrong_kst=Fromexcel::where('haf_id',$haf->id)->where('kst_type','wrong')->sum('ksm');
-                $haf->half=Fromexcel::where('haf_id',$haf->id)->where('kst_type','half')->sum('ksm');
-                $haf->save();
-            })
+            Actions\Action::make('Delete Hafitha')
+                ->color('danger')
+                ->form([
+
+                    TextInput::make('haf_id')
+                        ->label('رقم الحافظة')
+                        ->live()
+                        ->afterStateUpdated(function ($state,Set $set){
+                            if ($state ) {
+                                $haf=Hafitha::find($state);
+                                if ($haf) $set('notes',$haf->Taj->TajName.' من '.$haf->from_date.' إلي '.$haf->to_date);
+                            }
+                        })
+                        ->required(),
+                    Textarea::make('notes')
+                        ->hiddenLabel()
+                        ->disabled(),
+
+                ])
+
+                ->action(function (array $data){
+                    if ($data['haf_id']) {
+                        $haf=Hafitha::find($data['haf_id']);
+                        if ($haf) {
+                            Tran::where('haf_id',$data['haf_id'])->delete();
+                            Trans_arc::where('haf_id',$data['haf_id'])->delete();
+                            Overkst::where('haf_id',$data['haf_id'])->delete();
+                            Wrongkst::where('haf_id',$data['haf_id'])->delete();
+
+                            $mains=Main::where('taj_id',$haf->taj_id)->get();
+                            foreach ($mains as $main){
+                                self::MainTarseed2($main->id);
+                            }
+
+                            $haf->delete();
+
+                            Notification::make()
+                                ->title('تم حذف الحافظة')
+                                ->success()
+                                ->send();
+
+                        }
+                    }
+
+                })
+                ->requiresConfirmation(),
         ];
     }
+
 }
