@@ -159,52 +159,7 @@ class ListFromexcels extends ListRecords
 
             }),
 
-            Actions\Action::make('Delete Hafitha')
-                ->color('danger')
-                ->form([
 
-                    TextInput::make('haf_id')
-                        ->label('رقم الحافظة')
-                        ->live()
-                        ->afterStateUpdated(function ($state,Set $set){
-                            if ($state ) {
-                                $haf=Hafitha::find($state);
-                                if ($haf) $set('notes',$haf->Taj->TajName.' من '.$haf->from_date.' إلي '.$haf->to_date);
-                            }
-                        })
-                        ->required(),
-                    Textarea::make('notes')
-                        ->hiddenLabel()
-                        ->disabled(),
-
-                ])
-
-                ->action(function (array $data){
-                    if ($data['haf_id']) {
-                        $haf=Hafitha::find($data['haf_id']);
-                        if ($haf) {
-                            Tran::where('haf_id',$data['haf_id'])->delete();
-                            Trans_arc::where('haf_id',$data['haf_id'])->delete();
-                            Overkst::where('haf_id',$data['haf_id'])->delete();
-                            Wrongkst::where('haf_id',$data['haf_id'])->delete();
-
-                            $mains=Main::where('taj_id',$haf->taj_id)->get();
-                            foreach ($mains as $main){
-                                self::MainTarseed2($main->id);
-                            }
-
-                            $haf->delete();
-
-                            Notification::make()
-                                ->title('تم حذف الحافظة')
-                                ->success()
-                                ->send();
-
-                        }
-                    }
-
-                })
-                ->requiresConfirmation(),
         ];
     }
 

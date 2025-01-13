@@ -140,7 +140,8 @@ trait MainTrait {
             $NextKst= date('Y-m-d', strtotime($nextkst . "+1 month"));
         else $NextKst=self::setMonth2($main->sul_begin);
         $main=Main::find($id);
-         $tar=$main->tarkst->sum('kst');
+        $tar=$main->tarkst->sum('kst');
+        $over=$main->overkstable->sum('kst');
 
         Main::where('id',$id)->
         update([
@@ -152,6 +153,9 @@ trait MainTrait {
             'Late'=>self::RetLate2($id,$main->kst_count,$NextKst),
             'Kst_baky'=>$main->kst_count-$count,
             'tar_kst'=>$tar,
+            'tar_count'=>$main->tarkst->count(),
+            'over_kst'=>$over,
+            'over_count'=>$main->overkstable->count(),
         ]);
 
 

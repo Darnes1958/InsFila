@@ -10,10 +10,5 @@ class EditDateofexcel extends EditRecord
 {
     protected static string $resource = DateofexcelResource::class;
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\DeleteAction::make(),
-        ];
-    }
+
 }

@@ -10,10 +10,5 @@ class EditHafitha extends EditRecord
 {
     protected static string $resource = HafithaResource::class;
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\DeleteAction::make(),
-        ];
-    }
+
 }
