@@ -64,7 +64,8 @@ class MainEdit extends Page
     }
     public function store(){
         $this->validate();
-        Main::find($this->main_id)->update(collect($this->contData)->except(['total','pay','baky'])->toArray());
+      //  info($this->contData);
+        Main::find($this->main_id)->update(collect($this->contData)->except(['total','pay','baky','sell','customer','name'])->toArray());
         Notification::make()
             ->title('تم تحزين البانات بنجاح')
             ->success()

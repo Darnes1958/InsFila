@@ -232,6 +232,7 @@ class NewSell extends Page
                                      ->required(),
                                  TextInput::make('price1')
                                      ->numeric()
+                                     ->live(debounce: 500)
                                      ->minValue(1)
                                      ->afterStateUpdated(function (Set $set,Get $get,$state){
                                          if ($state<1) {$set('p1',null);$set('sub_tot',null); return;}
