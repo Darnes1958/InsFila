@@ -223,22 +223,7 @@ class newCont extends Page implements HasForms
                                              ->required()
                                              ->label('اسم المصرف')
                                              ->maxLength(255),
-                                         Select::make('taj_id')
-                                             ->relationship('Taj','TajName')
-                                             ->label('المصرف التجميعي')
-                                             ->searchable()
-                                             ->preload()
-                                             ->createOptionForm([
-                                                 TextInput::make('TajName')
-                                                     ->required()
 
-                                                     ->label('المصرف التجميعي')
-                                                     ->maxLength(255),
-                                                 TextInput::make('TajAcc')
-                                                     ->label('رقم الحساب')
-                                                     ->required(),
-                                             ])
-                                             ->required(),
                                      ])
                              ])
                              ->createOptionAction(fn ($action) => $action->color('success'))
