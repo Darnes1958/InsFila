@@ -114,9 +114,16 @@ class ListFromexcels extends ListRecords
                     } else return;
 
                     foreach ($fromexcel as $item){
-                        $main=Main::where('taj_id',$item->taj_id)->where('acc',$item->acc)->first();
+                        $mains=Main::where('taj_id',$item->taj_id)->where('acc',$item->acc)->get();
 
-                        if ($main){
+                        if ($mains->count()>0){
+                            if ($mains->count()==1)
+                                $main=$mains->first();
+                            else
+                            {
+                                $main=$mains->where('kst',$item->ksm)->first();
+                                if (!$main) $main=$mains->first();
+                            }
                             $type=$this->Fill_From_Excel($main->id,$item->ksm,$item->ksm_date,$haf->id,$item->id);
                             $item->main_id=$main->id;
                             $item->main_name=$main->Customer->name;

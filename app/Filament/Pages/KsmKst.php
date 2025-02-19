@@ -128,17 +128,27 @@ class KsmKst extends Page implements HasTable
     }
     public function chkmainid()
     {
+
             $this->message=null;
             $this->is_arc=false;
 
             $this->main=Main::where('id',$this->main_id)->first();
-            $this->acc=$this->main->acc;
-            $this->ksm=$this->main->kst;
-            $this->accTaken=true;
+            if ($this->main){
+                $this->acc=$this->main->acc;
+                $this->ksm=$this->main->kst;
+                $this->accTaken=true;
 
-        $this->has_baki=Tran::where('main_id',$this->main_id)->sum('baky')>0;
-            $this->fillcontForm();
-            $this->go('ksm_date');
+                $this->has_baki=Tran::where('main_id',$this->main_id)->sum('baky')>0;
+                $this->fillcontForm();
+                $this->go('ksm_date');
+            } else {
+                $this->acc=null;
+                $this->ksm=null;
+                $this->accTaken=false;
+
+
+            }
+
     }
 
 
@@ -212,7 +222,7 @@ class KsmKst extends Page implements HasTable
                   ->columnSpan(3)
                   ->live()
                   ->relationship('Main','name',modifyQueryUsing: fn ($query) =>
-                     $query->when($this->accTaken,function ($q){
+                     $query->when($this->accTaken && $this->acc,function ($q){
                          $q->where('acc',$this->acc);
                      }),)
 
