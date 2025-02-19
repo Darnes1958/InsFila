@@ -33,7 +33,7 @@ class UserResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return Auth::user()->hasRole('Admin');
+        return Auth::user()->hasRole('admin');
     }
 
     public static function form(Form $form): Form
@@ -52,7 +52,7 @@ class UserResource extends Resource
                     ->searchable()
                     ->multiple()
                     ->relationship('roles', 'name', fn (Builder $query) => $query
-                        ->when(Auth::id()!=1,function ($q) {$q->where('name','!=','Admin');})
+                        ->when(Auth::id()!=1,function ($q) {$q->where('name','!=','admin');})
                         ->where('for_who','ins')
                     )
 
