@@ -217,6 +217,7 @@ class MainResource extends Resource
               Select::make('sell_id')
                     ->label('البضاعة')
                     ->relationship('Sell','notes')
+                    ->searchable()
                     ->preload()
                     ->required()
                 ->createOptionForm([

@@ -61,10 +61,14 @@ class EventServiceProvider extends ServiceProvider
         $blog->LastUpd=now();
         $blog->kst_baky=$blog->kst_count;
         $blog->raseed=$blog->sul-$blog->pay;
+        $blog->taj_id=Bank::find($blog->bank_id)->taj_id;
       });
 
       Main::updating(function($blog){
+          info($blog);
         $blog->user_id = auth()->id();
+        $blog->taj_id=Bank::find($blog->bank_id)->taj_id;
+
 
       });
 
