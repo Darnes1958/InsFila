@@ -38,6 +38,20 @@ class ListFromexcels extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('Convert')
+                ->action(function (){
+
+                    $mains=Main::query()->get();
+                    foreach ($mains as $main){
+            //            $this->SortKstDate($main->id);
+  //                      $main->pay=Tran::where('main_id',$main->id)->sum('ksm');
+  //                      $main->save();
+                        self::MainTarseed2($main->id);
+                   }
+                    Notification::make('ok')->title('Ok')->success()->send();
+                })
+                ->visible(false)
+             ->label('do ser'),
             Actions\Action::make('Do')
                 ->color('success')
                 ->form([

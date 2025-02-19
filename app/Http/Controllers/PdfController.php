@@ -22,9 +22,6 @@ class PdfController extends Controller
 
     $RepDate=date('Y-m-d');
     $cus=OurCompany::where('Company',Auth::user()->company)->first();
-
-
-
             $res=Taj::with('main')
                 ->has('main')
                 ->withCount('main as count')
@@ -33,35 +30,8 @@ class PdfController extends Controller
                 ->withSum('main as raseed','raseed')
                 ->get();
 
-
-
-
-    $html = view('PrnView.pdf-bank-sum',
-      ['RepTable'=>$res,'cus'=>$cus,'RepDate'=>$RepDate])->toArabicHTML();
-
-    $pdf = PDF::loadHTML($html)->output();
-
-    $headers = array(
-      "Content-type" => "application/pdf",
-    );
-
-
-// Create a stream response as a file download
-    return response()->streamDownload(
-      fn () => print($pdf), // add the content to the stream
-      "invoice.pdf", // the name of the file/stream
-      $headers
-    );
-  }
-    function PdfAll($id)
-    {
-        $RepDate = date('Y-m-d');
-        $cus = OurCompany::where('Company', Auth::user()->company)->first();
-         $res = Main::where('taj_id', $id)->get();
-         $BankName=Taj::find($id)->TajName;
-
-        $reportHtml = view('PrnView.pdf-all',
-            ['RepTable' => $res, 'cus' => $cus, 'RepDate' => $RepDate,'BankName'=>$BankName])->render();
+        $reportHtml = view('PrnView.pdf-bank-sum',
+            ['RepTable'=>$res,'cus'=>$cus,'RepDate'=>$RepDate])->render();
         $arabic = new Arabic();
         $p = $arabic->arIdentify($reportHtml);
 
@@ -71,10 +41,9 @@ class PdfController extends Controller
         }
 
         $pdf = PDF::loadHTML($reportHtml);
+        return $pdf->download('report.pdf');
 
-        $headers = array("Content-type" => "application/pdf",);
-        return response()->streamDownload(fn () => print($pdf), "invoice.pdf", $headers );
-    }
+  }
     function PdfNames(Request $request){
         $RepDate = date('Y-m-d');
         $cus = OurCompany::where('Company', Auth::user()->company)->first();
