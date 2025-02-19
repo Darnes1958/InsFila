@@ -47,7 +47,7 @@ class MainResource extends Resource
 
   public static function shouldRegisterNavigation(): bool
   {
-    return  auth()->user()->hasAnyPermission('ادخال عقود','تعديل عقود','الغاء عقود');
+    return  auth()->user()->can('ادخال عقود');
   }
     public static function form(Form $form): Form
     {
