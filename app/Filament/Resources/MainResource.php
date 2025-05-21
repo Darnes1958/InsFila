@@ -47,7 +47,7 @@ class MainResource extends Resource
 
   public static function shouldRegisterNavigation(): bool
   {
-    return  auth()->user()->hasAnyPermission('ادخال عقود','تعديل عقود','الغاء عقود');
+    return  auth()->user()->can('ادخال عقود');
   }
     public static function form(Form $form): Form
     {
@@ -217,6 +217,7 @@ class MainResource extends Resource
               Select::make('sell_id')
                     ->label('البضاعة')
                     ->relationship('Sell','notes')
+                    ->searchable()
                     ->preload()
                     ->required()
                 ->createOptionForm([

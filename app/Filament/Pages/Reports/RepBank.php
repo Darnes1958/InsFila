@@ -41,6 +41,7 @@ class RepBank extends Page implements HasTable, HasForms
   protected static ?string $navigationGroup='تقارير';
   protected static ?int $navigationSort=3;
 
+
   public static function shouldRegisterNavigation(): bool
   {
     return  auth()->user()->can('اجمالي المصارف');
@@ -80,6 +81,7 @@ class RepBank extends Page implements HasTable, HasForms
                 else $bank = Taj::has('main');
                 return  $bank;
             })
+            ->pluralModelLabel('المصارف')
             ->columns([
                 TextColumn::make('id')
                     ->label('الرقم الألي'),
