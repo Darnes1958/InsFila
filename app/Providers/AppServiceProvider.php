@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
-use BezhanSalleh\FilamentLanguageSwitch\LanguageSwitch;
+
 use Filament\Support\Colors\Color;
 use Filament\Support\Facades\FilamentColor;
 
@@ -83,10 +83,7 @@ class AppServiceProvider extends ServiceProvider
             // $query->time
         });
 
-      LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
-        $switch
-          ->locales(['ar','en']); // also accepts a closure
-      });
+
       Model::unguard();
     }
 }
