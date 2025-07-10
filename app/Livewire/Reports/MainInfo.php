@@ -91,9 +91,13 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable,Has
           ->preload()
           ->hiddenLabel()
           ->afterStateUpdated(function (Get $get) {
-            info($get('main_id'));
+
             if (Main::where('id',$get('main_id'))->exists())
-             $this->main_id=$get('main_id');
+            {
+                $this->main_id=$get('main_id');
+                $this->dispatch('Take_Main_Id',main_id: $this->main_id);
+            }
+
             else $this->main_id=null;
           }),
       ]);
@@ -164,6 +168,11 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable,Has
         return  $tran;
       })
       ->columns([
+          TextColumn::make('ser')
+
+              ->color('primary')
+              ->sortable()
+              ->label('ت'),
         TextColumn::make('kst_date')->sortable()
           ->label('تاريخ القسط'),
         TextColumn::make('ksm_date')->sortable()

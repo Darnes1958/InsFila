@@ -22,6 +22,7 @@
 
         <div class="w-1/2">
             {{ $this->table }}
+            @livewire(\App\Livewire\widgets\OverWidget::class)
         </div>
     </div>
 
