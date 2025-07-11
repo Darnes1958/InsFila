@@ -15,15 +15,20 @@ use App\Models\Overkst_arc;
 use App\Models\Tran;
 use App\Models\Trans_arc;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Infolists\Components\Group;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
 use Filament\Infolists\Infolist;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\TextColumn\TextColumnSize;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
@@ -38,13 +43,20 @@ class   MainArcInfo extends Component implements HasInfolists,HasForms,HasTable
   use InteractsWithInfolists,InteractsWithForms,InteractsWithTable;
 
   public $mainId;
+    public $main_id;
   public Main_arc $mainRec;
 
   public MainForm $mainForm;
   public TransForm $transForm;
   public OverForm $overForm;
 
-
+    public function mount()
+    {
+        $this->mainId=Main_arc::min('id');
+        $this->main_id=$this->mainId;
+        $this->mainRec=Main_arc::find($this->mainId);
+        $this->form->fill([]);
+    }
   public function form(Form $form): Form
   {
     return $form
@@ -52,72 +64,89 @@ class   MainArcInfo extends Component implements HasInfolists,HasForms,HasTable
         Select::make('mainId')
           ->options(Main_arc::all()->pluck('Customer.name', 'id')->toArray())
           ->searchable()
-          ->reactive()
-          ->hiddenLabel()
+          ->live()
+          ->Label('بحث')
 
 
-          ->afterStateUpdated(function (callable $get) {
-            if (Main_arc::where('id',$get('mainId'))->exists())
-             $this->mainId=$get('mainId');
+          ->afterStateUpdated(function ($state,Set $set) {
+            if (Main_arc::where('id',$state)->exists())
+            {
+                $this->mainId=$state;
+                $this->mainRec=Main_arc::find($this->main_id);
+                $this->dispatch('Take_Main_Id',main_id: $this->mainId);
+                $set('main_id',$this->mainId);
+            }
+
             else $this->mainId=null;
 
-          }),
-      ]);
+          })
+            ->columnSpan(2),
+          TextInput::make('main_id')
+              ->label('رقم العقد')
+              ->columnSpan(1)
+              ->live(onBlur: true)
+
+              ->afterStateUpdated(function ($state,Set $set){
+                  if (Main_arc::where('id',$state)->exists()){
+                      $this->mainId=$state;
+                      $this->mainRec=Main_arc::find($this->main_id);
+                      $set('mainId',$state);
+                      $this->dispatch('Take_Main_Id',main_id: $this->mainId);
+                  }
+
+
+              }),
+      ])->columns(3);
   }
 
   public function mainArcInfolist(Infolist $infolist): Infolist
   {
     return $infolist
       ->record($this->mainRec)
-      ->schema([
-        Group::make([
-          Section::make(new HtmlString('<div class="text-danger-600">بيانات الزبون</div>'))
-            ->schema([
-              TextEntry::make('Customer.name')
-                ->label(new HtmlString('<div class="text-primary-400 text-lg">اسم الزبون</div>'))
-                ->color('info')->size(TextEntry\TextEntrySize::Large)
-                ->columnSpan(2),
-              TextEntry::make('Bank.BankName')
-                ->label('المصرف')
-                ->color('info'),
-              TextEntry::make('acc')->label('رقم الحساب')
-                ->color('info'),
-              TextEntry::make('libyana')->label('لبيانا')
-                ->color('Fuchsia'),
-              TextEntry::make('mdar')->label('المدار')->color('grean')
-                ->color('green'),
-            ])->columns(3)->collapsible()
-        ]),
-        Group::make([
-          Section::make('بيانات العقد')
+        ->schema([
 
-            ->schema([
-              TextEntry::make('id')
-                ->columnSpanFull()
+            TextEntry::make('Customer.name')
+                ->label(new HtmlString('<div class="text-primary-400 text-lg font-extrabold">اسم الزبون</div>'))
+                ->color('info')->size(TextEntry\TextEntrySize::Large)
+                ->weight(FontWeight::ExtraBold)
+                ->columnSpan(3),
+            TextEntry::make('Bank.BankName')
+                ->label('المصرف')
+                ->columnSpan(3)
+                ->color('info'),
+            TextEntry::make('acc')->label('رقم الحساب')
+                ->columnSpan(2)
+                ->color('info'),
+            TextEntry::make('id')
+                ->columnSpan(2)
                 ->label(new HtmlString('<div class="text-primary-400 text-lg">رقم العقد</div>'))
                 ->color('info')
+                ->weight(FontWeight::ExtraBold)
                 ->size(TextEntry\TextEntrySize::Large),
-              TextEntry::make('sul_begin')->label('تاريخ العقد'),
-              TextEntry::make('sul')->label('قيمة العقد')->color('info'),
+            TextEntry::make('sul_begin')->label('تاريخ العقد')->columnSpan(2),
+            TextEntry::make('sul')->label('قيمة العقد')->color('info')->columnSpan(2),
 
-              TextEntry::make('kst_count')->label('عدد الأقساط'),
-              TextEntry::make('kst')->label('القسط'),
-              TextEntry::make('pay')->label('المدفوع'),
-              TextEntry::make('raseed')->label('المتبقي')->color('danger'),
-            ])->columns(3)->collapsible()->collapsed()
-        ]),
-        Group::make([
-          Section::make('بيانات عامة')
-            ->schema([
-              TextEntry::make('LastKsm')->label('تاريخ اخر خصم')->columnSpan(2),
-              TextEntry::make('NextKst')->label('تاريخ الخصم القادم')->columnSpan(2),
-              TextEntry::make('over_count')->label('اقساط بالفائض'),
-              TextEntry::make('over_kst')->label('قيمتها'),
-              TextEntry::make('tar_count')->label('اقساط مرجعة'),
-              TextEntry::make('tar_kst')->label('قيمتها'),
-            ])->columns(4)->collapsible()->collapsed()
-        ]),
-      ]);
+            TextEntry::make('kst_count')->label('عدد الأقساط')->columnSpan(2),
+            TextEntry::make('kst')->label('القسط')->columnSpan(2),
+            TextEntry::make('pay')->label('المدفوع')->columnSpan(2),
+            TextEntry::make('raseed')->label('المتبقي')->color('danger')
+                ->weight(FontWeight::ExtraBold)->columnSpan(2),
+
+
+            TextEntry::make('LastKsm')->label('تاريخ اخر خصم')->columnSpan(2),
+
+            TextEntry::make('over_count')->label('اقساط بالفائض')->color('danger')
+                ->weight(FontWeight::ExtraBold)
+                ->visible(fn(): bool=>$this->mainRec->overkstable()->exists())->columnSpan(2),
+            TextEntry::make('over_kst')->label('قيمتها')
+                ->visible(fn(): bool=>$this->mainRec->overkstable()->exists())->columnSpan(2),
+            TextEntry::make('tar_count')->label('اقساط مرجعة')->color('danger')
+                ->weight(FontWeight::ExtraBold)
+                ->visible(fn(): bool=>$this->mainRec->tarkst()->exists())->columnSpan(2),
+            TextEntry::make('tar_kst')->label('قيمتها')
+                ->visible(fn(): bool=>$this->mainRec->tarkst()->exists())->columnSpan(2),
+
+        ])->columns(8);
   }
 
   public function table(Table $table):Table
@@ -128,12 +157,28 @@ class   MainArcInfo extends Component implements HasInfolists,HasForms,HasTable
         return  $tran;
       })
       ->columns([
+          TextColumn::make('ser')
+
+              ->color('primary')
+              ->sortable()
+              ->label('ت'),
         TextColumn::make('kst_date')->sortable()
+            ->toggleable()
           ->label('تاريخ القسط'),
         TextColumn::make('ksm_date')->sortable()
           ->label('تاريخ الخصم'),
         TextColumn::make('ksm')
           ->label('الخصم'),
+          TextColumn::make('ksm_type_id')
+              ->size(TextColumnSize::ExtraSmall)
+              ->toggleable()
+              ->toggledHiddenByDefault()
+              ->label('طريقة الدفع'),
+          TextColumn::make('ksm_notes')
+              ->toggleable()
+              ->toggledHiddenByDefault()
+              ->size(TextColumnSize::ExtraSmall)
+              ->label('ملاحظات'),
       ])
       ->striped();
   }
@@ -184,9 +229,6 @@ class   MainArcInfo extends Component implements HasInfolists,HasForms,HasTable
   public function render()
     {
 
-        if (!$this->mainId) $this->mainId=Main_arc::latest()->first()->id;
-
-        $this->mainRec=Main_arc::where('id',$this->mainId)->first();
 
 
       return view('livewire.reports.main-arc-info');

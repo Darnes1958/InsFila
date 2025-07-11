@@ -3,7 +3,7 @@
         <div class="w-2/4 mb-2">
             {{ $this->form }}
         </div>
-        <div class="w-1/4 mb-2 px-4 gap-4">
+        <div class="w-1/4 mb-2 px-4 gap-4 ">
             {{ $this->printAction }}
             {{ $this->printContAction }}
         </div>
@@ -20,10 +20,14 @@
             </div>
         </div>
 
-        <div class="w-1/2">
-            {{ $this->table }}
-            @livewire(\App\Livewire\widgets\OverWidget::class)
-        </div>
+            <div class="w-1/2">
+                {{ $this->table }}
+                @if($mainRec->overkstable->count()>0)
+                @livewire(\App\Livewire\widgets\OverWidget::class,['main_id'=>$main_id])
+                @endif
+            </div>
+
+
     </div>
 
 

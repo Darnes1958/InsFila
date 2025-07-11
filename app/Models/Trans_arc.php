@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\Auth;
 class Trans_arc extends Model
 {
   protected $connection = 'other';
-
+    protected $casts=[
+        'ksm_type_id'=>\App\Enums\KsmType::class
+    ];
   public function KsmType(){
     return $this->belongsTo(KsmType::class);
   }

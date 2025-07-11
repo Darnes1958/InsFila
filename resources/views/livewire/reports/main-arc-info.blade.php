@@ -1,6 +1,6 @@
 <div class="gap-2">
     <div class="flex">
-        <div class="w-1/4 mb-2">
+        <div class="w-1/2 mb-2">
             {{ $this->form }}
         </div>
         <div  wire:click="DoArc" class="flex w-1/4 mb-4 justify-end">
@@ -18,6 +18,9 @@
 
         <div class="w-1/2">
             {{ $this->table }}
+            @if($mainRec->overkstable->count()>0)
+                @livewire(\App\Livewire\widgets\OverWidget::class,['main_id'=>$mainId])
+            @endif
         </div>
     </div>
 

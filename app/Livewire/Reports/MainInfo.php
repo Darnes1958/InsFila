@@ -19,9 +19,11 @@ use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Infolists\Components\Group;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
@@ -30,6 +32,7 @@ use Filament\Infolists\Contracts\HasInfolists;
 use Filament\Infolists\Infolist;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\TextColumn\TextColumnSize;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
@@ -46,6 +49,9 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable,Has
   use InteractsWithInfolists,InteractsWithForms,InteractsWithTable,InteractsWithActions;
 
   public $main_id;
+  public $mainId;
+
+
   public Main $mainRec;
   public $montahy=false;
   public MainForm $mainForm;
@@ -54,6 +60,10 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable,Has
 
   public function mount()
   {
+      $this->mainId=Main::min('id');
+      $this->main_id=$this->mainId;
+      $this->mainRec=Main::find($this->mainId);
+      $this->montahy=$this->mainRec->raseed<=0;
       $this->form->fill([]);
   }
   public function printAction(): Action
@@ -83,24 +93,42 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable,Has
       ->model(Tran::class)
       ->schema([
         Select::make('main_id')
-
-          ->relationship('Main', 'id')
+        ->columnSpan(2)
+         ->relationship('Main', 'id')
           ->getOptionLabelFromRecordUsing(fn (Main $record) => "{$record->Customer->name} {$record->acc}")
           ->live()
           ->searchable()
           ->preload()
-          ->hiddenLabel()
-          ->afterStateUpdated(function (Get $get) {
+          ->Label('بحث')
+          ->afterStateUpdated(function (Get $get,Set $set) {
 
             if (Main::where('id',$get('main_id'))->exists())
             {
                 $this->main_id=$get('main_id');
+                $this->mainRec=Main::find($this->main_id);
                 $this->dispatch('Take_Main_Id',main_id: $this->main_id);
+                $set('mainId',$this->main_id);
             }
 
             else $this->main_id=null;
           }),
-      ]);
+          TextInput::make('mainId')
+          ->label('رقم العقد')
+          ->columnSpan(1)
+          ->live(onBlur: true)
+
+          ->afterStateUpdated(function ($state,Set $set){
+              if (Main::where('id',$state)->exists()){
+                  $this->main_id=$state;
+                  $this->mainRec=Main::find($this->main_id);
+                  $set('mainId',$state);
+                  $this->dispatch('Take_Main_Id',main_id: $this->main_id);
+              }
+
+
+          }),
+      ])
+      ->columns(3)  ;
   }
 
   public function mainInfolist(Infolist $infolist): Infolist
@@ -108,56 +136,49 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable,Has
     return $infolist
       ->record($this->mainRec)
       ->schema([
-        Group::make([
-          Section::make(new HtmlString('<div class="text-danger-600">بيانات الزبون</div>'))
-            ->schema([
+
               TextEntry::make('Customer.name')
                 ->label(new HtmlString('<div class="text-primary-400 text-lg font-extrabold">اسم الزبون</div>'))
                 ->color('info')->size(TextEntry\TextEntrySize::Large)
                 ->weight(FontWeight::ExtraBold)
-                ->columnSpan(2),
+                ->columnSpan(3),
               TextEntry::make('Bank.BankName')
                 ->label('المصرف')
+                  ->columnSpan(3)
                 ->color('info'),
               TextEntry::make('acc')->label('رقم الحساب')
+                  ->columnSpan(2)
                 ->color('info'),
-              TextEntry::make('Customer.libyana')->label('لبيانا')
-                ->color('Fuchsia'),
-              TextEntry::make('Customer.mdar')->label('المدار')->color('grean')
-                ->color('green'),
-            ])->columns(3)->collapsible()
-        ]),
-        Group::make([
-          Section::make('بيانات العقد')
-
-            ->schema([
               TextEntry::make('id')
                 ->columnSpan(2)
                 ->label(new HtmlString('<div class="text-primary-400 text-lg">رقم العقد</div>'))
                 ->color('info')
                 ->weight(FontWeight::ExtraBold)
                 ->size(TextEntry\TextEntrySize::Large),
-              TextEntry::make('sul_begin')->label('تاريخ العقد'),
-              TextEntry::make('sul')->label('قيمة العقد')->color('info'),
+              TextEntry::make('sul_begin')->label('تاريخ العقد')->columnSpan(2),
+              TextEntry::make('sul')->label('قيمة العقد')->color('info')->columnSpan(2),
 
-              TextEntry::make('kst_count')->label('عدد الأقساط'),
-              TextEntry::make('kst')->label('القسط'),
-              TextEntry::make('pay')->label('المدفوع'),
-              TextEntry::make('raseed')->label('المتبقي')->color('danger')->weight(FontWeight::ExtraBold),
-            ])->columns(4)->collapsible()
-        ]),
-        Group::make([
-          Section::make('بيانات عامة')
-            ->schema([
+              TextEntry::make('kst_count')->label('عدد الأقساط')->columnSpan(2),
+              TextEntry::make('kst')->label('القسط')->columnSpan(2),
+              TextEntry::make('pay')->label('المدفوع')->columnSpan(2),
+              TextEntry::make('raseed')->label('المتبقي')->color('danger')
+                  ->weight(FontWeight::ExtraBold)->columnSpan(2),
+
+
               TextEntry::make('LastKsm')->label('تاريخ اخر خصم')->columnSpan(2),
-              TextEntry::make('NextKst')->label('تاريخ الخصم القادم')->columnSpan(2),
-              TextEntry::make('over_count')->label('اقساط بالفائض'),
-              TextEntry::make('over_kst')->label('قيمتها'),
-              TextEntry::make('tar_count')->label('اقساط مرجعة'),
-              TextEntry::make('tar_kst')->label('قيمتها'),
-            ])->columns(4)->collapsible()
-        ]),
-      ]);
+
+              TextEntry::make('over_count')->label('اقساط بالفائض')->color('danger')
+                  ->weight(FontWeight::ExtraBold)
+                ->visible(fn(): bool=>$this->mainRec->overkstable()->exists())->columnSpan(2),
+              TextEntry::make('over_kst')->label('قيمتها')
+                  ->visible(fn(): bool=>$this->mainRec->overkstable()->exists())->columnSpan(2),
+              TextEntry::make('tar_count')->label('اقساط مرجعة')->color('danger')
+                  ->weight(FontWeight::ExtraBold)
+                  ->visible(fn(): bool=>$this->mainRec->tarkst()->exists())->columnSpan(2),
+              TextEntry::make('tar_kst')->label('قيمتها')
+                  ->visible(fn(): bool=>$this->mainRec->tarkst()->exists())->columnSpan(2),
+
+      ])->columns(8);
   }
 
   public function table(Table $table):Table
@@ -174,11 +195,22 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable,Has
               ->sortable()
               ->label('ت'),
         TextColumn::make('kst_date')->sortable()
+            ->toggleable()
           ->label('تاريخ القسط'),
         TextColumn::make('ksm_date')->sortable()
           ->label('تاريخ الخصم'),
         TextColumn::make('ksm')
           ->label('الخصم'),
+          TextColumn::make('ksm_type_id')
+              ->size(TextColumnSize::ExtraSmall)
+              ->toggleable()
+              ->toggledHiddenByDefault()
+              ->label('طريقة الدفع'),
+          TextColumn::make('ksm_notes')
+              ->toggleable()
+              ->toggledHiddenByDefault()
+              ->size(TextColumnSize::ExtraSmall)
+              ->label('ملاحظات'),
       ])
       ->striped();
   }
@@ -186,38 +218,30 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable,Has
   public function DoArc(){
     DB::connection(Auth()->user()->company)->beginTransaction();
     try {
-        $this->mainForm->SetMain($this->main_id);
-        Main_arc::create(
-          $this->mainForm->all()
-        );
+        $record=Main::find($this->main_id);
+        $oldRecord= $record;
+        $newRecord = $oldRecord->replicate();
 
-        $res=Tran::where('main_id',$this->main_id)->get();
+        $newRecord->setTable('main_arcs');
+        $newRecord->id=$record->id;
 
-        foreach ($res as $item){
-          $this->transForm->SetTrans($item);
-          $this->transForm->user_id=$item->user_id;
+        $newRecord->save();
+        Overkst::where('overkstable_type','App\Models\Main')
+            ->where('overkstable_id',$record->id)
+            ->update(['overkstable_type'=>'App\Models\Main_arc']);
 
-          Trans_arc::create(
-            $this->transForm->all()
-          );
+        Tran::query()
+            ->where('main_id', $record->id)
+            ->each(function ($oldTran) {
+                $newTran = $oldTran->replicate();
+                $newTran->setTable('trans_arcs');
+                $newTran->save();
+                $oldTran->delete();
+            });
+        $record->delete();
+        $this->main_id=null;
+        $this->dispatch('Take_Main_Id',main_id: $this->main_id);
 
-        }
-
-        $res=Overkst::where('main_id',$this->main_id)->get();
-        foreach ($res as $item){
-          $this->overForm->SetOver($item);
-          $this->overForm->user_id=$item->user_id;
-          Overkst_arc::create(
-            $this->overForm->all()
-          );
-
-        }
-
-        $old=$this->main_id;
-        $this->main_id=Main::latest()->first()->id;
-      Overkst::where('main_id',$old)->delete();
-      Tran::where('main_id',$old)->delete();
-      Main::where('id',$old)->delete();
 
 
       DB::connection(Auth()->user()->company)->commit();
@@ -232,10 +256,8 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable,Has
   public function render()
     {
 
-        if (!$this->main_id) $this->main_id=Main::latest()->first()->id;
 
-        $this->mainRec=Main::where('id',$this->main_id)->first();
-        $this->montahy=$this->mainRec->raseed<=0;
+
 
         return view('livewire.reports.main-info');
     }

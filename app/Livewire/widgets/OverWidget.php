@@ -43,29 +43,27 @@ class OverWidget extends BaseWidget
             ->paginationPageOptions([5,12,15,50])
 
             ->query(function (Overkst $tran){
-                $tran=Overkst::where('main_id',$this->main_id);
+                $tran=Overkst::where('overkstable_id',$this->main_id);
                 return $tran;
             })
 
-
+           ->heading('أقساط بالفائض')
             ->columns([
-                TextColumn::make('id')
-                    ->label('الرقم الألي'),
-
-                TextColumn::make('overkstable.Customer.name')
-                    ->label('الاسم'),
-
+                TextColumn::make('ser')
+                    ->label('ت')
+                    ->color('primary')
+                 ->rowIndex(),
                 TextColumn::make('over_date')
-                    ->searchable()
                     ->sortable()
                     ->label('التاريخ'),
                 TextColumn::make('kst')
                     ->label('المبلغ'),
                 TextColumn::make('status')
                     ->label('الحالة'),
-                TextColumn::make('overkstable_type')
-                    ->label('حالة العقد'),
+
+
             ])
+            ->striped()
            ;
     }
 }
