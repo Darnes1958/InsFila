@@ -14,6 +14,8 @@ use App\Models\Overkst;
 use App\Models\Overkst_arc;
 use App\Models\Tran;
 use App\Models\Trans_arc;
+use Filament\Forms\Components\Actions;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -26,7 +28,9 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
 use Filament\Infolists\Infolist;
+use Filament\Notifications\Notification;
 use Filament\Support\Enums\FontWeight;
+use Filament\Support\Enums\VerticalAlignment;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\TextColumn\TextColumnSize;
 use Filament\Tables\Concerns\InteractsWithTable;
@@ -57,6 +61,13 @@ class   MainArcInfo extends Component implements HasInfolists,HasForms,HasTable
         $this->mainRec=Main_arc::find($this->mainId);
         $this->form->fill([]);
     }
+    public function Do(Get $get,Set $set)
+    {
+        if (!Main_arc::find($this->main_id))
+            Notification::make()
+                ->color('danger')
+                ->title('هذا الرقم غير مخزون')->danger()->send();
+    }
   public function form(Form $form): Form
   {
     return $form
@@ -85,7 +96,7 @@ class   MainArcInfo extends Component implements HasInfolists,HasForms,HasTable
               ->label('رقم العقد')
               ->columnSpan(1)
               ->live(onBlur: true)
-
+              ->extraAttributes(['wire:keydown.enter' => 'Do',])
               ->afterStateUpdated(function ($state,Set $set){
                   if (Main_arc::where('id',$state)->exists()){
                       $this->mainId=$state;
@@ -96,7 +107,16 @@ class   MainArcInfo extends Component implements HasInfolists,HasForms,HasTable
 
 
               }),
-      ])->columns(3);
+          Actions::make([
+              Action::make('retrieve')
+              ->color('primary')
+              ->requiresConfirmation()
+              ->action(function (){
+                  $this->DoArc();
+              })
+              ->label('استرجاع من الأرشيف')
+          ])->columnSpan(1)->verticalAlignment(VerticalAlignment::End),
+      ])->columns(4);
   }
 
   public function mainArcInfolist(Infolist $infolist): Infolist
@@ -145,6 +165,8 @@ class   MainArcInfo extends Component implements HasInfolists,HasForms,HasTable
                 ->visible(fn(): bool=>$this->mainRec->tarkst()->exists())->columnSpan(2),
             TextEntry::make('tar_kst')->label('قيمتها')
                 ->visible(fn(): bool=>$this->mainRec->tarkst()->exists())->columnSpan(2),
+            TextEntry::make('notes')->label('ملاحظات')
+                ->visible(fn(): bool=>filled($this->mainRec->notes))->columnSpanFull(),
 
         ])->columns(8);
   }
@@ -186,40 +208,43 @@ class   MainArcInfo extends Component implements HasInfolists,HasForms,HasTable
   public function DoArc(){
     DB::connection(Auth()->user()->company)->beginTransaction();
     try {
-        $this->mainForm->SetMain_arc($this->mainId);
-        Main::create(
-          $this->mainForm->all()
-        );
 
-        $res=Trans_arc::where('main_id',$this->mainId)->get();
-        foreach ($res as $item){
-          $this->transForm->SetTransArc($item);
-          $this->transForm->user_id=$item->user_id;
-          Tran::create(
-            $this->transForm->all()
-          );
+        $record=Main_arc::find($this->mainId);
+        $oldRecord= $record;
+        $newRecord = $oldRecord->replicate();
 
-        }
+        $newRecord->setTable('mains');
+        $newRecord->id=$record->id;
 
-        $res=Overkst_arc::where('main_id',$this->mainId)->get();
-        foreach ($res as $item){
-          $this->overForm->SetOverArc($item);
-          $this->overForm->user_id=$item->user_id;
-          Overkst::create(
-            $this->overForm->all()
-          );
+        $newRecord->save();
+        Overkst::where('overkstable_type','App\Models\Main_arc')
+            ->where('overkstable_id',$record->id)
+            ->update(['overkstable_type'=>'App\Models\Main']);
 
-        }
-
-        $old=$this->mainId;
-        $this->mainId=Main_arc::latest()->first()->id;
-        Overkst_arc::where('main_id',$old)->delete();
-        Trans_arc::where('main_id',$old)->delete();
-        Main_arc::where('id',$old)->delete();
+        Trans_arc::query()
+            ->where('main_id', $record->id)
+            ->each(function ($oldTran) {
+                $newTran = $oldTran->replicate();
+                $newTran->setTable('trans');
+                $newTran->save();
+                $oldTran->delete();
+            });
+        $record->delete();
+        $this->mainRec=Main_arc::first();
+        $this->mainId=$this->mainRec->id;
+        $this->main_id=$this->mainId;
+        $this->dispatch('Take_Main_Id',main_id: $this->main_id);
+        Notification::make()
+            ->title('تم النقل بنجاح')
+            ->success()
+            ->send();
 
       DB::connection(Auth()->user()->company)->commit();
     } catch (\Exception $e) {
       info($e);
+      Notification::make()
+          ->title('حدث خطأ')
+          ->send();
       DB::connection(Auth()->user()->company)->rollback();
     }
    $this->form($this->form);
@@ -228,9 +253,6 @@ class   MainArcInfo extends Component implements HasInfolists,HasForms,HasTable
 
   public function render()
     {
-
-
-
       return view('livewire.reports.main-arc-info');
     }
 }

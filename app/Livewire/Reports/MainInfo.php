@@ -18,6 +18,7 @@ use App\Models\Trans_arc;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
+use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -30,7 +31,9 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
 use Filament\Infolists\Infolist;
+use Filament\Notifications\Notification;
 use Filament\Support\Enums\FontWeight;
+use Filament\Support\Enums\VerticalAlignment;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\TextColumn\TextColumnSize;
 use Filament\Tables\Concerns\InteractsWithTable;
@@ -44,9 +47,9 @@ use Livewire\Component;
 use Filament\Forms\Form;
 
 
-class   MainInfo extends Component implements HasInfolists,HasForms,HasTable,HasActions
+class   MainInfo extends Component implements HasInfolists,HasForms,HasTable
 {
-  use InteractsWithInfolists,InteractsWithForms,InteractsWithTable,InteractsWithActions;
+  use InteractsWithInfolists,InteractsWithForms,InteractsWithTable;
 
   public $main_id;
   public $mainId;
@@ -66,25 +69,12 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable,Has
       $this->montahy=$this->mainRec->raseed<=0;
       $this->form->fill([]);
   }
-  public function printAction(): Action
+
+  public function Do(Get $get,Set $set)
   {
-    return Action::make('print')
-      ->label('طباعة')
-      ->button()
-      ->color('info')
-      ->icon('heroicon-m-printer')
-      ->color('info')
-      ->url(fn (): string => route('pdfmain', ['id'=>$this->main_id]));
-  }
-  public function printContAction(): Action
-  {
-    return Action::make('print')
-      ->label('طباعة نموذج العقد')
-      ->button()
-      ->color('info')
-      ->icon('heroicon-m-printer')
-      ->color('info')
-      ->url(fn (): string => route('pdfmaincont', ['id'=>$this->main_id]));
+      if (!Main::find($this->mainId))
+      Notification::make()
+          ->title('هذا الرقم غير مخزون')->color('danger')->danger()->send();
   }
 
   public function form(Form $form): Form
@@ -108,6 +98,7 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable,Has
                 $this->mainRec=Main::find($this->main_id);
                 $this->dispatch('Take_Main_Id',main_id: $this->main_id);
                 $set('mainId',$this->main_id);
+                $this->montahy=$this->mainRec->raseed<=0;
             }
 
             else $this->main_id=null;
@@ -116,19 +107,45 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable,Has
           ->label('رقم العقد')
           ->columnSpan(1)
           ->live(onBlur: true)
-
+          ->extraAttributes(['wire:keydown.enter' => 'Do',])
           ->afterStateUpdated(function ($state,Set $set){
               if (Main::where('id',$state)->exists()){
                   $this->main_id=$state;
                   $this->mainRec=Main::find($this->main_id);
                   $set('mainId',$state);
                   $this->dispatch('Take_Main_Id',main_id: $this->main_id);
+                  $this->montahy=$this->mainRec->raseed<=0;
               }
 
 
           }),
+          Actions::make([
+              Actions\Action::make('print')
+                  ->label('طباعة')
+                  ->button()
+                  ->color('info')
+                  ->icon('heroicon-m-printer')
+                  ->color('info')
+
+                  ->url(fn (): string => route('pdfmain', ['id'=>$this->main_id])),
+              Actions\Action::make('print2')
+                  ->label('طباعة نموذج العقد')
+                  ->button()
+                  ->color('info')
+                  ->icon('heroicon-m-printer')
+                  ->color('info')
+                  ->url(fn (): string => route('pdfmaincont', ['id'=>$this->main_id])),
+              Actions\Action::make('retrieve')
+                  ->color('primary')
+                  ->visible(fn():bool=>$this->montahy)
+                  ->requiresConfirmation()
+                  ->action(function (){
+                      $this->DoArc();
+                  })
+                  ->label('نقل الأرشيف')
+          ])->columnSpan(3)->verticalAlignment(VerticalAlignment::End),
       ])
-      ->columns(3)  ;
+      ->columns(6)  ;
   }
 
   public function mainInfolist(Infolist $infolist): Infolist
@@ -165,7 +182,8 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable,Has
                   ->weight(FontWeight::ExtraBold)->columnSpan(2),
 
 
-              TextEntry::make('LastKsm')->label('تاريخ اخر خصم')->columnSpan(2),
+              TextEntry::make('LastKsm')->label('تاريخ اخر خصم')
+                  ->visible(fn(): bool=>filled($this->mainRec->LastKsm))->columnSpan(2),
 
               TextEntry::make('over_count')->label('اقساط بالفائض')->color('danger')
                   ->weight(FontWeight::ExtraBold)
@@ -177,6 +195,9 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable,Has
                   ->visible(fn(): bool=>$this->mainRec->tarkst()->exists())->columnSpan(2),
               TextEntry::make('tar_kst')->label('قيمتها')
                   ->visible(fn(): bool=>$this->mainRec->tarkst()->exists())->columnSpan(2),
+          TextEntry::make('notes')->label('ملاحظات')
+              ->visible(fn(): bool=>filled($this->mainRec->notes))->columnSpanFull(),
+
 
       ])->columns(8);
   }
@@ -239,10 +260,16 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable,Has
                 $oldTran->delete();
             });
         $record->delete();
-        $this->main_id=null;
+        $this->mainRec=Main::first();
+        $this->mainId=$this->mainRec->id;
+        $this->main_id=$this->mainId;
         $this->dispatch('Take_Main_Id',main_id: $this->main_id);
+        $this->montahy=$this->mainRec->raseed<=0;
 
-
+        Notification::make()
+            ->title('تم النقل بنجاح')
+            ->success()
+            ->send();
 
       DB::connection(Auth()->user()->company)->commit();
     } catch (\Exception $e) {
@@ -255,9 +282,6 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable,Has
 
   public function render()
     {
-
-
-
 
         return view('livewire.reports.main-info');
     }
