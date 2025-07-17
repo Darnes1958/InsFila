@@ -12,6 +12,7 @@ class Main_arc extends Model
     public function getNameAttribute(){
         return $this->Customer->name;
     }
+
     public function tarkst()
     {
         return $this->morphMany(Tarkst::class, 'tarkstable');

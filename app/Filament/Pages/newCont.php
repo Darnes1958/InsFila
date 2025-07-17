@@ -122,7 +122,8 @@ class newCont extends Page implements HasForms
                              ->hiddenLabel()
                              ->prefix('الفاتورة')
                              ->relationship('Sell','name',modifyQueryUsing: fn (Builder $query) =>
-                             $query->WhereDoesntHave('Main')->where('price_type_id','=',3),)
+                             $query->WhereDoesntHave('Main')
+                                 ->WhereDoesntHave('Main_arc')->where('price_type_id','=',3),)
                              ->getOptionLabelFromRecordUsing(fn (Model $record) => "{$record->id} {$record->Customer->name} {$record->total}")
                              ->searchable()
                              ->preload()

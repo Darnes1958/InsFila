@@ -7,7 +7,12 @@ use App\Enums\Tar_type;
 use App\Filament\Resources\TarKstResource\Pages;
 use App\Filament\Resources\TarKstResource\RelationManagers;
 use App\Livewire\Traits\AksatTrait;
+use App\Models\Customer;
+use App\Models\Main;
+use App\Models\Main_arc;
+use App\Models\Overkst;
 use App\Models\TarKst;
+use App\Models\Wrongkst;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -49,7 +54,6 @@ class TarKstResource extends Resource
                 TextColumn::make('main_id')
                     ->label('رقم العقد'),
                 TextColumn::make('tarkstable.name')
-                    ->searchable()
                     ->label('الاسم'),
                 TextColumn::make('tar_date')
                     ->searchable()

@@ -16,6 +16,9 @@ class Sell extends Model
     public function Main(){
         return $this->hasOne(Main::class);
     }
+    public function Main_arc(){
+        return $this->hasOne(Main_arc::class);
+    }
     public function Place(){
         return $this->belongsTo(Place::class);
     }
