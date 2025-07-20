@@ -46,11 +46,12 @@ class ListFromexcels extends ListRecords
             //            $this->SortKstDate($main->id);
   //                      $main->pay=Tran::where('main_id',$main->id)->sum('ksm');
   //                      $main->save();
-                        self::MainTarseed2($main->id);
+                    //  $this->SortKstDate($main->id);
+                         self::MainTarseed2($main->id);
                    }
                     Notification::make('ok')->title('Ok')->success()->send();
                 })
-                ->visible(false)
+                ->visible(true)
              ->label('do ser'),
             Actions\Action::make('Do')
                 ->color('success')
