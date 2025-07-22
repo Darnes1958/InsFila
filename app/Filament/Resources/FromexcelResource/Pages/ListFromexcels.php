@@ -38,21 +38,59 @@ class ListFromexcels extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('Tarseed')
+                ->action(function (){
+
+                    $mains=Main::query()
+
+                        ->get();
+
+                         foreach ($mains as $main){
+                             self::MainTarseed2($main->id);
+                         }
+
+
+                    Notification::make('ok')->title('Ok')->success()->send();
+                })
+                ->visible(false)
+             ->label('tarseed'),
             Actions\Action::make('Convert')
                 ->action(function (){
 
-                    $mains=Main::query()->get();
+                    $mains=Main::query()
+                        ->where('raseed','<',0)
+                        ->get();
                     foreach ($mains as $main){
-            //            $this->SortKstDate($main->id);
-  //                      $main->pay=Tran::where('main_id',$main->id)->sum('ksm');
-  //                      $main->save();
-                    //  $this->SortKstDate($main->id);
-                         self::MainTarseed2($main->id);
-                   }
+                        $trans=Tran::query()
+                            ->where('main_id',$main->id)
+                            ->orderBy('ser','desc')
+                            ->get();
+                        $raseed=abs($main->raseed);
+                        foreach ($trans as $tran){
+                            if ($raseed > $tran->ksm){
+
+                                $raseed=round($raseed-$tran->ksm,3);
+                                self::StoreOver2($main,$tran->ksm_date,$tran->ksm);
+                                $tran->delete();
+                            }
+                            else {
+                                self::StoreOver2($main,$tran->ksm_date,$raseed);
+                                $tran->ksm-=$raseed;
+                                $tran->save();
+                                $raseed=0;
+                            }
+                            if ($raseed==0) break;
+                        }
+                        //            $this->SortKstDate($main->id);
+                        //                      $main->pay=Tran::where('main_id',$main->id)->sum('ksm');
+                        //                      $main->save();
+                        //  $this->SortKstDate($main->id);
+                        self::MainTarseed2($main->id);
+                    }
                     Notification::make('ok')->title('Ok')->success()->send();
                 })
-                ->visible(true)
-             ->label('do ser'),
+                ->visible(false)
+                ->label('over kst'),
             Actions\Action::make('Do')
                 ->color('success')
                 ->form([

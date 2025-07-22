@@ -13,6 +13,7 @@ use App\Models\Main;
 use App\Models\Main_arc;
 use App\Models\Overkst;
 use App\Models\Tarkst;
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\MorphToSelect;
@@ -21,6 +22,9 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Columns\Summarizers\Sum;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -72,10 +76,12 @@ class OverkstResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-
+            ->pluralModelLabel('الصفحات')
             ->columns([
                 TextColumn::make('id')
                     ->label('الرقم الألي'),
+                TextColumn::make('overkstable_id')
+                    ->label('رقم العقد'),
 
                 TextColumn::make('overkstable.Customer.name')
                     ->label('الاسم'),
@@ -85,6 +91,8 @@ class OverkstResource extends Resource
                     ->sortable()
                     ->label('التاريخ'),
                 TextColumn::make('kst')
+                    ->summarize(Sum::make()->label('')
+                    ->numeric('2','.',','))
                     ->label('المبلغ'),
                 TextColumn::make('status')
                     ->label('الحالة'),
@@ -92,7 +100,41 @@ class OverkstResource extends Resource
                     ->label('حالة العقد'),
             ])
             ->filters([
-                //
+                SelectFilter::make('overkstable_type')
+                 ->label('حالة العقد')
+                ->options([
+                    'App\Models\Main' => 'القائم',
+                    'App\Models\Main_arc' => 'الأرشيف'
+                ]),
+                Filter::make('created_at')
+                    ->form([
+                        Forms\Components\DatePicker::make('Date1')
+                            ->label('من تاريخ'),
+                        Forms\Components\DatePicker::make('Date2')
+                            ->label('إلي تاريخ'),
+                    ])
+                    ->indicateUsing(function (array $data): ?string {
+                        if (! $data['Date1'] && ! $data['Date2']) { return null;   }
+                        if ( $data['Date1'] && !$data['Date2'])
+                            return 'ادخلت بتاريخ  ' . Carbon::parse($data['Date1'])->toFormattedDateString();
+                        if ( !$data['Date1'] && $data['Date2'])
+                            return 'حتي تاريخ  ' . Carbon::parse($data['Date2'])->toFormattedDateString();
+                        if ( $data['Date1'] && $data['Date2'])
+                            return 'ادخلت في الفترة من  ' . Carbon::parse($data['Date1'])->toFormattedDateString()
+                                .' إلي '. Carbon::parse($data['Date1'])->toFormattedDateString();
+
+                    })
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['Date1'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('over_date', '>=', $date),
+                            )
+                            ->when(
+                                $data['Date2'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('over_date', '<=', $date),
+                            );
+                    }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
@@ -102,7 +144,12 @@ class OverkstResource extends Resource
                 Tables\Actions\DeleteAction::make()
                     ->visible(function (Model $record) {
                         return $record->haf_id==0 && $record->status==Status::غير_مرجع;
-                    }),
+                    })
+                ->after(function (Model $record) {
+                    if ($record->overkstable_type=='App\Models\Main') $main=Main::find($record->overkstable_id);
+                    else $main=Main_arc::find($record->overkstable_id);
+                     self::OverTarseed2($main);
+                }),
             ])
             ->checkIfRecordIsSelectableUsing(
                 fn (Model $record): bool => $record->status->value ==1,

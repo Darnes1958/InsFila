@@ -18,6 +18,8 @@ use App\Models\Tran;
 use App\Services\MainForm;
 use Filament\Support\Enums\ActionSize;
 use Filament\Support\Enums\IconSize;
+use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
@@ -33,6 +35,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Livewire;
 
@@ -274,6 +277,45 @@ class MainResource extends Resource
                 Tables\Filters\Filter::make('المسددة')
                  ->query(fn(Builder $query): Builder=>$query->where('raseed','=',0))
             ])
+            ->bulkActions([
+                BulkAction::make('to_arch')
+                    ->deselectRecordsAfterCompletion()
+                    ->label('نقل للأرشيف')
+                    ->requiresConfirmation()
+                    ->visible(function (Main $record) {return $record->raseed<=0;})
+
+                    ->action(function (Collection $records) {
+                        foreach ($records as $record) {
+
+
+                            $oldRecord= $record;
+                            $newRecord = $oldRecord->replicate();
+
+                            $newRecord->setTable('main_arcs');
+                            $newRecord->id=$record->id;
+
+                            $newRecord->save();
+                            Overkst::where('overkstable_type','App\Models\Main')
+                                ->where('overkstable_id',$record->id)
+                                ->update(['overkstable_type'=>'App\Models\Main_arc']);
+
+                            Tran::query()
+                                ->where('main_id', $record->id)
+                                ->each(function ($oldTran) {
+                                    $newTran = $oldTran->replicate();
+                                    $newTran->setTable('trans_arcs');
+                                    $newTran->save();
+                                    $oldTran->delete();
+                                });
+                            $record->delete();
+
+                        }
+                    })
+
+            ])
+            ->checkIfRecordIsSelectableUsing(
+                function (Main $record) {return $record->raseed<=0;}
+            )
             ->actions([
 
                 DeleteAction::make()->iconButton()->hidden(! auth()->user()->can('الغاء عقود'))
