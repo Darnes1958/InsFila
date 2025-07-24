@@ -14,53 +14,56 @@
 
           direction: rtl;
           font-family: Amiri ;
-          font-size: 16px;
-          border: 1px;
-          line-height: 32px;
       }
-
 
 
 
       table {
           width: 96%;
           border-collapse: collapse;
-          font-size: 12px;
+          font-size: 14px;
       }
       tr {
-          line-height: 12px;
+          line-height: 20px;
       }
       th {
           text-align: center;
           border: 1pt solid  gray;
-          font-size: 12px;
+          font-size: 14px;
           height: 30px;
       }
+      caption {
+          font-family: Amiri ;
 
+      }
+      thead {
+
+          font-family: Amiri ;
+      }
 
       td {
           text-align: right;
           border: 1pt solid  lightgray;
       }
-      .page-break {
-          page-break-after: always;
-      }
-      br[style] {
-          display:none;
-      }
 
-      #mainlabel  {
-          display:inline-block;border-style: dotted;border-top: none;border-right: none;
-          border-left: none;padding-left: 4px;padding-right: 4px;text-align: center;
-      }
-      #mainlabel2  {
-          display:inline-block; height: 20px;
-      }
+
+
+
   </style>
 </head>
 <body  >
-
 <div >
+
+
+    <div>
+      <label style="font-size: 20pt; margin-right: 12px;margin-bottom: 0;margin-top: 0;padding: 0;" >{{$cus->CompanyName}}</label>
+    </div>
+    <div >
+      <label style="font-size: 16pt; margin-right: 12px;margin-bottom: 0;margin-top: 0;padding: 0;">{{$cus->CompanyNameSuffix}}</label>
+     </div>
+</div>
+<br>
+<div>
 
   @yield('mainrep')
 

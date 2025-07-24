@@ -5,6 +5,7 @@ namespace App\Providers;
 
 use App\Filament\Pages\KsmKst;
 use App\Filament\Pages\newCont;
+use App\Models\GlobalSetting;
 use Filament\Facades\Filament;
 use Filament\Navigation\NavigationGroup;
 use Filament\Notifications\Livewire\Notifications;
@@ -25,6 +26,8 @@ use Filament\Support\Facades\FilamentColor;
 
 use Filament\Tables\Columns\Column;
 use Illuminate\View\View;
+use Spatie\Browsershot\Browsershot;
+use Spatie\LaravelPdf\Facades\Pdf;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -45,6 +48,13 @@ class AppServiceProvider extends ServiceProvider
     {
    //     Notifications::alignment(Alignment::Center);
      //   Notifications::verticalAlignment(VerticalAlignment::Center);
+        Pdf::default()
+            ->footerView('PrnView.footer')
+            ->withBrowsershot(function (Browsershot $shot) {
+                $shot->noSandbox()
+                    ->setChromePath(GlobalSetting::first()->exePath);
+            })
+            ->margins(10, 10, 20, 10, );
         Table::$defaultNumberLocale = 'nl';
         FilamentView::registerRenderHook(
             'panels::page.end',

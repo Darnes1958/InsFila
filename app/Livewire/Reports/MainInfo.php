@@ -7,14 +7,18 @@ use App\Livewire\Forms\MainForm;
 use App\Livewire\Forms\OverForm;
 use App\Livewire\Forms\TarForm;
 use App\Livewire\Forms\TransForm;
+use App\Livewire\Traits\PublicTrait;
+use App\Models\Bank;
 use App\Models\Customer;
 use App\Models\Main;
 
 use App\Models\Main_arc;
 use App\Models\Overkst;
 use App\Models\Overkst_arc;
+use App\Models\Taj;
 use App\Models\Tran;
 use App\Models\Trans_arc;
+use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
@@ -42,6 +46,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Support\HtmlString;
 use Livewire\Component;
 use Filament\Forms\Form;
@@ -50,6 +55,8 @@ use Filament\Forms\Form;
 class   MainInfo extends Component implements HasInfolists,HasForms,HasTable
 {
   use InteractsWithInfolists,InteractsWithForms,InteractsWithTable;
+
+  use PublicTrait;
 
   public $main_id;
   public $mainId;
@@ -126,15 +133,45 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable
                   ->color('info')
                   ->icon('heroicon-m-printer')
                   ->color('info')
-
-                  ->url(fn (): string => route('pdfmain', ['id'=>$this->main_id])),
+                  ->action(function (){
+                      $res=Main::find($this->mainId);
+                      $res2=Tran::where('main_id',$res->id)->orderBy('ser')->get();
+                      return Response::download(self::ret_spatie($res,
+                          'PrnView.Pdf-main',[
+                              'res2'=>$res2,
+                          ]
+                      ), 'filename.pdf', self::ret_spatie_header());
+                  })
+                 ,
               Actions\Action::make('print2')
                   ->label('طباعة نموذج العقد')
                   ->button()
                   ->color('info')
                   ->icon('heroicon-m-printer')
                   ->color('info')
-                  ->url(fn (): string => route('pdfmaincont', ['id'=>$this->main_id])),
+                  ->action(function (){
+                      $res=Main::find($this->main_id);
+
+
+
+                      $mindate=$res->sul_begin;
+                      $mdate=Carbon::parse($mindate) ;
+                      $mmdate=$mdate->month.'-'.$mdate->year;
+
+                      $maxdate=$res->sul_end;
+                      $xdate=Carbon::parse($maxdate) ;
+                      $xxdate=$xdate->month.'-'.$xdate->year;
+
+                      $taj=Taj::find(Bank::find($res->bank_id)->taj_id);
+
+                      $BankName=$taj->TajName;
+                      $TajAcc=$taj->TajAcc;
+                      return Response::download(self::ret_spatie($res,
+                          'PrnView.Pdf-main-Cont',[
+                              'res' => $res,  'TajAcc' => $TajAcc,'BankName'=>$BankName,'mindate'=>$mmdate,'maxdate'=>$xxdate,]
+                      ), 'filename.pdf', self::ret_spatie_header());
+                  })
+                 ,
               Actions\Action::make('retrieve')
                   ->color('primary')
                   ->visible(fn():bool=>$this->montahy)
