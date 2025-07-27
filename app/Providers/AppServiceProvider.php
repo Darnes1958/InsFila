@@ -52,7 +52,7 @@ class AppServiceProvider extends ServiceProvider
             ->footerView('PrnView.footer')
             ->withBrowsershot(function (Browsershot $shot) {
                 $shot->noSandbox()
-                    ->setChromePath(GlobalSetting::first()->exePath);
+                    ->setChromePath(GlobalSetting::first()->LiteExePath);
             })
             ->margins(10, 10, 20, 10, );
         Table::$defaultNumberLocale = 'nl';
