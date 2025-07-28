@@ -46,6 +46,10 @@ class MainResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
     protected static ?string $pluralModelLabel='عقود';
     protected static ?int $navigationSort = 1;
+    public static function getNavigationBadge(): ?string
+    {
+        return Main::count();
+    }
 
 
   public static function shouldRegisterNavigation(): bool

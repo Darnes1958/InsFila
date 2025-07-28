@@ -35,6 +35,10 @@ class MainArcResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationLabel='الأرشيف';
     protected static ?int $navigationSort=8;
+    public static function getNavigationBadge(): ?string
+    {
+        return Main_arc::count();
+    }
 
     public static function form(Form $form): Form
     {

@@ -40,6 +40,10 @@ class OverkstResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationLabel='خصم بالفائض';
+    public static function getNavigationBadge(): ?string
+    {
+        return Overkst::count();
+    }
 
     use AksatTrait,PublicTrait;
 

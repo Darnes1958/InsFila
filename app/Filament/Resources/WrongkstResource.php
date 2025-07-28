@@ -40,6 +40,10 @@ class WrongkstResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationLabel='أقساط واردة بالخطأ';
     protected static ?int $navigationSort = 4;
+    public static function getNavigationBadge(): ?string
+    {
+        return Wrongkst::count();
+    }
     public static function form(Form $form): Form
     {
         return $form

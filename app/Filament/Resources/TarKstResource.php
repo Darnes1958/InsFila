@@ -20,6 +20,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -36,6 +37,10 @@ class TarKstResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationLabel='اقساط مرجعة';
     protected static ?int $navigationSort = 6;
+    public static function getNavigationBadge(): ?string
+    {
+        return TarKst::count();
+    }
 
     public static function form(Form $form): Form
     {
@@ -48,6 +53,7 @@ class TarKstResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->pluralModelLabel('الترجيع')
             ->columns([
                 TextColumn::make('id')
                     ->label('الرقم الألي'),
@@ -60,7 +66,8 @@ class TarKstResource extends Resource
                     ->sortable()
                     ->label('التاريخ'),
                 TextColumn::make('kst')
-                    ->label('المبلغ'),
+                    ->label('المبلغ')
+                    ->summarize(Sum::make()->label('')->numeric('2','.',',')),
                 TextColumn::make('tar_type')
                     ->label('البيان'),
                 TextColumn::make('haf_id')
@@ -82,6 +89,8 @@ class TarKstResource extends Resource
                          self::SortTrans2($record->tarkstable->id);
 
                      }
+                     if ($record->tar_type==Tar_type::من_قسط_مخصوم || $record->tar_type==Tar_type::من_الفائض)
+                     self::MainTarseed2($record->main_id);
                  }),
             ])
             ->bulkActions([
@@ -101,6 +110,8 @@ class TarKstResource extends Resource
                                     self::StoreTran2($item->tarkstable->id,$item->tar_date,$item->kst,$item->haf_id);
                                     self::SortTrans2($item->tarkstable->id);
                                 }
+                                if ($item->tar_type==Tar_type::من_قسط_مخصوم || $item->tar_type==Tar_type::من_الفائض)
+                                    self::MainTarseed2($item->main_id);
                             }
 
                         }),

@@ -10,6 +10,7 @@ enum Tar_type: int implements HasLabel,HasColor
     case من_الفائض = 1;
     case من_الخطأ = 2;
     case من_قسط_مخصوم =3;
+    case ترجيع_مبلغ =4;
 
 
     public function getLabel(): ?string
@@ -22,6 +23,7 @@ enum Tar_type: int implements HasLabel,HasColor
             self::من_الفائض => 'success',
             self::من_الخطأ => 'info',
             self::من_قسط_مخصوم => 'primary',
+            self::ترجيع_مبلغ => 'warning',
         };
     }
 

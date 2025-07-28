@@ -42,17 +42,17 @@ class ListFromexcels extends ListRecords
                 ->action(function (){
 
                     $mains=Main::query()
-
                         ->get();
-
                          foreach ($mains as $main){
+                             $this->SortTrans($main->id);
+                             $this->SortKstDate($main->id);
                              self::MainTarseed2($main->id);
                          }
 
 
                     Notification::make('ok')->title('Ok')->success()->send();
                 })
-                ->visible(false)
+                ->visible(true)
              ->label('tarseed'),
             Actions\Action::make('Convert')
                 ->action(function (){
@@ -81,7 +81,7 @@ class ListFromexcels extends ListRecords
                             }
                             if ($raseed==0) break;
                         }
-                        //            $this->SortKstDate($main->id);
+
                         //                      $main->pay=Tran::where('main_id',$main->id)->sum('ksm');
                         //                      $main->save();
                         //  $this->SortKstDate($main->id);
@@ -89,7 +89,7 @@ class ListFromexcels extends ListRecords
                     }
                     Notification::make('ok')->title('Ok')->success()->send();
                 })
-                ->visible(false)
+                ->visible(true)
                 ->label('over kst'),
             Actions\Action::make('Do')
                 ->color('success')

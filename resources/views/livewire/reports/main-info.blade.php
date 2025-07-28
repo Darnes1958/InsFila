@@ -16,6 +16,9 @@
                 @if($mainRec->overkstable->count()>0)
                 @livewire(\App\Livewire\widgets\OverWidget::class,['main_id'=>$main_id])
                 @endif
+                @if($mainRec->tarkst->count()>0)
+                    @livewire(\App\Livewire\widgets\TarWidget::class,['main_id'=>$main_id])
+                @endif
             </div>
 
 
