@@ -49,7 +49,7 @@ class   MainArcInfo extends Component implements HasInfolists,HasForms,HasTable
 
   public $mainId;
     public $main_id;
-  public Main_arc $mainRec;
+  public $mainRec;
 
   public MainForm $mainForm;
   public TransForm $transForm;
@@ -57,11 +57,17 @@ class   MainArcInfo extends Component implements HasInfolists,HasForms,HasTable
 
     public function mount()
     {
-      if ($this->mainId==null)
-            $this->mainId=Main_arc::min('id');
-
+          $this->mainId=Main_arc::min('id');
         $this->main_id=$this->mainId;
-        $this->mainRec=Main_arc::find($this->mainId);
+
+
+        if ($this->mainId!=null)
+         $this->mainRec=Main_arc::find($this->mainId);
+        else
+        {
+            $this->mainId=Main::min('id');
+            $this->mainRec=Main::find($this->mainId);
+        }
         $this->form->fill([]);
     }
     #[On('showMainArcModal')]
