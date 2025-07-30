@@ -32,10 +32,7 @@ class RepBank extends Page implements HasTable, HasForms
     use InteractsWithTable,InteractsWithForms;
 
   protected ?string $heading = '';
-  public function getBreadcrumbs(): array
-  {
-    return [""];
-  }
+
    public static ?string $title = 'إجمالي المصارف';
 
   protected static ?string $navigationGroup='تقارير';

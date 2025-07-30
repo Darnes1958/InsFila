@@ -18,6 +18,9 @@ class Taj extends Model
   public function Bank(){
     return $this->hasMany(Bank::class);
   }
+  public function BankMain(){
+        return $this->belongsTo(BankMain::class);
+  }
   public function main()
   {
     return $this->hasManyThrough('App\Models\main', 'App\Models\bank');

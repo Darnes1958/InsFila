@@ -9,15 +9,18 @@ use App\Filament\Resources\OverkstResource\RelationManagers;
 use App\Livewire\Forms\TarForm;
 use App\Livewire\Traits\AksatTrait;
 use App\Livewire\Traits\PublicTrait;
+use App\Models\Bank;
 use App\Models\Main;
 use App\Models\Main_arc;
 use App\Models\Overkst;
+use App\Models\Taj;
 use App\Models\Tarkst;
 use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\MorphToSelect;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -110,6 +113,19 @@ class OverkstResource extends Resource
                     'App\Models\Main' => 'القائم',
                     'App\Models\Main_arc' => 'الأرشيف'
                 ]),
+                Filter::make('taj')
+                    ->form([
+                        Select::make('taj_id')
+                            ->label('بالمصرف التجميعي')
+                            ->live()
+                            ->searchable()
+                            ->preload()
+                            ->options(Taj::all()->pluck('TajName', 'id')),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when($data['taj_id'],
+                            fn (Builder $subQuery) => $subQuery->whereIn('overkstable_id',Main::where('taj_id',$data['taj_id'])->pluck('id')));
+                    }),
                 Filter::make('created_at')
                     ->form([
                         Forms\Components\DatePicker::make('Date1')

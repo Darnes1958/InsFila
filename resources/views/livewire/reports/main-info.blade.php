@@ -9,6 +9,10 @@
             <div >
                 {{ $this->mainInfolist }}
             </div>
+            <div class="mt-4">
+                @livewire(\App\Livewire\widgets\SelltranWidget::class,['main_id'=>$main_id])
+            </div>
+
         </div>
 
             <div class="w-1/2">

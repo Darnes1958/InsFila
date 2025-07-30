@@ -11,15 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::connection('Yzen')->create('hafithas', function (Blueprint $table) {
+        Schema::connection('other')->create('bank_mains', function (Blueprint $table) {
             $table->id();
-            $table->date('from_date');
-            $table->date('to_date');
-            $table->decimal('tot',12,3);
-            $table->decimal('morahel',12,3);
-            $table->decimal('over',12,3);
-            $table->decimal('over_arc',12,3);
-            $table->decimal('wrong',12,3);
+            $table->string('name');
+            $table->integer('ratio');
+            $table->integer('R_type');
             $table->timestamps();
         });
     }
@@ -29,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('hafithas');
+        Schema::dropIfExists('bank_mains');
     }
 };
