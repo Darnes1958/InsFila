@@ -12,6 +12,9 @@
             <div class="mt-4">
                 @livewire(\App\Livewire\widgets\SelltranWidget::class,['main_id'=>$main_id])
             </div>
+            <div class="mt-4">
+                @livewire(\App\Livewire\widgets\ContArc::class,['main_id'=>$main_id])
+            </div>
 
         </div>
 
@@ -27,6 +30,16 @@
 
 
     </div>
+
+    <x-filament::modal id="mymainModal" slide-over width="6xl" sticky-header>
+
+        <x-slot name="heading">
+
+
+        </x-slot>
+
+        @livewire(\App\livewire\Reports\MainArcInfo::class)        {{-- Modal content --}}
+    </x-filament::modal>
 
 
 </div>

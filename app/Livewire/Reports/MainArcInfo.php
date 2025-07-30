@@ -38,6 +38,7 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Filament\Forms\Form;
 
@@ -56,10 +57,20 @@ class   MainArcInfo extends Component implements HasInfolists,HasForms,HasTable
 
     public function mount()
     {
-        $this->mainId=Main_arc::min('id');
+      if ($this->mainId==null)
+            $this->mainId=Main_arc::min('id');
+
         $this->main_id=$this->mainId;
         $this->mainRec=Main_arc::find($this->mainId);
         $this->form->fill([]);
+    }
+    #[On('showMainArcModal')]
+    public function show($main_id){
+        info($main_id);
+        $this->mainId=$main_id;
+        $this->main_id=$this->mainId;
+        $this->mainRec=Main_arc::find($this->main_id);
+
     }
     public function Do(Get $get,Set $set)
     {
