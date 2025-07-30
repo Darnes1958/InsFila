@@ -19,20 +19,22 @@ use Livewire\Attributes\On;
 
 class ContArc extends BaseWidget
 {
-    public $cust;
+    public  $cust;
+
     protected static ?string $heading="";
 
     #[On('Take_Main_Id')]
     public function ContCust($main_id){
 
         $this->cust=Main::find($main_id)->customer_id;
+
     }
     public function mount($main_id){
         $this->cust=Main::find($main_id)->customer_id;
     }
 
     public function Do($main_id){
-info('yes '.$main_id);
+
         $this->dispatch('open-modal', id: 'mymainModal',main_id: $main_id);
         $this->dispatch('showMainArcModal', main_id: $main_id);
 
@@ -40,7 +42,7 @@ info('yes '.$main_id);
     public function table(Table $table): Table
     {
         return $table
-
+            ->pluralModelLabel('أرشيف')
             ->paginated(false)
             ->defaultSort('sul_begin')
             ->query(function (Main_arc $main){

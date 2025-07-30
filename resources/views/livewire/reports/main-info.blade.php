@@ -1,4 +1,4 @@
-<div class="gap-2">
+<div  class="gap-2">
     <div class="flex">
         <div class=" mb-2">
             {{ $this->form }}
