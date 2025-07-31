@@ -52,7 +52,7 @@ class ContArc extends BaseWidget
 
             ->recordUrl(null)
             ->columns([
-                TextColumn::make('main_id')
+                TextColumn::make('id')
                     ->action(function (Main_arc $record){$this->Do($record->id);})
                     ->tooltip('انقر للعرض')
                     ->size(TextColumnSize::ExtraSmall)

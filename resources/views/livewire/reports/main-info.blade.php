@@ -12,9 +12,11 @@
             <div class="mt-4">
                 @livewire(\App\Livewire\widgets\SelltranWidget::class,['main_id'=>$main_id])
             </div>
-            <div class="mt-4">
-                @livewire(\App\Livewire\widgets\ContArc::class,['main_id'=>$main_id])
-            </div>
+            @if($showArc)
+                <div class="mt-4">
+                    @livewire(\App\Livewire\widgets\ContArc::class,['main_id'=>$main_id])
+                </div>
+            @endif
 
         </div>
 

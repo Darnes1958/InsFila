@@ -50,6 +50,7 @@ class   MainArcInfo extends Component implements HasInfolists,HasForms,HasTable
   public $mainId;
     public $main_id;
   public $mainRec;
+  public $showFromOther=false;
 
   public MainForm $mainForm;
   public TransForm $transForm;
@@ -72,10 +73,11 @@ class   MainArcInfo extends Component implements HasInfolists,HasForms,HasTable
     }
     #[On('showMainArcModal')]
     public function show($main_id){
-        info($main_id);
+
         $this->mainId=$main_id;
         $this->main_id=$this->mainId;
         $this->mainRec=Main_arc::find($this->main_id);
+        $this->showFromOther=true;
 
     }
     public function Do(Get $get,Set $set)
@@ -94,7 +96,7 @@ class   MainArcInfo extends Component implements HasInfolists,HasForms,HasTable
           ->searchable()
           ->live()
           ->Label('بحث')
-
+          ->visible(fn():bool=>!$this->showFromOther)
 
           ->afterStateUpdated(function ($state,Set $set) {
             if (Main_arc::where('id',$state)->exists())
@@ -131,6 +133,7 @@ class   MainArcInfo extends Component implements HasInfolists,HasForms,HasTable
               ->action(function (){
                   $this->DoArc();
               })
+                  ->visible(fn():bool=>!$this->showFromOther)
               ->label('استرجاع من الأرشيف')
           ])->columnSpan(1)->verticalAlignment(VerticalAlignment::End),
       ])->columns(4);

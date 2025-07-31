@@ -67,6 +67,7 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable
   public MainForm $mainForm;
   public TransForm $transForm;
   public OverForm $overForm;
+  public $showArc=false;
 
   public function mount()
   {
@@ -106,6 +107,8 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable
                 $this->dispatch('Take_Main_Id',main_id: $this->main_id);
                 $set('mainId',$this->main_id);
                 $this->montahy=$this->mainRec->raseed<=0;
+
+                 $this->showArc=(Main_arc::where('customer_id', $this->mainRec->customer_id)->exists());
             }
 
             else $this->main_id=null;
@@ -122,6 +125,7 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable
                   $set('mainId',$state);
                   $this->dispatch('Take_Main_Id',main_id: $this->main_id);
                   $this->montahy=$this->mainRec->raseed<=0;
+                  $this->showArc=(Main_arc::where('customer_id', $this->mainRec->customer_id)->exists());
               }
 
 
