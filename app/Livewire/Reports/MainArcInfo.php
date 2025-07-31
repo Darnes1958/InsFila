@@ -102,6 +102,7 @@ class   MainArcInfo extends Component implements HasInfolists,HasForms,HasTable
             if (Main_arc::where('id',$state)->exists())
             {
                 $this->mainId=$state;
+                $this->main_id=$this->mainId;
                 $this->mainRec=Main_arc::find($this->main_id);
                 $this->dispatch('Take_Main_Id',main_id: $this->mainId);
                 $set('main_id',$this->mainId);
@@ -119,6 +120,7 @@ class   MainArcInfo extends Component implements HasInfolists,HasForms,HasTable
               ->afterStateUpdated(function ($state,Set $set){
                   if (Main_arc::where('id',$state)->exists()){
                       $this->mainId=$state;
+                      $this->main_id=$this->mainId;
                       $this->mainRec=Main_arc::find($this->main_id);
                       $set('mainId',$state);
                       $this->dispatch('Take_Main_Id',main_id: $this->mainId);

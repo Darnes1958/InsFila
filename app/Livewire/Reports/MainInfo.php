@@ -103,6 +103,7 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable
             if (Main::where('id',$get('main_id'))->exists())
             {
                 $this->main_id=$get('main_id');
+                $this->main_id=$this->main_id;
                 $this->mainRec=Main::find($this->main_id);
                 $this->dispatch('Take_Main_Id',main_id: $this->main_id);
                 $set('mainId',$this->main_id);
@@ -121,6 +122,7 @@ class   MainInfo extends Component implements HasInfolists,HasForms,HasTable
           ->afterStateUpdated(function ($state,Set $set){
               if (Main::where('id',$state)->exists()){
                   $this->main_id=$state;
+                  $this->mainId=$this->main_id;
                   $this->mainRec=Main::find($this->main_id);
                   $set('mainId',$state);
                   $this->dispatch('Take_Main_Id',main_id: $this->main_id);
