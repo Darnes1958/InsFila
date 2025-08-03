@@ -54,12 +54,30 @@ class TarKstResource extends Resource
     {
         return $table
             ->pluralModelLabel('الترجيع')
+            ->paginationPageOptions([5,10,25,50,100])
             ->columns([
                 TextColumn::make('id')
                     ->label('الرقم الألي'),
                 TextColumn::make('main_id')
                     ->label('رقم العقد'),
                 TextColumn::make('tarkstable.name')
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->whereHasMorph(
+                            'tarkstable',
+                            [Main::class, Main_arc::class],
+                            function ($query, $type) use ($search) {
+                                if ($type === 'App\Models\Main') {
+                                    $query->whereHas('Customer', function ($query) use ($search) {
+                                        return $query->where('name', 'like', '%'.$search.'%');
+                                    });
+                                } elseif ($type === 'App\Models\Main_arc') {
+                                    $query->whereHas('Customer', function ($query) use ($search) {
+                                        return $query->where('name', 'like', '%'.$search.'%');
+                                    });
+                                }
+                            }
+                        );
+                    })
                     ->label('الاسم'),
                 TextColumn::make('tar_date')
                     ->searchable()

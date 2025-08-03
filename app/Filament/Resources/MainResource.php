@@ -264,6 +264,7 @@ class MainResource extends Resource
             ->recordUrl(
                 null
             )
+            ->defaultSort('id','desc')
             ->paginationPageOptions([5,10,25,50,100])
             ->columns([
                 TextColumn::make('id')->label('رقم العقد')->sortable()->searchable(),

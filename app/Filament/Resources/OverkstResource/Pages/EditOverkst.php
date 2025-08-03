@@ -9,6 +9,7 @@ use Filament\Resources\Pages\EditRecord;
 class EditOverkst extends EditRecord
 {
     protected static string $resource = OverkstResource::class;
+    protected ?string $heading='';
 
     protected function getHeaderActions(): array
     {
