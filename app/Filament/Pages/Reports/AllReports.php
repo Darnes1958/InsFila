@@ -3,6 +3,7 @@
 namespace App\Filament\Pages\Reports;
 
 use App\Livewire\Traits\MainTrait;
+use App\Livewire\Traits\PublicTrait;
 use App\Models\Bank;
 use App\Models\Main;
 use App\Models\OurCompany;
@@ -35,6 +36,7 @@ class AllReports extends Page implements HasTable, HasForms
 {
     use InteractsWithTable, InteractsWithForms;
     use MainTrait;
+    use PublicTrait;
     protected ?string $heading = '';
 
     public static function shouldRegisterNavigation(): bool
@@ -163,35 +165,7 @@ protected function getHeaderActions(): array
                     ->reactive()
                     ->visible(fn (Get $get): bool => $get('rep_name')=='Mohasla' || $get('rep_name')=='Not_Mohasla'),
                 \Filament\Forms\Components\Actions::make([
-                    Action::make('prinitem')
-                        ->label('طباعة 2')
-                        ->visible(Auth::id()==1)
-                        ->icon('heroicon-s-printer')
-                        ->color('success')
-                        ->action(function (){
-                            $RepDate=date('Y-m-d');
-                            $cus=OurCompany::where('Company',Auth::user()->company)->first();
 
-                            \Spatie\LaravelPdf\Facades\Pdf::view('PrnView.pdf-all',
-                                ['RepTable'=>$this->getTableQueryForExport()->get(),
-                                    'cus'=>$cus,'RepDate'=>$RepDate,'BankName'=>'any','By'=>1
-                                ])
-                               ->withBrowsershot(function (Browsershot $shot) {
-                                    $shot->setNodeBinary('C:\Program Files\nodejs\node.exe')
-                                        ->setNpmBinary('C:\Program Files\nodejs\npm')
-                                        ->setChromePath('C:\Program Files\Google\Chrome\Application\chrome.exe');
-                                })
-                                ->headerHtml('<div>My header</div>')
-                                ->footerView('PrnView.footer')
-                                ->margins(10, 10, 40, 10, Unit::Pixel)
-                                ->save(Auth::user()->company.'/invoice-2023-04-10.pdf');
-                            $file= public_path().'/'.Auth::user()->company.'/invoice-2023-04-10.pdf';
-
-                            $headers = [
-                                'Content-Type' => 'application/pdf',
-                            ];
-                            return Response::download($file, 'filename.pdf', $headers);
-                        }),
                 Action::make('names')
                  ->label('طباعة')
                  ->icon('heroicon-o-printer')

@@ -23,7 +23,7 @@ enum KsmType: int implements HasLabel,HasColor
       self::نقدا => 'info',
       self::المصرف => 'primary',
         self::صك => 'success',
-        self::الكنروني => 'warning',
+        self::الكتروني => 'warning',
 
 
     };

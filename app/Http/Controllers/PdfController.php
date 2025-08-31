@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Livewire\Traits\PublicTrait;
 use App\Models\Bank;
 use App\Models\Customer;
 use App\Models\Main;
@@ -15,9 +16,12 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Response;
+
 
 class PdfController extends Controller
 {
+    use PublicTrait;
     function PdfBankSum(Request $request){
 
     $RepDate=date('Y-m-d');
@@ -45,23 +49,19 @@ class PdfController extends Controller
 
   }
     function PdfNames(Request $request){
+
         $RepDate = date('Y-m-d');
-        $cus = OurCompany::where('Company', Auth::user()->company)->first();
         $res = Main::where('taj_id', $request->bank_id)->get();
         $BankName=Taj::find($request->bank_id)->TajName;
 
-        $reportHtml = view('PrnView.pdf-all',
-            ['RepTable' => $res, 'cus' => $cus, 'RepDate' => $RepDate,'BankName'=>$BankName])->render();
-        $arabic = new Arabic();
-        $p = $arabic->arIdentify($reportHtml);
+        return Response::download(self::ret_spatie($res,
+            'PrnView.pdf-all',[
+                'BankName'=>$BankName,'RepDate'=>$RepDate,
+            ]
+        ), 'filename.pdf', self::ret_spatie_header());
 
-        for ($i = count($p)-1; $i >= 0; $i-=2) {
-            $utf8ar = $arabic->utf8Glyphs(substr($reportHtml, $p[$i-1], $p[$i] - $p[$i-1]));
-            $reportHtml = substr_replace($reportHtml, $utf8ar, $p[$i-1], $p[$i] - $p[$i-1]);
-        }
 
-        $pdf = PDF::loadHTML($reportHtml);
-        return $pdf->download('report.pdf');
+
 
     }
     function PdfMosdadaBank(Request $request)
@@ -75,43 +75,40 @@ class PdfController extends Controller
 
          $BankName=Taj::find($request->bank_id)->TajName;
 
-        $reportHtml = view('PrnView.pdf-mosdada',
-            ['RepTable' => $res, 'cus' => $cus, 'RepDate' => $RepDate,'BankName'=>$BankName,])->render();
-        $arabic = new Arabic();
-        $p = $arabic->arIdentify($reportHtml);
-        for ($i = count($p)-1; $i >= 0; $i-=2) {
-            $utf8ar = $arabic->utf8Glyphs(substr($reportHtml, $p[$i-1], $p[$i] - $p[$i-1]));
-            $reportHtml = substr_replace($reportHtml, $utf8ar, $p[$i-1], $p[$i] - $p[$i-1]);
-        }
-        $pdf = PDF::loadHTML($reportHtml);
-        return $pdf->download('report.pdf');
+        return Response::download(self::ret_spatie($res,
+            'PrnView.pdf-mosdada',[
+                'BankName'=>$BankName,'RepDate'=>$RepDate,
+            ]
+        ), 'filename.pdf', self::ret_spatie_header());
+
+
+
 
     }
     function PdfNotMosdadaBank(Request $request)
     {
         $RepDate = date('Y-m-d');
-        $cus = OurCompany::where('Company', Auth::user()->company)->first();
+
 
             $res = Main::where('pay', 0)
                 ->where('taj_id', $request->bank_id)->get();
 
             $BankName=Taj::find($request->bank_id)->TajName;
 
-        $reportHtml = view('PrnView.pdf-not-mosdada',
-            ['RepTable' => $res, 'cus' => $cus, 'RepDate' => $RepDate,'BankName'=>$BankName,])->render();
-        $arabic = new Arabic();
-        $p = $arabic->arIdentify($reportHtml);
-        for ($i = count($p)-1; $i >= 0; $i-=2) {
-            $utf8ar = $arabic->utf8Glyphs(substr($reportHtml, $p[$i-1], $p[$i] - $p[$i-1]));
-            $reportHtml = substr_replace($reportHtml, $utf8ar, $p[$i-1], $p[$i] - $p[$i-1]);
-        }
-        $pdf = PDF::loadHTML($reportHtml);
-        return $pdf->download('report.pdf');
+        return Response::download(self::ret_spatie($res,
+            'PrnView.pdf-not-mosdada',[
+                'BankName'=>$BankName,'RepDate'=>$RepDate,
+            ]
+        ), 'filename.pdf', self::ret_spatie_header());
+
+
+
+
     }
     function PdfMotakraBank(Request $request)
     {
         $RepDate = date('Y-m-d');
-        $cus = OurCompany::where('Company', Auth::user()->company)->first();
+
 
          $res = Main::where('Late', '>=', $request->Baky)
             ->where('taj_id', $request->bank_id)
@@ -120,16 +117,15 @@ class PdfController extends Controller
             }) ->get();
 
             $BankName=Taj::find($request->bank_id)->TajName;
-        $reportHtml = view('PrnView.pdf-motakra',
-            ['RepTable' => $res, 'cus' => $cus, 'RepDate' => $RepDate,'BankName'=>$BankName,])->render();
-        $arabic = new Arabic();
-        $p = $arabic->arIdentify($reportHtml);
-        for ($i = count($p)-1; $i >= 0; $i-=2) {
-            $utf8ar = $arabic->utf8Glyphs(substr($reportHtml, $p[$i-1], $p[$i] - $p[$i-1]));
-            $reportHtml = substr_replace($reportHtml, $utf8ar, $p[$i-1], $p[$i] - $p[$i-1]);
-        }
-        $pdf = PDF::loadHTML($reportHtml);
-        return $pdf->download('report.pdf');
+
+
+        return Response::download(self::ret_spatie($res,
+            'PrnView.pdf-motakra',[
+                'BankName'=>$BankName,'RepDate'=>$RepDate,
+            ]
+        ), 'filename.pdf', self::ret_spatie_header());
+
+
 
     }
     function PdfMohasla(Request $request)
@@ -142,16 +138,13 @@ class PdfController extends Controller
                     $q->select('id')->from('mains')->where('taj_id',$request->bank_id);
                 })->get();
          $BankName=Taj::find($request->bank_id)->TajName;
-        $reportHtml = view('PrnView.pdf-mohasla',
-            ['RepTable' => $res, 'cus' => $cus, 'Date1' => $request->Date1, 'Date2' => $request->Date2,'BankName'=>$BankName,])->render();
-        $arabic = new Arabic();
-        $p = $arabic->arIdentify($reportHtml);
-        for ($i = count($p)-1; $i >= 0; $i-=2) {
-            $utf8ar = $arabic->utf8Glyphs(substr($reportHtml, $p[$i-1], $p[$i] - $p[$i-1]));
-            $reportHtml = substr_replace($reportHtml, $utf8ar, $p[$i-1], $p[$i] - $p[$i-1]);
-        }
-        $pdf = PDF::loadHTML($reportHtml);
-        return $pdf->download('report.pdf');
+
+        return Response::download(self::ret_spatie($res,
+            'PrnView.pdf-mohasla',[
+                'BankName'=>$BankName,'RepDate'=>$RepDate,'Date1'=>$request->Date1,'Date2'=>$request->Date2,
+            ]
+        ), 'filename.pdf', self::ret_spatie_header());
+
 
     }
     function PdfNotMohasla(Request $request)
@@ -167,16 +160,14 @@ class PdfController extends Controller
                 ->get();
 
          $BankName=Taj::find($request->bank_id)->TajName;
-        $reportHtml = view('PrnView.pdf-not-mohasla',
-            ['RepTable' => $res, 'cus' => $cus, 'Date1' => $request->Date1, 'Date2' => $request->Date2,'BankName'=>$BankName,])->render();
-        $arabic = new Arabic();
-        $p = $arabic->arIdentify($reportHtml);
-        for ($i = count($p)-1; $i >= 0; $i-=2) {
-            $utf8ar = $arabic->utf8Glyphs(substr($reportHtml, $p[$i-1], $p[$i] - $p[$i-1]));
-            $reportHtml = substr_replace($reportHtml, $utf8ar, $p[$i-1], $p[$i] - $p[$i-1]);
-        }
-        $pdf = PDF::loadHTML($reportHtml);
-        return $pdf->download('report.pdf');
+
+        return Response::download(self::ret_spatie($res,
+            'PrnView.pdf-not-mohasla',[
+                'BankName'=>$BankName,'RepDate'=>$RepDate,'Date1'=>$request->Date1,'Date2'=>$request->Date2,
+            ]
+        ), 'filename.pdf', self::ret_spatie_header());
+
+
 
     }
 
