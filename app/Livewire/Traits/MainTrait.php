@@ -129,6 +129,10 @@ trait MainTrait {
 
   }
     public static function MainTarseed2($id){
+        $main=Main::find($id);
+
+        if (!$main) return false;
+
         $pay=Tran::where('main_id',$id)->sum('ksm');
         $count=Tran::where('main_id',$id)->count();
         $lastksm=Tran::where('main_id',$id)->max('ksm_date');
@@ -139,7 +143,7 @@ trait MainTrait {
         if ($nextkst)
             $NextKst= date('Y-m-d', strtotime($nextkst . "+1 month"));
         else $NextKst=self::setMonth2($main->sul_begin);
-        $main=Main::find($id);
+
         $tar=$main->tarkst->sum('kst');
         $over=$main->overkstable->sum('kst');
 

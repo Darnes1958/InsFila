@@ -209,10 +209,16 @@ protected function getHeaderActions(): array
             })
             ->columns([
                 TextColumn::make('id')
+                    ->searchable()
+                    ->sortable()
                     ->label('رقم العقد'),
                 TextColumn::make('acc')
+                    ->sortable()
+                    ->searchable()
                     ->label('رقم الحساب'),
                 TextColumn::make('Customer.name')
+                    ->searchable()
+                    ->sortable()
                     ->label('الاسم'),
                 TextColumn::make('sul')
                     ->summarize(Sum::make()->label('')->numeric(
