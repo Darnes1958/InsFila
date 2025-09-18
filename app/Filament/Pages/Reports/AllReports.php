@@ -169,13 +169,40 @@ protected function getHeaderActions(): array
                 Action::make('names')
                  ->label('طباعة')
                  ->icon('heroicon-o-printer')
-                 ->url( function ():string {
-                    if ($this->rep_name=='All') return route('pdfnames',['bank_id'=>$this->bank_id]);
-                    if ($this->rep_name=='Mosdada') return route('pdfmosdadabank',['Baky'=>$this->Baky,'bank_id'=>$this->bank_id]);
-                     if ($this->rep_name=='NotMosdada') return route('pdfnotmosdadabank',['bank_id'=>$this->bank_id]);
-                    if ($this->rep_name=='Motakra') return route('pdfmotakrabank',['Baky'=>$this->Baky,'bank_id'=>$this->bank_id,'notPay'=>$this->notPay]);
-                    if ($this->rep_name=='Mohasla') return route('pdfmohasla',['bank_id'=>$this->bank_id,'Date1'=>$this->Date1,'Date2'=>$this->Date2]);
-                    if ($this->rep_name=='Not_Mohasla') return route('pdfnotmohasla',['bank_id'=>$this->bank_id,'Date1'=>$this->Date1,'Date2'=>$this->Date2]);
+                 ->Action( function () {
+                     $RepDate = date('Y-m-d');
+                     $res =$this->getTableQueryForExport()->get();
+                     $BankName=Taj::find($this->bank_id)->TajName;
+
+                    if ($this->rep_name=='All')
+                        return Response::download(self::ret_spatie($res,
+                            'PrnView.pdf-all',['BankName'=>$BankName,'RepDate'=>$RepDate,]), 'filename.pdf', self::ret_spatie_header());
+
+                     if ($this->rep_name=='Mosdada')
+                         return Response::download(self::ret_spatie($res,
+                             'PrnView.pdf-mosdada',['BankName'=>$BankName,'RepDate'=>$RepDate,]), 'filename.pdf', self::ret_spatie_header());
+
+                     if ($this->rep_name=='NotMosdada')
+                         return Response::download(self::ret_spatie($res,
+                             'PrnView.pdf-not-mosdada',['BankName'=>$BankName,'RepDate'=>$RepDate,]), 'filename.pdf', self::ret_spatie_header());
+
+
+                     if ($this->rep_name=='Motakra')
+                         return Response::download(self::ret_spatie($res,
+                             'PrnView.pdf-motakra',['BankName'=>$BankName,'RepDate'=>$RepDate,]), 'filename.pdf', self::ret_spatie_header());
+
+                     if ($this->rep_name=='Mohasla')
+                         return Response::download(self::ret_spatie($res,
+                             'PrnView.pdf-mohasla',['BankName'=>$BankName,'RepDate'=>$RepDate,'Date1'=>$this->Date1,'Date2'=>$this->Date2]), 'filename.pdf', self::ret_spatie_header());
+
+
+                     if ($this->rep_name=='Not_Mohasla')
+                         return Response::download(self::ret_spatie($res,
+                             'PrnView.pdf-not-mohasla',['BankName'=>$BankName,'RepDate'=>$RepDate,'Date1'=>$this->Date1,'Date2'=>$this->Date2]), 'filename.pdf', self::ret_spatie_header());
+
+
+
+
                  })
 
                ])

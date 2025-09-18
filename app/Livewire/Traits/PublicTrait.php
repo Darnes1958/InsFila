@@ -13,6 +13,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 
 
 trait PublicTrait{
@@ -67,6 +68,7 @@ trait PublicTrait{
         \Spatie\LaravelPdf\Facades\Pdf::view($blade,
             ['res'=>$res,'arr'=>$arr,'cus'=>$cus])
             ->save(Auth::user()->company.'/invoice-2023-04-10.pdf');
+        Log::info('that is it');
         return public_path().'/'.Auth::user()->company.'/invoice-2023-04-10.pdf';
 
     }
